@@ -24,11 +24,11 @@ user.get('/profile', async c => {
   try {
     const payload = c.get('jwtPayload');
     const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
+    const found = await dbUserFunctions.returnUserById(userIdString);
+    if (!found || found.length !== 1) {
       return c.json(err('User not found', 404));
     }
-    const profile: ProfileData = user[0];
+    const profile: ProfileData = found[0];
     return c.json(ok(profile));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -39,20 +39,13 @@ user.get('/profile', async c => {
   }
 });
 
-// Return all tvshows
+// Return all tvshows for the authenticated user
 user.get('/tvshows', async (c) => {
   try {
     const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
-    }
-    let returnValue = await dbShowFunctions.returnAllShows();
-    if (!returnValue) {
-      return c.json(err('No shows for user', 404));
-    }
-    return c.json(ok(returnValue));
+    const userId = Number(payload.sub);
+    const shows = await dbShowFunctions.returnAllShows(userId);
+    return c.json(ok(shows));
   } catch (e: unknown) {
     if (e instanceof Error) {
       return c.json(err(e.message, 500));
@@ -67,16 +60,12 @@ user.get('/tvshow/:id', async (c) => {
   const showId: string = c.req.param('id');
   try {
     const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
-    }
-    let returnValue = await dbShowFunctions.returnOneShowId(showId);
-    if (!returnValue || !returnValue[0].tvMazeId) {
+    const userId = Number(payload.sub);
+    const shows = await dbShowFunctions.returnOneShowId(showId, userId);
+    if (!shows || shows.length === 0) {
       return c.json(err('Show not found', 404));
     }
-    return c.json(ok(returnValue[0]));
+    return c.json(ok(shows[0]));
   } catch (e: unknown) {
     if (e instanceof Error) {
       return c.json(err(e.message, 500));
@@ -86,32 +75,24 @@ user.get('/tvshow/:id', async (c) => {
   }
 });
 
-// Add a new tvshow
+// Add a new tvshow by TvMaze ID
 user.post('/tvshow/:id', async (c) => {
   const tvMazeId: string = c.req.param('id');
   try {
     const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
-    }
-    const existing = await dbShowFunctions.returnOneTvMazeId(tvMazeId);
+    const userId = Number(payload.sub);
+    const existing = await dbShowFunctions.returnOneTvMazeId(tvMazeId, userId);
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
     const response = await fetch(`${tvMazeAPI}/shows/${tvMazeId}`);
     if (!response.ok) {
-      return c.json(err(`tvMaze Response status: ${response.status}`, 404));
+      return c.json(err(`TvMaze response status: ${response.status}`, 502));
     }
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
     await showData.updateEpisodes();
-    console.log(showData);
-    const result = await dbShowFunctions.addOneShow(showData);
-    if (!result) {
-      return c.json(err(`Could not add show with TvMazeId=${tvMazeId}`, 404));
-    }
+    await dbShowFunctions.addOneShow(showData, userId);
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -122,64 +103,24 @@ user.post('/tvshow/:id', async (c) => {
   }
 });
 
-// Add a new tvshow
-user.post('/tvshow', async (c) => {
-  const body = await c.req.json()
-  const tvMazeId = body.id;
-  try {
-    const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
-    }
-    let returnValue1 = await dbShowFunctions.returnOneTvMazeId(tvMazeId);
-    if (returnValue1 !== undefined && returnValue1.length != 0) {
-      return c.json(ok({ status: 'exists' }));
-    }
-    const showData = new TvMazeData(body);
-    await showData.updateEpisodes();
-    console.log(showData);
-    let returnValue2 = await dbShowFunctions.addOneShow(showData);
-    if (!returnValue2) {
-      return c.json(err(`Could not add show with TvMazeId=${tvMazeId}`, 404));
-    }
-    return c.json(ok({ status: 'added' }));
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message, 500));
-    }
-    logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
-  }
-});
-
-// Update a tvshow by ID
+// Update a tvshow by ID (re-fetches data from TvMaze)
 user.patch('/tvshow/:id', async (c) => {
   const showId = c.req.param('id');
   try {
     const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
+    const userId = Number(payload.sub);
+    const existing = await dbShowFunctions.returnOneShowId(showId, userId);
+    if (!existing || existing.length === 0) {
+      return c.json(err(`Show with id=${showId} not found`, 404));
     }
-    let returnValue1 = await dbShowFunctions.returnOneShowId(showId);
-    if (!returnValue1 || !returnValue1[0].tvMazeId) {
-      return c.json(err(`The show with ShowId=${showId} has not been found in the DB`, 404));
-    }
-    const response = await fetch(`${tvMazeAPI}/shows/${returnValue1[0].tvMazeId}`);
+    const response = await fetch(`${tvMazeAPI}/shows/${existing[0].tvMazeId}`);
     if (!response.ok) {
-      return c.json(err(`tvMaze Response status: ${response.status}`, 404));
+      return c.json(err(`TvMaze response status: ${response.status}`, 502));
     }
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
     await showData.updateEpisodes();
-    console.log(showData);
-    let returnValue2 = await dbShowFunctions.updateOneShow(showData, showId);
-    if (!returnValue2) {
-      return c.json(err(`Could not update show with ShowId=${showId}`, 404));
-    }
+    await dbShowFunctions.updateOneShow(showData, showId, userId);
     return c.json(ok({ status: 'updated' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -195,14 +136,10 @@ user.delete('/tvshow/:id', async (c) => {
   const showId = c.req.param('id');
   try {
     const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdString);
-    if (!user || user.length !== 1) {
-      return c.json(err('User not found', 404));
-    }
-    let returnValue = await dbShowFunctions.deleteOneShowId(showId);
-    if (!returnValue) {
-      return c.json(err('No show found', 404));
+    const userId = Number(payload.sub);
+    const result = await dbShowFunctions.deleteOneShowId(showId, userId);
+    if (result.rowsAffected === 0) {
+      return c.json(err('Show not found', 404));
     }
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {

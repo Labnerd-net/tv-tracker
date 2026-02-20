@@ -3,7 +3,7 @@ import { sign } from 'hono/jwt';
 import * as bcrypt from 'bcryptjs';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import { ok, err } from '../utils/response.js';
-import type { Credentials, JwtData, UserData } from '@shared/types/tv-tracker.js';
+import type { Credentials, JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
 import {
   bcryptSaltRounds,
   jwtAlgorithm,
@@ -56,7 +56,7 @@ auth.post('/register', authRateLimit, async c => {
     }
     const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
     const totalUsers = await dbUserFunctions.returnUsers();
-    const roles = totalUsers.length === 0 ? ['user', 'admin'] : ['user'];
+    const roles: Role[] = totalUsers.length === 0 ? ['user', 'admin'] : ['user'];
     const user = { email, passwordHash, roles, displayName: displayName.trim() } as UserData;
     const result = await dbUserFunctions.addUser(user);
     if (!result || !(result.length > 0)) {

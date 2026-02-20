@@ -14,6 +14,10 @@ export interface PasswordValidationResult {
 export function validatePassword(password: string): PasswordValidationResult {
   const MIN_LENGTH = 6;
 
+  if (!password || typeof password !== 'string') {
+    return { valid: false, error: 'Password is required' };
+  }
+
   if (password.length < MIN_LENGTH) {
     return {
       valid: false,

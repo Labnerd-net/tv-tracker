@@ -17,6 +17,7 @@ export const users = sqliteTable('users', {
 
 export const tvShows = sqliteTable('tv_shows', {
   id: int('id').primaryKey({ autoIncrement: true }),
+  userId: int('user_id').notNull().references(() => users.userId),
   title: text('title').notNull(),
   tvMazeId: int('tvmaze_id').notNull(),
   platform: text('platform'),
@@ -38,5 +39,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const showRelations = relations(tvShows, ({ one }) => ({
-  user: one(users),
+  user: one(users, {
+    fields: [tvShows.userId],
+    references: [users.userId],
+  }),
 }));

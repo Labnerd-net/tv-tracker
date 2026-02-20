@@ -48,8 +48,8 @@ export interface Episode {
 
 export interface Links {
   self: Self;
-  previousepisode: Episode;
-  nextepisode: Episode;
+  previousepisode?: Episode | null;
+  nextepisode?: Episode | null;
 }
 
 export interface TvMazeShow {
@@ -67,10 +67,10 @@ export interface TvMazeShow {
   schedule: Schedule;
   rating: Rating;
   weight: number;
-  network: Network;
-  webChannel: WebChannel;
+  network: Network | null;
+  webChannel: WebChannel | null;
   externals: Externals;
-  image: Image;
+  image: Image | null;
   summary: string;
   updated: number;
   _links: Links;

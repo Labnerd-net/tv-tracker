@@ -1,54 +1,59 @@
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { tvShows, db } from './schema.js';
 import TvMazeData from '../tvmaze.js';
+import logger from '../utils/logger.js';
 
-export async function returnAllShows() {
-  console.log('Inside returnAllShows dbFunction');
+export async function returnAllShows(userId: number) {
+  logger.debug({ userId }, 'returnAllShows');
   try {
-    return await db.select().from(tvShows);
+    return await db.select().from(tvShows).where(eq(tvShows.userId, userId));
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'returnAllShows failed');
+    throw e;
   }
 }
 
-export async function returnOneShowId(showId: string) {
-  console.log(`Inside returnOneShowId dbFunction: returning ${showId}`);
+export async function returnOneShowId(showId: string, userId: number) {
+  logger.debug({ showId, userId }, 'returnOneShowId');
   try {
     const showIdNumber = Number(showId);
     return await db.select().from(tvShows)
-      .where(eq(tvShows.id, showIdNumber));
+      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'returnOneShowId failed');
+    throw e;
   }
 }
 
-export async function deleteOneShowId(showId: string) {
-  console.log(`Inside deleteOneShowId dbFunction: deleting ${showId}`);
+export async function deleteOneShowId(showId: string, userId: number) {
+  logger.debug({ showId, userId }, 'deleteOneShowId');
   try {
     const showIdNumber = Number(showId);
     return await db.delete(tvShows)
-      .where(eq(tvShows.id, showIdNumber));
+      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'deleteOneShowId failed');
+    throw e;
   }
 }
 
-export async function returnOneTvMazeId(tvMazeId: string) {
-  console.log(`Inside returnOneTvMazeId dbFunction: returning ${tvMazeId}`);
+export async function returnOneTvMazeId(tvMazeId: string, userId: number) {
+  logger.debug({ tvMazeId, userId }, 'returnOneTvMazeId');
   try {
     const tvMazeIdNumber = Number(tvMazeId);
     return await db.select().from(tvShows)
-      .where(eq(tvShows.tvMazeId, tvMazeIdNumber));
+      .where(and(eq(tvShows.tvMazeId, tvMazeIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'returnOneTvMazeId failed');
+    throw e;
   }
 }
 
-export async function addOneShow(showData: TvMazeData) {
-  console.log('Inside addOneShow dbFunction');
+export async function addOneShow(showData: TvMazeData, userId: number) {
+  logger.debug({ tvMazeId: showData.tvMazeId, userId }, 'addOneShow');
   try {
-    return await db.insert(tvShows)
-    .values({
+    return await db.insert(tvShows).values({
+      userId,
       title: showData.title,
       tvMazeId: showData.tvMazeId,
       platform: showData.platform,
@@ -60,12 +65,13 @@ export async function addOneShow(showData: TvMazeData) {
       imageLink: showData.imageLink,
     });
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'addOneShow failed');
+    throw e;
   }
 }
 
-export async function updateOneShow(showData: TvMazeData, showId: string) {
-  console.log(`Inside updateOneShow dbFunction: updating ${showId}`);
+export async function updateOneShow(showData: TvMazeData, showId: string, userId: number) {
+  logger.debug({ showId, userId }, 'updateOneShow');
   try {
     const showIdNumber = Number(showId);
     return await db.update(tvShows)
@@ -80,8 +86,9 @@ export async function updateOneShow(showData: TvMazeData, showId: string) {
         nextEpisode: showData.nextEpisode,
         imageLink: showData.imageLink,
       })
-      .where(eq(tvShows.id, showIdNumber));
+      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
-    console.log(e);
+    logger.error({ err: e }, 'updateOneShow failed');
+    throw e;
   }
 }
