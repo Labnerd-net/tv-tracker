@@ -1,13 +1,11 @@
 import type { AlgorithmTypes } from 'hono/jwt';
 
-export const dbOption = process.env.DB_TYPE?.toLocaleLowerCase() || 'sqlite';
-
 const sqliteFile = process.env.DB_FILE_NAME || 'file:data/local.db';
 export const dbUrl = sqliteFile;
 
 const localClientURLs = ['http://localhost:4173', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'];
 const envClientURLs = process.env.CLIENT_URL?.split(",");
-export const clientURL = envClientURLs || localClientURLs;
+export const clientURLs = envClientURLs || localClientURLs;
 
 export const serverPort = Number(process.env.SERVER_PORT) || 3000;
 
