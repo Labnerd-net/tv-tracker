@@ -9,6 +9,7 @@ import type {
 import { authMiddleware } from '../utils/middleware.js';
 import logger from '../utils/logger.js';
 import TvMazeData from '../tvmaze.js';
+import type { TvMazeShow } from '@shared/types/tvmaze.js';
 
 const tvMazeAPI = 'https://api.tvmaze.com';
 
@@ -28,7 +29,12 @@ user.get('/profile', async c => {
     if (!found || found.length !== 1) {
       return c.json(err('User not found', 404));
     }
-    const profile: ProfileData = found[0];
+    const profile: ProfileData = {
+      userId: found[0].userId,
+      email: found[0].email,
+      displayName: found[0].displayName,
+      roles: found[0].roles,
+    };
     return c.json(ok(profile));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -75,7 +81,34 @@ user.get('/tvshow/:id', async (c) => {
   }
 });
 
-// Add a new tvshow by TvMaze ID
+// Add a new tvshow from a full TvMazeShow body
+user.post('/tvshow', async (c) => {
+  try {
+    const body = await c.req.json();
+    if (!body || typeof body.id !== 'number') {
+      return c.json(err('Missing or invalid show id in request body', 400));
+    }
+    const tvMazeId = String(body.id);
+    const payload = c.get('jwtPayload');
+    const userId = Number(payload.sub);
+    const existing = await dbShowFunctions.returnOneShowTvMazeId(tvMazeId, userId);
+    if (existing && existing.length > 0) {
+      return c.json(ok({ status: 'exists' }));
+    }
+    const showData = new TvMazeData(body as TvMazeShow);
+    await showData.updateEpisodes();
+    await dbShowFunctions.addOneShow(showData, userId);
+    return c.json(ok({ status: 'added' }));
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      return c.json(err(e.message, 500));
+    }
+    logger.error({ err: e }, 'Unexpected error in user route');
+    return c.json(err('An unexpected error occurred', 500));
+  }
+});
+
+// Add a new tvshow by TvMaze ID (fetches data from TVMaze)
 user.post('/tvshow/:id', async (c) => {
   const tvMazeId: string = c.req.param('id');
   try {

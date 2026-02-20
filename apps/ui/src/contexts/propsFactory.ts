@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { AlertProps } from '../types/alert';
 import type { ViewProps } from '../types/view';
 import type { DataProps } from '../types/data';
@@ -9,12 +9,12 @@ export const useAlertProps = (): AlertProps => {
   const [alertVariant, setAlertVariant] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   
-  const showAlert = () => {
+  const showAlert = useCallback(() => {
     setVisibleAlert(true);
-    setTimeout( () => {
+    setTimeout(() => {
       setVisibleAlert(false);
     }, 5000);
-  };
+  }, []);
   
   return { 
      visibleAlert, 

@@ -58,7 +58,7 @@ export default function NavOffcanvas() {
         <Toolbar>
           <Typography
             component='a'
-            href='/'
+            href='/dashboard'
             variant='h6'
             sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}
           >

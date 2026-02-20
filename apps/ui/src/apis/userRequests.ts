@@ -1,7 +1,6 @@
 import axios from 'axios';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
 import type { ProfileData, ShowData } from '@shared/types/tv-tracker';
-import { logger } from '../utils/logger';
 import { getAuthHeaders, handleApiError } from '../utils/requests';
 
 const tvMazeAPI = 'https://api.tvmaze.com';

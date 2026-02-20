@@ -15,12 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const profileData = await getUserProfile();
           if (profileData.success && profileData.data) {
-            setUser({
-              userId: profileData.data.userId,
-              email: profileData.data.email,
-              displayName: profileData.data.displayName,
-              roles: profileData.data.roles,
-            });
+            setUser(profileData.data);
           } else {
             // Token invalid or expired
             localStorage.removeItem('jwt');
@@ -40,12 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const profileData = await getUserProfile();
       if (profileData.success && profileData.data) {
-        setUser({
-          userId: profileData.data.userId,
-          email: profileData.data.email,
-          displayName: profileData.data.displayName,
-          roles: profileData.data.roles,
-        });
+        setUser(profileData.data);
       } else {
         // Profile fetch failed
         localStorage.removeItem('jwt');
