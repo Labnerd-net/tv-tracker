@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Structure
 
-pnpm workspace with two apps under `apps/`:
+pnpm workspace with three packages under `apps/`:
 - `apps/api` — Hono + Node.js REST API (`@tv-tracker/api`)
 - `apps/ui` — React + Vite frontend (`@tv-tracker/ui`)
+- `apps/shared` — shared TypeScript types consumed by both apps (`@tv-tracker/shared`)
 
 ## Commands
 
@@ -58,6 +59,9 @@ The SQLite database file is created at `apps/api/data/local.db` by default (dire
 - **`db/dbShowFunctions.ts`** / **`db/dbUserFunctions.ts`** — Thin wrappers around Drizzle queries, one function per operation.
 - **`utils/auth.ts`** — bcrypt password hashing and JWT sign/verify. `authMiddleware` is a Hono middleware that validates Bearer tokens and attaches `userId` to context.
 - **`utils/envVars.ts`** — Single place to read and export env vars.
+- **`utils/logger.ts`** — Pino logger instance, level driven by `logLevel` from `envVars.ts`.
+
+**Shared types (`apps/shared/types/tv-tracker.ts`):** `Role`, `Credentials`, `RegistrationData`, `JwtData`, `ProfileData`, `UserData`, `UserDbData`. Imported by the API as `@shared/types/tv-tracker.js`.
 
 **Data flow for adding a show:** client sends TVMaze ID → API fetches show from TVMaze → constructs `TvMazeData` (resolves episode links) → inserts into SQLite.
 
@@ -65,7 +69,7 @@ The SQLite database file is created at `apps/api/data/local.db` by default (dire
 
 ### UI (`apps/ui/`)
 
-React 19, React Router 7, React-Bootstrap/Bootstrap 5, Formik + Yup for forms, Axios for HTTP, `jwt-decode` for reading the token client-side. Source lives in `src/` (not yet committed at time of writing).
+React 19, React Router 7, Formik + Yup for forms, Axios for HTTP, `jwt-decode` for reading the token client-side. Source lives in `src/` (not yet written at time of writing).
 
 ## Key Constraints
 
