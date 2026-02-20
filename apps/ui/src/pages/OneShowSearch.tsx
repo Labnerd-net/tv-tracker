@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
 import * as Api from '../apis/userRequests.ts';
+import { getPlatformName } from '../utils/tvmaze.ts';
 import type { TvMazeShow } from '@shared/types/tvmaze.ts';
 
 export default function OneShowSearch() {
@@ -14,6 +15,7 @@ export default function OneShowSearch() {
   const dataProps = useContext(TvShowContext);
   const [tvShow, setTvShow] = useState<TvMazeShow>();
   const [nextEpisode, setNextEpisode] = useState('');
+  const [platform, setPlatform] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -21,17 +23,28 @@ export default function OneShowSearch() {
   useEffect(() => {
     const searchTvShow = async (showID: string) => {
       try {
-        console.log(showID);
-        const show = await Api.returnSearchShow(showID);
-        setTvShow(show);
-        const nextEp = await Api.returnNextEpisodeSearch(show);
-        setNextEpisode(nextEp);
+        const response = await Api.returnSearchShow(showID);
+        if (response.success && response.data) {
+          setTvShow(response.data);
+          const nextEp = await Api.fetchNextEpisodeDate(response.data);
+          if (nextEp.success && nextEp.data) {
+            setNextEpisode(nextEp.data.date);
+          }
+          const platformName = getPlatformName(response.data);
+          if (platformName) setPlatform(platformName);
+        } else {
+          const msg = response.error ?? 'Failed to retrieve TV Show';
+          alertProps.setAlertVariant('danger');
+          alertProps.setAlertMessage(msg);
+          alertProps.showAlert();
+          setError(msg);
+        }
       } catch (err) {
+        const msg = 'Failed to retrieve TV Show results';
         alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage('Failed to retreive TV Show results');
+        alertProps.setAlertMessage(msg);
         alertProps.showAlert();
-        setError('Failed to retreive TV Show results');
-        console.error(err);
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -42,30 +55,34 @@ export default function OneShowSearch() {
   }, [alertProps, showID]);
 
   const addTvShow = async () => {
-    if (tvShow) {
-      try {
-        const response1 = await Api.addNewShowJson(tvShow);
-        console.log(response1);
-        if (response1.status === 'exists') {
-          alertProps.setAlertVariant('warning');
-          alertProps.setAlertMessage(`${tvShow.name} already exists!`);
-          alertProps.showAlert();
-        } else {
-          alertProps.setAlertVariant('success');
-          alertProps.setAlertMessage(`${tvShow.name} successfully added!`);
-          alertProps.showAlert();
-        }
-        const response2 = await Api.getAllShows();
-        console.log(response2);
-        dataProps.setTvShows(response2);
-      } catch (err) {
+    if (!tvShow) return;
+    try {
+      const response1 = await Api.addNewShowJson(tvShow);
+      if (!response1.success) {
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage(`Failed to add ${tvShow.name}!`);
         alertProps.showAlert();
-        console.error(err);
-      } finally {
-        setLoading(false);
+        return;
       }
+      if (response1.data?.status === 'exists') {
+        alertProps.setAlertVariant('warning');
+        alertProps.setAlertMessage(`${tvShow.name} already exists!`);
+      } else {
+        alertProps.setAlertVariant('success');
+        alertProps.setAlertMessage(`${tvShow.name} successfully added!`);
+      }
+      alertProps.showAlert();
+
+      const response2 = await Api.getAllShows();
+      if (response2.success && response2.data) {
+        dataProps.setTvShows(response2.data);
+      }
+    } catch (err) {
+      alertProps.setAlertVariant('danger');
+      alertProps.setAlertMessage(`Failed to add ${tvShow.name}!`);
+      alertProps.showAlert();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +92,7 @@ export default function OneShowSearch() {
 
   return (
     <Container sx={{ pt: 3 }}>
-      <Typography variant='h5'>{tvShow.name} — {Api.returnPlatform(tvShow)}</Typography>
+      <Typography variant='h5'>{tvShow.name} — {platform}</Typography>
 
       {tvShow.image?.medium && (
         <Box

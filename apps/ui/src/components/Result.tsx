@@ -5,6 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import { TvShowContext } from '../contexts/Contexts.js';
 import * as Api from '../apis/userRequests.ts';
+import { getPlatformName } from '../utils/tvmaze.ts';
 import type { AlertProps } from '../types/alert.ts';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze.ts';
 
@@ -17,12 +18,12 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
   useEffect(() => {
     const getNextEpisode = async (show: TvMazeShow) => {
       try {
-        const response = await Api.returnNextEpisodeSearch(show);
-        console.log(response);
-        setNextEpisode(response);
+        const response = await Api.fetchNextEpisodeDate(show);
+        if (response.success && response.data) {
+          setNextEpisode(response.data.date);
+        }
       } catch (err) {
         setError('Failed to get next episode');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -33,24 +34,29 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
   const addTvShow = async () => {
     try {
       const response1 = await Api.addNewShowJson(showData.show);
-      console.log(response1);
-      if (response1.status === 'exists') {
+      if (!response1.success) {
+        alertProps.setAlertVariant('danger');
+        alertProps.setAlertMessage(`Failed to add ${showData.show.name}!`);
+        alertProps.showAlert();
+        return;
+      }
+      if (response1.data?.status === 'exists') {
         alertProps.setAlertVariant('warning');
         alertProps.setAlertMessage(`${showData.show.name} already exists!`);
-        alertProps.showAlert();
       } else {
         alertProps.setAlertVariant('success');
         alertProps.setAlertMessage(`${showData.show.name} successfully added!`);
-        alertProps.showAlert();
       }
+      alertProps.showAlert();
+
       const response2 = await Api.getAllShows();
-      console.log(response2);
-      dataProps.setTvShows(response2);
+      if (response2.success && response2.data) {
+        dataProps.setTvShows(response2.data);
+      }
     } catch (err) {
       alertProps.setAlertVariant('danger');
       alertProps.setAlertMessage(`Failed to add ${showData.show.name}!`);
       alertProps.showAlert();
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -67,7 +73,7 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
     >
       <ListItemText
         primary={<Link to={`/search/show/${showData.show.id}/`}>{showData.show.name}</Link>}
-        secondary={`${Api.returnPlatform(showData.show)} — ${nextEpisode}`}
+        secondary={`${getPlatformName(showData.show) ?? 'N/A'} — ${nextEpisode}`}
       />
     </ListItem>
   );

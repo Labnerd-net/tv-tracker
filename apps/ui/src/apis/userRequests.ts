@@ -1,25 +1,12 @@
 import axios from 'axios';
-import type { TvMazeShow } from '@shared/types/tvmaze';
+import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
 import type { ProfileData, ShowData } from '@shared/types/tv-tracker';
 import { logger } from '../utils/logger';
+import { getAuthHeaders, handleApiError } from '../utils/requests';
 
 const tvMazeAPI = 'https://api.tvmaze.com';
 const databaseAPI = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const path = 'api/user';
-
-function getAuthHeaders() {
-  const token = localStorage.getItem('jwt');
-  return { Authorization: `Bearer ${token}` };
-}
-
-function handleApiError(fnName: string, error: unknown): { success: false; error: string } {
-  if (axios.isAxiosError(error) && error.response?.data?.error) {
-    logger.error(`${fnName} failed`, error.response.status, error.response.data.error);
-    return { success: false, error: error.response.data.error };
-  }
-  logger.error(`${fnName} unexpected error`, error);
-  return { success: false, error: 'An unexpected error occurred' };
-}
 
 export interface ProfileResponse {
   success: boolean;
@@ -125,38 +112,67 @@ export async function deleteShow(showID: string): Promise<StringResponse> {
   }
 }
 
-export function returnPlatform(searchData: TvMazeShow): string {
-  if (searchData.network) {
-    return searchData.network.name;
-  } else if (searchData.webChannel) {
-    return searchData.webChannel.name;
-  }
-  return 'Not Available';
+export interface DateResponse {
+  success: boolean;
+  data?: { date: string };
+  error?: string;
 }
 
-export async function returnNextEpisodeSearch(searchData: TvMazeShow): Promise<string> {
-  if (searchData._links.nextepisode) {
-    const nextEpisodeData = await axios.get(searchData._links.nextepisode.href);
-    return new Date(nextEpisodeData.data.airdate).toDateString();
+export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
+  try {
+    if (searchData._links.nextepisode) {
+      const response = await axios.get(searchData._links.nextepisode.href);
+      if (response.data?.airdate) {
+        return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
+      }
+      return { success: false, error: 'No airdate in episode response' };
+    }
+    return { success: false, error: 'No Next Episode' };
+  } catch (error) {
+    return handleApiError('fetchNextEpisodeDate', error);
   }
-  return 'No Scheduled Episode';
 }
 
-export async function tvShowResults(showName: string) {
+export async function fetchPrevEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
+  try {
+    if (searchData._links.previousepisode) {
+      const response = await axios.get(searchData._links.previousepisode.href);
+      if (response.data?.airdate) {
+        return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
+      }
+      return { success: false, error: 'No airdate in episode response' };
+    }
+    return { success: false, error: 'No Previous Episode' };
+  } catch (error) {
+    return handleApiError('fetchPrevEpisodeDate', error);
+  }
+}
+
+export interface TvMazeShowsResponse {
+  success: boolean;
+  data?: TvMazeSeries[];
+  error?: string;
+}
+
+export async function tvShowResults(showName: string): Promise<TvMazeShowsResponse> {
   try {
     const response = await axios.get(`${tvMazeAPI}/search/shows?q=${showName}`)
-    logger.debug('tvShowResults response', { count: response.data.length, showName });
-    return response.data;
+    return { success: true, data: response.data };
   } catch(error) {
     return handleApiError('tvShowResults', error);
   }
 }
 
-export async function returnSearchShow(showId: string) {
+export interface TvMazeShowResponse {
+  success: boolean;
+  data?: TvMazeShow;
+  error?: string;
+}
+
+export async function returnSearchShow(showId: string): Promise<TvMazeShowResponse> {
   try {
     const response = await axios.get(`${tvMazeAPI}/shows/${showId}`)
-    logger.debug('returnSearchShow response', { showId });
-    return response.data;
+    return { success: true, data: response.data };
   } catch(error) {
     return handleApiError('returnSearchShow', error);
   }

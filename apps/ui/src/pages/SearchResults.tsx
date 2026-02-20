@@ -7,11 +7,12 @@ import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.js';
 import Result from '../components/Result.js';
 import { AlertContext } from '../contexts/Contexts.js';
+import type { TvMazeSeries } from '@shared/types/tvmaze.js';
 
 export default function SearchResults() {
   const alertProps = useContext(AlertContext);
   const { showName } = useParams();
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<TvMazeSeries[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -19,15 +20,22 @@ export default function SearchResults() {
   useEffect(() => {
     const searchTvShows = async (showName: string) => {
       try {
-        console.log(showName);
         const response = await Api.tvShowResults(showName);
-        setSearchResults(response);
+        if (response.success && response.data) {
+          setSearchResults(response.data);
+        } else {
+          const msg = response.error ?? 'Failed to retrieve TV Show results';
+          alertProps.setAlertVariant('danger');
+          alertProps.setAlertMessage(msg);
+          alertProps.showAlert();
+          setError(msg);
+        }
       } catch (err) {
+        const msg = 'Failed to retrieve TV Show results';
         alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage('Failed to retreive TV Show results');
+        alertProps.setAlertMessage(msg);
         alertProps.showAlert();
-        setError('Failed to retreive TV Show results');
-        console.error(err);
+        setError(msg);
       } finally {
         setLoading(false);
       }
