@@ -81,7 +81,7 @@ user.post('/tvshow/:id', async (c) => {
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const existing = await dbShowFunctions.returnOneTvMazeId(tvMazeId, userId);
+    const existing = await dbShowFunctions.returnOneShowTvMazeId(tvMazeId, userId);
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }

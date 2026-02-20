@@ -2,8 +2,9 @@ import { eq, and } from 'drizzle-orm';
 import { tvShows, db } from './schema.js';
 import TvMazeData from '../tvmaze.js';
 import logger from '../utils/logger.js';
+import type { ShowData } from '@shared/types/tv-tracker.js';
 
-export async function returnAllShows(userId: number) {
+export async function returnAllShows(userId: number): Promise<ShowData[]> {
   logger.debug({ userId }, 'returnAllShows');
   try {
     return await db.select().from(tvShows).where(eq(tvShows.userId, userId));
@@ -13,12 +14,12 @@ export async function returnAllShows(userId: number) {
   }
 }
 
-export async function returnOneShowId(showId: string, userId: number) {
+export async function returnOneShowId(showId: string, userId: number): Promise<ShowData[]> {
   logger.debug({ showId, userId }, 'returnOneShowId');
   try {
     const showIdNumber = Number(showId);
     return await db.select().from(tvShows)
-      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
+      .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
     logger.error({ err: e }, 'returnOneShowId failed');
     throw e;
@@ -30,21 +31,21 @@ export async function deleteOneShowId(showId: string, userId: number) {
   try {
     const showIdNumber = Number(showId);
     return await db.delete(tvShows)
-      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
+      .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
     logger.error({ err: e }, 'deleteOneShowId failed');
     throw e;
   }
 }
 
-export async function returnOneTvMazeId(tvMazeId: string, userId: number) {
-  logger.debug({ tvMazeId, userId }, 'returnOneTvMazeId');
+export async function returnOneShowTvMazeId(tvMazeId: string, userId: number): Promise<ShowData[]> {
+  logger.debug({ tvMazeId, userId }, 'returnOneShowTvMazeId');
   try {
     const tvMazeIdNumber = Number(tvMazeId);
     return await db.select().from(tvShows)
       .where(and(eq(tvShows.tvMazeId, tvMazeIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
-    logger.error({ err: e }, 'returnOneTvMazeId failed');
+    logger.error({ err: e }, 'returnOneShowTvMazeId failed');
     throw e;
   }
 }
@@ -86,7 +87,7 @@ export async function updateOneShow(showData: TvMazeData, showId: string, userId
         nextEpisode: showData.nextEpisode,
         imageLink: showData.imageLink,
       })
-      .where(and(eq(tvShows.id, showIdNumber), eq(tvShows.userId, userId)));
+      .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
     logger.error({ err: e }, 'updateOneShow failed');
     throw e;

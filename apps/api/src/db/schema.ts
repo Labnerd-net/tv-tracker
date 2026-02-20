@@ -16,7 +16,7 @@ export const users = sqliteTable('users', {
 });
 
 export const tvShows = sqliteTable('tv_shows', {
-  id: int('id').primaryKey({ autoIncrement: true }),
+  showId: int('id').primaryKey({ autoIncrement: true }),
   userId: int('user_id').notNull().references(() => users.userId),
   title: text('title').notNull(),
   tvMazeId: int('tvmaze_id').notNull(),

@@ -2,6 +2,7 @@ import { eq, and } from 'drizzle-orm';
 import { users, db } from './schema.js';
 import logger from '../utils/logger.js';
 import type {
+  ProfileData,
   UserData,
   UserDbData,
 } from '@shared/types/tv-tracker.js';
@@ -49,7 +50,7 @@ export async function returnUserById(userId: string): Promise<UserDbData[]> {
 // ------------------------------------------------------------------
 // Add user
 // ------------------------------------------------------------------
-export async function addUser(user: UserData) {
+export async function addUser(user: UserData): Promise<ProfileData[]> {
   logger.debug({ email: user.email }, 'addUser');
   try {
     return await db
@@ -61,7 +62,7 @@ export async function addUser(user: UserData) {
         roles: user.roles,
       })
       .returning({
-        id: users.userId,
+        userId: users.userId,
         email: users.email,
         displayName: users.displayName,
         roles: users.roles,

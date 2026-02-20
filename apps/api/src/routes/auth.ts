@@ -63,7 +63,7 @@ auth.post('/register', authRateLimit, async c => {
       throw new Error(`Could not add new user with email=${email}`);
     }
     const payload = {
-      sub: result[0].id,
+      sub: result[0].userId,
       email: result[0].email,
       displayName: result[0].displayName,
       roles: result[0].roles,

@@ -21,15 +21,13 @@ export default function App() {
 
   useEffect(() => {
     const retreiveTvShows = async () => {
-      try {
-        const response = await Api.getAllShows();
-        console.log(response);
-        dataProps.setTvShows(response);
-      } catch (err) {
+      const response = await Api.getAllShows();
+      if (response.success && response.data) {
+        dataProps.setTvShows(response.data);
+      } else if (!response.success) {
         alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage('Failed to retreive TV Shows');
+        alertProps.setAlertMessage(response.error ?? 'Failed to retrieve TV Shows');
         alertProps.showAlert();
-        console.error(err);
       }
     };
     retreiveTvShows();

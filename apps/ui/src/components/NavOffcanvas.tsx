@@ -8,10 +8,11 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { AuthContext, TvShowContext, ViewContext } from '../contexts/Contexts.ts';
+import { TvShowContext, ViewContext } from '../contexts/Contexts.ts';
+import { useAuth } from '../contexts/auth/AuthContext.tsx';
 
 export default function NavOffcanvas() {
-  const authProps = useContext(AuthContext);
+  const { logout } = useAuth();
   const dataProps = useContext(TvShowContext);
   const viewProps = useContext(ViewContext);
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ export default function NavOffcanvas() {
   };
 
   const handleLogout = () => {
-    authProps.logout();
+    logout();
     navigate('/login');
   };
 

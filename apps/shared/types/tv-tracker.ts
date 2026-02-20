@@ -37,16 +37,17 @@ export interface UserDbData extends UserData {
 }
 
 export interface ShowData {
-  id: string
-  title: string
-  tvMazeId: number
-  platform: string
-  status: string
-  scheduleDay: string
-  scheduleTime: string
-  prevEpisode: string
-  nextEpisode: string
-  imageLink: string
+  showId: number;
+  userId: number;
+  title: string;
+  tvMazeId: number;
+  platform: string | null;
+  status: string | null;
+  scheduleDay: string | null;
+  scheduleTime: string | null;
+  prevEpisode: string | null;
+  nextEpisode: string | null;
+  imageLink: string | null;
 }
 
 export type TvShows = ShowData[]
