@@ -1,0 +1,22 @@
+node_modules/
+dist/
+
+# env files — keep samples, ignore everything else
+.env
+.env.*
+!.env.sample
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Drizzle generated migrations
+drizzle/
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS
+.DS_Store

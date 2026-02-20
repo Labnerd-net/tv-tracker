@@ -1,0 +1,21 @@
+{
+  "name": "tv-tracker",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "dev:api": "pnpm --filter @tv-tracker/api run dev",
+    "dev:ui": "pnpm --filter @tv-tracker/ui run dev",
+    "build": "pnpm -r run build",
+    "build:api": "pnpm --filter @tv-tracker/api run build",
+    "build:ui": "pnpm --filter @tv-tracker/ui run build",
+    "lint": "pnpm -r run lint"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "dependencies": {
+    "pino": "^10.3.1"
+  }
+}
