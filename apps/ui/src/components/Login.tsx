@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import { loginUser } from '../apis/requests';
+import { loginUser } from '../apis/authRequests';
 import useToken from '../hooks/useToken';
 
 export default function Login() {

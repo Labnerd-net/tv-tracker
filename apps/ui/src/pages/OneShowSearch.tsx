@@ -5,8 +5,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
-import * as Api from '../apis/requests.ts';
-import type { TvMazeShow } from '../types/tvmaze.ts';
+import * as Api from '../apis/userRequests.ts';
+import type { TvMazeShow } from '@shared/types/tvmaze.ts';
 
 export default function OneShowSearch() {
   const { showID } = useParams();

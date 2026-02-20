@@ -9,14 +9,12 @@ import OneShow from './pages/OneShow.tsx';
 import SearchResults from './pages/SearchResults.tsx';
 import OneShowSearch from './pages/OneShowSearch.tsx';
 // import ProtectedRoute from './pages/ProtectedRoute.tsx';
-import * as Api from './apis/requests.ts';
-import { useAuthProps } from './contexts/propsFactory.ts';
+import * as Api from './apis/userRequests.ts';
 import { useAlertProps } from './contexts/propsFactory.ts';
 import { useViewProps }  from './contexts/propsFactory.ts';
 import { useDataProps }  from './contexts/propsFactory.ts';
 
 export default function App() {
-  const authProps   = useAuthProps();
   const alertProps  = useAlertProps();
   const viewProps   = useViewProps();
   const dataProps   = useDataProps();
@@ -40,7 +38,7 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <BrowserRouter>
-        <MyProviders authProps={authProps} alertProps={alertProps} dataProps={dataProps} viewProps={viewProps}>
+        <MyProviders alertProps={alertProps} dataProps={dataProps} viewProps={viewProps}>
           <NavOffcanvas />
           {alertProps.visibleAlert && <AppAlert alertVariant={alertProps.alertVariant} alertMessage={alertProps.alertMessage} />}
           <Routes>

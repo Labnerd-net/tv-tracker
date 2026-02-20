@@ -4,7 +4,7 @@ import Container from '@mui/material/Container';
 import List from '@mui/material/List';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import * as Api from '../apis/requests.js';
+import * as Api from '../apis/userRequests.js';
 import Result from '../components/Result.js';
 import { AlertContext } from '../contexts/Contexts.js';
 

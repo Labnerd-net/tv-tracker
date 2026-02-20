@@ -1,58 +1,37 @@
 import axios from 'axios';
-import type { TvMazeShow } from '../types/tvmaze.ts';
-import type { Credentials } from '../types/auth.ts';
+import type { TvMazeShow } from '@shared/types/tvmaze';
+import type { ProfileData } from '@shared/types/tv-tracker';
+import { logger } from '../utils/logger';
 
 const tvMazeAPI = 'https://api.tvmaze.com';
 const databaseAPI = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const path = 'api/user';
 
-export async function loginUser(credentials: Credentials) {
-  try {
-    const response = await axios.post(`${databaseAPI}/api/auth/login`, credentials);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
+export interface ProfileResponse {
+  success: boolean;
+  data?: ProfileData;
+  error?: string;
 }
 
-export async function registerUser(credentials: Credentials) {
+export async function getUserProfile(): Promise<ProfileResponse> {
   try {
-    const response = await axios.post(`${databaseAPI}/api/auth/register`, credentials);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-export async function getUserData(userID: string) {
-  try {
-    const token = localStorage.getItem('jwt'); // or read from a cookie
-    const response = await axios.get(`${databaseAPI}/api/auth/${userID}`, {
+    const token = localStorage.getItem('jwt');
+    const response = await axios.get(`${databaseAPI}/${path}/profile`, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
-    console.log(response.data);
-    return response.data;
+    if (response.data.ok) {
+      return { success: true, data: response.data.data };
+    }
+    return { success: false, error: response.data.error };
   } catch (error) {
-    console.error(error);
-  }
-}
-
-export async function deleteUser(userID: string) {
-  try {
-    const token = localStorage.getItem('jwt'); // or read from a cookie
-    const response = await axios.delete(`${databaseAPI}/api/auth/${userID}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    console.log(`Deleting finished.`);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error(error);
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      logger.error('getUserProfile failed', error.response.status, error.response.data.error);
+      return { success: false, error: error.response.data.error };
+    }
+    logger.error('getUserProfile unexpected error', error);
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 

@@ -35,3 +35,18 @@ export interface UserData extends ProfileData {
 export interface UserDbData extends UserData {
   createdAt: Date;
 }
+
+export interface ShowData {
+  id: string
+  title: string
+  tvMazeId: number
+  platform: string
+  status: string
+  scheduleDay: string
+  scheduleTime: string
+  prevEpisode: string
+  nextEpisode: string
+  imageLink: string
+}
+
+export type TvShows = ShowData[]

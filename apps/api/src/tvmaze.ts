@@ -1,4 +1,4 @@
-import { type TvMazeShow } from './types/tvmaze.js';
+import { type TvMazeShow } from '@shared/types/tvmaze.js';
 import logger from './utils/logger.js';
 
 export default class TvMazeData {

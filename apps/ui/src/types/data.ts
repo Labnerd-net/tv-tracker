@@ -1,15 +1,4 @@
-export interface ShowData {
-  id: string
-  title: string
-  tvMazeId: number
-  platform: string
-  status: string
-  scheduleDay: string
-  scheduleTime: string
-  prevEpisode: string
-  nextEpisode: string
-  imageLink: string
-}
+import type { ShowData } from "@shared/types/tv-tracker";
 
 export interface DataProps {
     tvShows: ShowData[]
@@ -19,5 +8,3 @@ export interface DataProps {
     sortCol: string
     setSortCol: React.Dispatch<React.SetStateAction<string>>
 }
-
-export type TvShows = ShowData[]

@@ -9,9 +9,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import * as Api from '../apis/requests.ts';
+import * as Api from '../apis/userRequests.ts';
 import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
-import type { ShowData } from '../types/data.ts';
+import type { ShowData } from '@shared/types/tv-tracker.ts';
 
 export default function OneShow() {
   const { showID } = useParams();

@@ -4,9 +4,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import { TvShowContext } from '../contexts/Contexts.js';
-import * as Api from '../apis/requests.js';
+import * as Api from '../apis/userRequests.ts';
 import type { AlertProps } from '../types/alert.ts';
-import type { TvMazeSeries, TvMazeShow } from '../types/tvmaze.ts';
+import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze.ts';
 
 export default function Result({ showData, alertProps }: { showData: TvMazeSeries, alertProps: AlertProps }) {
   const dataProps = useContext(TvShowContext);
