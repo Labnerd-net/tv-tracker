@@ -6,13 +6,18 @@ import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { TvShowContext, ViewContext } from '../contexts/Contexts.ts';
 import { useAuth } from '../contexts/auth/AuthContext.tsx';
+import { useTheme } from '../contexts/theme/ThemeContext.tsx';
 
 export default function NavOffcanvas() {
   const { logout } = useAuth();
+  const { mode, toggleTheme } = useTheme();
   const dataProps = useContext(TvShowContext);
   const viewProps = useContext(ViewContext);
   const navigate = useNavigate();
@@ -64,6 +69,9 @@ export default function NavOffcanvas() {
           >
             TV Show Tracker
           </Typography>
+          <IconButton color='inherit' onClick={toggleTheme} aria-label='toggle theme'>
+            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
           <Button color='inherit' onClick={() => setNavOpen(true)}>Menu</Button>
         </Toolbar>
       </AppBar>
