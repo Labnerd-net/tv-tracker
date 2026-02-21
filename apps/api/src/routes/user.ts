@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import * as dbShowFunctions from '../db/dbShowFunctions.js';
 import { ok, err } from '../utils/response.js';
@@ -10,7 +11,7 @@ import { authMiddleware } from '../utils/middleware.js';
 import logger from '../utils/logger.js';
 import TvMazeData from '../tvmaze.js';
 import type { TvMazeShow } from '@shared/types/tvmaze.js';
-
+import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
 const tvMazeAPI = 'https://api.tvmaze.com';
 
 type Variables = {
@@ -19,6 +20,13 @@ type Variables = {
 
 const user = new Hono<{ Variables: Variables }>();
 user.use(authMiddleware);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validationHook = (result: any, c: any) => {
+  if (!result.success) {
+    return c.json(err(result.error.issues[0].message), 400);
+  }
+};
 
 // Show user info
 user.get('/profile', async c => {
@@ -62,8 +70,8 @@ user.get('/tvshows', async (c) => {
 });
 
 // Return a specific tvshow by ID
-user.get('/tvshow/:id', async (c) => {
-  const showId: string = c.req.param('id');
+user.get('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async (c) => {
+  const { id: showId } = c.req.valid('param');
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
@@ -82,12 +90,9 @@ user.get('/tvshow/:id', async (c) => {
 });
 
 // Add a new tvshow from a full TvMazeShow body
-user.post('/tvshow', async (c) => {
+user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), async (c) => {
   try {
-    const body = await c.req.json();
-    if (!body || typeof body.id !== 'number') {
-      return c.json(err('Missing or invalid show id in request body', 400));
-    }
+    const body = c.req.valid('json');
     const tvMazeId = String(body.id);
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
@@ -95,7 +100,7 @@ user.post('/tvshow', async (c) => {
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
-    const showData = new TvMazeData(body as TvMazeShow);
+    const showData = new TvMazeData(body as unknown as TvMazeShow);
     await showData.updateEpisodes();
     await dbShowFunctions.addOneShow(showData, userId);
     return c.json(ok({ status: 'added' }));
@@ -109,8 +114,8 @@ user.post('/tvshow', async (c) => {
 });
 
 // Add a new tvshow by TvMaze ID (fetches data from TVMaze)
-user.post('/tvshow/:id', async (c) => {
-  const tvMazeId: string = c.req.param('id');
+user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async (c) => {
+  const { id: tvMazeId } = c.req.valid('param');
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
@@ -137,8 +142,8 @@ user.post('/tvshow/:id', async (c) => {
 });
 
 // Update a tvshow by ID (re-fetches data from TvMaze)
-user.patch('/tvshow/:id', async (c) => {
-  const showId = c.req.param('id');
+user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async (c) => {
+  const { id: showId } = c.req.valid('param');
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
@@ -165,8 +170,8 @@ user.patch('/tvshow/:id', async (c) => {
 });
 
 // Delete a tvshow by ID
-user.delete('/tvshow/:id', async (c) => {
-  const showId = c.req.param('id');
+user.delete('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async (c) => {
+  const { id: showId } = c.req.valid('param');
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);

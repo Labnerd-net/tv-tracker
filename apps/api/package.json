@@ -12,12 +12,14 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",
+    "@hono/zod-validator": "^0.7.6",
     "@libsql/client": "^0.17.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.3",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

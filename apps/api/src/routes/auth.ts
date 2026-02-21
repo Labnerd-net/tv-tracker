@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { sign } from 'hono/jwt';
 import * as bcrypt from 'bcryptjs';
+import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import { ok, err } from '../utils/response.js';
-import type { Credentials, JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
+import type { JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
 import {
   bcryptSaltRounds,
   jwtAlgorithm,
@@ -11,44 +12,26 @@ import {
   jwtSecret,
 } from '../utils/envVars.js';
 import { authMiddleware } from '../utils/middleware.js';
-import { validatePassword } from '../utils/passwordValidation.js';
-import { validateEmail } from '../utils/emailValidation.js';
 import { authRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
-
+import { loginSchema, registrationSchema } from '../schemas/auth.js';
 type Variables = {
   jwtPayload: JwtData;
 };
 
 const auth = new Hono<{ Variables: Variables }>();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validationHook = (result: any, c: any) => {
+  if (!result.success) {
+    return c.json(err(result.error.issues[0].message), 400);
+  }
+};
+
 // Register a new user
-auth.post('/register', authRateLimit, async c => {
+auth.post('/register', authRateLimit, zValidator('json', registrationSchema, validationHook), async c => {
   try {
-    const { email, password, displayName } = await c.req.json();
-    if (!email || !password) {
-      return c.json(err('Email and password required'), 400);
-    }
-
-    // Validate display name
-    if (!displayName || typeof displayName !== 'string' || displayName.trim().length === 0) {
-      return c.json(err('Display name is required'), 400);
-    }
-    if (displayName.length > 50) {
-      return c.json(err('Display name must be less than 50 characters'), 400);
-    }
-
-    // Validate email format
-    const emailValidation = validateEmail(email);
-    if (!emailValidation.valid) {
-      return c.json(err(emailValidation.error!), 400);
-    }
-
-    // Validate password strength
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-      return c.json(err(passwordValidation.error!), 400);
-    }
+    const { email, password, displayName } = c.req.valid('json');
 
     const existing = await dbUserFunctions.returnUserByEmail(email);
     if (existing?.length) {
@@ -57,7 +40,7 @@ auth.post('/register', authRateLimit, async c => {
     const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
     const totalUsers = await dbUserFunctions.returnUsers();
     const roles: Role[] = totalUsers.length === 0 ? ['user', 'admin'] : ['user'];
-    const user = { email, passwordHash, roles, displayName: displayName.trim() } as UserData;
+    const user = { email, passwordHash, roles, displayName } as UserData;
     const result = await dbUserFunctions.addUser(user);
     if (!result || !(result.length > 0)) {
       throw new Error(`Could not add new user with email=${email}`);
@@ -81,12 +64,10 @@ auth.post('/register', authRateLimit, async c => {
 });
 
 // Log in an existing user
-auth.post('/login', authRateLimit, async c => {
+auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHook), async c => {
   try {
-    const { email, password }: Credentials = await c.req.json();
-    if (!email || !password) {
-      return c.json(err('Email and password required'), 400);
-    }
+    const { email, password } = c.req.valid('json');
+
     const user = await dbUserFunctions.returnUserByEmail(email);
     if (!user || user.length === 0) {
       return c.json(err('Invalid credentials'), 401);
