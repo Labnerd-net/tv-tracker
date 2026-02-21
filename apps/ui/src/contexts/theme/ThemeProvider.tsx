@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { theme, lightTheme } from '../../utils/theme';
+import { darkTheme, lightTheme } from '../../utils/theme';
 import { ThemeContext } from './ThemeContext';
 import type { ThemeMode } from './ThemeContext';
 
@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const currentTheme = mode === 'light' ? lightTheme : theme;
+  const currentTheme = mode === 'light' ? lightTheme : darkTheme;
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>
