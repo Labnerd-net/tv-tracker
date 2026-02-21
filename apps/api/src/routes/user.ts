@@ -35,7 +35,7 @@ user.get('/profile', async c => {
     const userIdString = String(payload.sub);
     const found = await dbUserFunctions.returnUserById(userIdString);
     if (!found || found.length !== 1) {
-      return c.json(err('User not found', 404));
+      return c.json(err('User not found'), 404);
     }
     const profile: ProfileData = {
       userId: found[0].userId,
@@ -46,10 +46,10 @@ user.get('/profile', async c => {
     return c.json(ok(profile));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -62,10 +62,10 @@ user.get('/tvshows', async (c) => {
     return c.json(ok(shows));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -77,15 +77,15 @@ user.get('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook
     const userId = Number(payload.sub);
     const shows = await dbShowFunctions.returnOneShowId(showId, userId);
     if (!shows || shows.length === 0) {
-      return c.json(err('Show not found', 404));
+      return c.json(err('Show not found'), 404);
     }
     return c.json(ok(shows[0]));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -106,10 +106,10 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -125,7 +125,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     }
     const response = await fetch(`${tvMazeAPI}/shows/${tvMazeId}`);
     if (!response.ok) {
-      return c.json(err(`TvMaze response status: ${response.status}`, 502));
+      return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
@@ -134,10 +134,10 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -149,11 +149,11 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     const userId = Number(payload.sub);
     const existing = await dbShowFunctions.returnOneShowId(showId, userId);
     if (!existing || existing.length === 0) {
-      return c.json(err(`Show with id=${showId} not found`, 404));
+      return c.json(err(`Show with id=${showId} not found`), 404);
     }
     const response = await fetch(`${tvMazeAPI}/shows/${existing[0].tvMazeId}`);
     if (!response.ok) {
-      return c.json(err(`TvMaze response status: ${response.status}`, 502));
+      return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
@@ -162,10 +162,10 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     return c.json(ok({ status: 'updated' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
@@ -177,15 +177,15 @@ user.delete('/tvshow/:id', zValidator('param', numericIdParamSchema, validationH
     const userId = Number(payload.sub);
     const result = await dbShowFunctions.deleteOneShowId(showId, userId);
     if (result.rowsAffected === 0) {
-      return c.json(err('Show not found', 404));
+      return c.json(err('Show not found'), 404);
     }
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
-      return c.json(err(e.message, 500));
+      return c.json(err(e.message), 500);
     }
     logger.error({ err: e }, 'Unexpected error in user route');
-    return c.json(err('An unexpected error occurred', 500));
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 
