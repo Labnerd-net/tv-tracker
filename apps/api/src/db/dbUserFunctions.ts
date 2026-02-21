@@ -1,5 +1,6 @@
-import { eq, and } from 'drizzle-orm';
-import { users, db } from './schema.js';
+import { eq } from 'drizzle-orm';
+import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { users } from './schema.js';
 import logger from '../utils/logger.js';
 import type {
   ProfileData,
@@ -10,7 +11,7 @@ import type {
 // ------------------------------------------------------------------
 // Return all users
 // ------------------------------------------------------------------
-export async function returnUsers(): Promise<UserDbData[]> {
+export async function returnUsers(db: LibSQLDatabase): Promise<UserDbData[]> {
   logger.debug('returnUsers');
   try {
     return await db.select().from(users);
@@ -23,7 +24,7 @@ export async function returnUsers(): Promise<UserDbData[]> {
 // ------------------------------------------------------------------
 // Return user by Email
 // ------------------------------------------------------------------
-export async function returnUserByEmail(email: string): Promise<UserDbData[]> {
+export async function returnUserByEmail(db: LibSQLDatabase, email: string): Promise<UserDbData[]> {
   logger.debug({ email }, 'returnUserByEmail');
   try {
     return await db.select().from(users).where(eq(users.email, email));
@@ -36,7 +37,7 @@ export async function returnUserByEmail(email: string): Promise<UserDbData[]> {
 // ------------------------------------------------------------------
 // Return user by Id
 // ------------------------------------------------------------------
-export async function returnUserById(userId: string): Promise<UserDbData[]> {
+export async function returnUserById(db: LibSQLDatabase, userId: string): Promise<UserDbData[]> {
   logger.debug({ userId }, 'returnUserById');
   try {
     const userIdNumber = Number(userId);
@@ -50,7 +51,7 @@ export async function returnUserById(userId: string): Promise<UserDbData[]> {
 // ------------------------------------------------------------------
 // Add user
 // ------------------------------------------------------------------
-export async function addUser(user: UserData): Promise<ProfileData[]> {
+export async function addUser(db: LibSQLDatabase, user: UserData): Promise<ProfileData[]> {
   logger.debug({ email: user.email }, 'addUser');
   try {
     return await db
@@ -76,7 +77,7 @@ export async function addUser(user: UserData): Promise<ProfileData[]> {
 // ------------------------------------------------------------------
 // Update refresh token hash + expiry for a user
 // ------------------------------------------------------------------
-export async function updateRefreshToken(userId: number, hash: string, expiresAt: Date) {
+export async function updateRefreshToken(db: LibSQLDatabase, userId: number, hash: string, expiresAt: Date) {
   logger.debug({ userId }, 'updateRefreshToken');
   try {
     return await db
@@ -92,7 +93,7 @@ export async function updateRefreshToken(userId: number, hash: string, expiresAt
 // ------------------------------------------------------------------
 // Clear refresh token on logout
 // ------------------------------------------------------------------
-export async function clearRefreshToken(userId: number) {
+export async function clearRefreshToken(db: LibSQLDatabase, userId: number) {
   logger.debug({ userId }, 'clearRefreshToken');
   try {
     return await db
@@ -108,7 +109,7 @@ export async function clearRefreshToken(userId: number) {
 // ------------------------------------------------------------------
 // Return user by refresh token hash
 // ------------------------------------------------------------------
-export async function returnUserByRefreshTokenHash(hash: string): Promise<UserDbData[]> {
+export async function returnUserByRefreshTokenHash(db: LibSQLDatabase, hash: string): Promise<UserDbData[]> {
   logger.debug('returnUserByRefreshTokenHash');
   try {
     return await db.select().from(users).where(eq(users.refreshTokenHash, hash));
@@ -121,7 +122,7 @@ export async function returnUserByRefreshTokenHash(hash: string): Promise<UserDb
 // ------------------------------------------------------------------
 // Delete user by Id
 // ------------------------------------------------------------------
-export async function deleteUserById(userId: string) {
+export async function deleteUserById(db: LibSQLDatabase, userId: string) {
   logger.debug({ userId }, 'deleteUserById');
   try {
     const userIdNumber = Number(userId);

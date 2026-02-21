@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { returnUsers } from '../db/dbUserFunctions.js';
+import { db } from '../db/schema.js';
 import { ok, err } from '../utils/response.js';
 import type {
   JwtData,
@@ -18,7 +19,7 @@ admin.use(authMiddleware);
 // Return all users' details
 admin.get('/users', requireRole('admin'), async c => {
   try {
-    const allUsers = await returnUsers();
+    const allUsers = await returnUsers(db);
     const allUserProfiles: ProfileData[] = allUsers;
     return c.json(ok({ allUserProfiles }));
   } catch (e: unknown) {

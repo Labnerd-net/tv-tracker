@@ -5,6 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { createHash } from 'node:crypto';
 import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
+import { db } from '../db/schema.js';
 import { ok, err } from '../utils/response.js';
 import { generateRefreshToken } from '../utils/auth.js';
 import type { JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
@@ -35,6 +36,7 @@ const validationHook = (result: any, c: any) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setRefreshCookie(c: any, raw: string) {
   setCookie(c, 'refreshToken', raw, {
     httpOnly: true,
@@ -50,15 +52,15 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
   try {
     const { email, password, displayName } = c.req.valid('json');
 
-    const existing = await dbUserFunctions.returnUserByEmail(email);
+    const existing = await dbUserFunctions.returnUserByEmail(db, email);
     if (existing?.length) {
       return c.json(err('User already exists'), 409);
     }
     const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
-    const totalUsers = await dbUserFunctions.returnUsers();
+    const totalUsers = await dbUserFunctions.returnUsers(db);
     const roles: Role[] = totalUsers.length === 0 ? ['user', 'admin'] : ['user'];
     const user = { email, passwordHash, roles, displayName } as UserData;
-    const result = await dbUserFunctions.addUser(user);
+    const result = await dbUserFunctions.addUser(db, user);
     if (!result || !(result.length > 0)) {
       throw new Error(`Could not add new user with email=${email}`);
     }
@@ -73,7 +75,7 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
 
     const { raw, hash } = generateRefreshToken();
     const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(result[0].userId, hash, expiresAt);
+    await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, expiresAt);
     setRefreshCookie(c, raw);
 
     return c.json(ok({ token }));
@@ -91,7 +93,7 @@ auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHoo
   try {
     const { email, password } = c.req.valid('json');
 
-    const user = await dbUserFunctions.returnUserByEmail(email);
+    const user = await dbUserFunctions.returnUserByEmail(db, email);
     if (!user || user.length === 0) {
       return c.json(err('Invalid credentials'), 401);
     }
@@ -108,7 +110,7 @@ auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHoo
 
     const { raw, hash } = generateRefreshToken();
     const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(user[0].userId, hash, expiresAt);
+    await dbUserFunctions.updateRefreshToken(db, user[0].userId, hash, expiresAt);
     setRefreshCookie(c, raw);
 
     return c.json(ok({ token }));
@@ -130,7 +132,7 @@ auth.post('/refresh', async c => {
     }
 
     const hash = createHash('sha256').update(raw).digest('hex');
-    const users = await dbUserFunctions.returnUserByRefreshTokenHash(hash);
+    const users = await dbUserFunctions.returnUserByRefreshTokenHash(db, hash);
     if (!users || users.length === 0) {
       return c.json(err('Invalid refresh token'), 401);
     }
@@ -151,7 +153,7 @@ auth.post('/refresh', async c => {
 
     const { raw: newRaw, hash: newHash } = generateRefreshToken();
     const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(user.userId, newHash, expiresAt);
+    await dbUserFunctions.updateRefreshToken(db, user.userId, newHash, expiresAt);
     setRefreshCookie(c, newRaw);
 
     return c.json(ok({ token }));
@@ -168,7 +170,7 @@ auth.post('/refresh', async c => {
 auth.post('/logout', authMiddleware, async c => {
   try {
     const payload = c.get('jwtPayload');
-    await dbUserFunctions.clearRefreshToken(payload.sub);
+    await dbUserFunctions.clearRefreshToken(db, payload.sub);
     deleteCookie(c, 'refreshToken', { path: '/api/auth' });
     return c.json(ok({ status: 'logged out' }));
   } catch (e: unknown) {
@@ -185,11 +187,11 @@ auth.delete('/deleteUser', authMiddleware, async c => {
   try {
     const payload = c.get('jwtPayload');
     const userIdNumber = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(userIdNumber);
+    const user = await dbUserFunctions.returnUserById(db, userIdNumber);
     if (!user || user.length === 0) {
       return c.json(err('User not found'), 404);
     }
-    const returnValue = await dbUserFunctions.deleteUserById(userIdNumber);
+    const returnValue = await dbUserFunctions.deleteUserById(db, userIdNumber);
     if (!returnValue) {
       return c.json(err('User not found'), 404);
     }

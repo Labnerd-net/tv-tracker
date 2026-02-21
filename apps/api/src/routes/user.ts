@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import * as dbShowFunctions from '../db/dbShowFunctions.js';
+import { db } from '../db/schema.js';
 import { ok, err } from '../utils/response.js';
 import type {
   JwtData,
@@ -33,7 +34,7 @@ user.get('/profile', async c => {
   try {
     const payload = c.get('jwtPayload');
     const userIdString = String(payload.sub);
-    const found = await dbUserFunctions.returnUserById(userIdString);
+    const found = await dbUserFunctions.returnUserById(db, userIdString);
     if (!found || found.length !== 1) {
       return c.json(err('User not found'), 404);
     }
@@ -58,7 +59,7 @@ user.get('/tvshows', async (c) => {
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const shows = await dbShowFunctions.returnAllShows(userId);
+    const shows = await dbShowFunctions.returnAllShows(db, userId);
     return c.json(ok(shows));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -75,7 +76,7 @@ user.get('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const shows = await dbShowFunctions.returnOneShowId(showId, userId);
+    const shows = await dbShowFunctions.returnOneShowId(db, showId, userId);
     if (!shows || shows.length === 0) {
       return c.json(err('Show not found'), 404);
     }
@@ -96,13 +97,13 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
     const tvMazeId = String(body.id);
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const existing = await dbShowFunctions.returnOneShowTvMazeId(tvMazeId, userId);
+    const existing = await dbShowFunctions.returnOneShowTvMazeId(db, tvMazeId, userId);
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
     const showData = new TvMazeData(body as unknown as TvMazeShow);
     await showData.updateEpisodes();
-    await dbShowFunctions.addOneShow(showData, userId);
+    await dbShowFunctions.addOneShow(db, showData, userId);
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -119,7 +120,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const existing = await dbShowFunctions.returnOneShowTvMazeId(tvMazeId, userId);
+    const existing = await dbShowFunctions.returnOneShowTvMazeId(db, tvMazeId, userId);
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
@@ -130,7 +131,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
     await showData.updateEpisodes();
-    await dbShowFunctions.addOneShow(showData, userId);
+    await dbShowFunctions.addOneShow(db, showData, userId);
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -147,7 +148,7 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const existing = await dbShowFunctions.returnOneShowId(showId, userId);
+    const existing = await dbShowFunctions.returnOneShowId(db, showId, userId);
     if (!existing || existing.length === 0) {
       return c.json(err(`Show with id=${showId} not found`), 404);
     }
@@ -158,7 +159,7 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
     await showData.updateEpisodes();
-    await dbShowFunctions.updateOneShow(showData, showId, userId);
+    await dbShowFunctions.updateOneShow(db, showData, showId, userId);
     return c.json(ok({ status: 'updated' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -175,7 +176,7 @@ user.delete('/tvshow/:id', zValidator('param', numericIdParamSchema, validationH
   try {
     const payload = c.get('jwtPayload');
     const userId = Number(payload.sub);
-    const result = await dbShowFunctions.deleteOneShowId(showId, userId);
+    const result = await dbShowFunctions.deleteOneShowId(db, showId, userId);
     if (result.rowsAffected === 0) {
       return c.json(err('Show not found'), 404);
     }

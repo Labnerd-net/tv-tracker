@@ -1,10 +1,11 @@
 import { eq, and } from 'drizzle-orm';
-import { tvShows, db } from './schema.js';
+import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { tvShows } from './schema.js';
 import TvMazeData from '../tvmaze.js';
 import logger from '../utils/logger.js';
 import type { ShowData } from '@shared/types/tv-tracker.js';
 
-export async function returnAllShows(userId: number): Promise<ShowData[]> {
+export async function returnAllShows(db: LibSQLDatabase, userId: number): Promise<ShowData[]> {
   logger.debug({ userId }, 'returnAllShows');
   try {
     return await db.select().from(tvShows).where(eq(tvShows.userId, userId));
@@ -14,7 +15,7 @@ export async function returnAllShows(userId: number): Promise<ShowData[]> {
   }
 }
 
-export async function returnOneShowId(showId: string, userId: number): Promise<ShowData[]> {
+export async function returnOneShowId(db: LibSQLDatabase, showId: string, userId: number): Promise<ShowData[]> {
   logger.debug({ showId, userId }, 'returnOneShowId');
   try {
     const showIdNumber = Number(showId);
@@ -26,7 +27,7 @@ export async function returnOneShowId(showId: string, userId: number): Promise<S
   }
 }
 
-export async function deleteOneShowId(showId: string, userId: number) {
+export async function deleteOneShowId(db: LibSQLDatabase, showId: string, userId: number) {
   logger.debug({ showId, userId }, 'deleteOneShowId');
   try {
     const showIdNumber = Number(showId);
@@ -38,7 +39,7 @@ export async function deleteOneShowId(showId: string, userId: number) {
   }
 }
 
-export async function returnOneShowTvMazeId(tvMazeId: string, userId: number): Promise<ShowData[]> {
+export async function returnOneShowTvMazeId(db: LibSQLDatabase, tvMazeId: string, userId: number): Promise<ShowData[]> {
   logger.debug({ tvMazeId, userId }, 'returnOneShowTvMazeId');
   try {
     const tvMazeIdNumber = Number(tvMazeId);
@@ -50,7 +51,7 @@ export async function returnOneShowTvMazeId(tvMazeId: string, userId: number): P
   }
 }
 
-export async function addOneShow(showData: TvMazeData, userId: number) {
+export async function addOneShow(db: LibSQLDatabase, showData: TvMazeData, userId: number) {
   logger.debug({ tvMazeId: showData.tvMazeId, userId }, 'addOneShow');
   try {
     return await db.insert(tvShows).values({
@@ -71,7 +72,7 @@ export async function addOneShow(showData: TvMazeData, userId: number) {
   }
 }
 
-export async function updateOneShow(showData: TvMazeData, showId: string, userId: number) {
+export async function updateOneShow(db: LibSQLDatabase, showData: TvMazeData, showId: string, userId: number) {
   logger.debug({ showId, userId }, 'updateOneShow');
   try {
     const showIdNumber = Number(showId);
