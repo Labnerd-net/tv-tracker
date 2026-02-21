@@ -74,6 +74,51 @@ export async function addUser(user: UserData): Promise<ProfileData[]> {
 }
 
 // ------------------------------------------------------------------
+// Update refresh token hash + expiry for a user
+// ------------------------------------------------------------------
+export async function updateRefreshToken(userId: number, hash: string, expiresAt: Date) {
+  logger.debug({ userId }, 'updateRefreshToken');
+  try {
+    return await db
+      .update(users)
+      .set({ refreshTokenHash: hash, refreshTokenExpiresAt: expiresAt })
+      .where(eq(users.userId, userId));
+  } catch (e) {
+    logger.error({ err: e }, 'updateRefreshToken failed');
+    throw e;
+  }
+}
+
+// ------------------------------------------------------------------
+// Clear refresh token on logout
+// ------------------------------------------------------------------
+export async function clearRefreshToken(userId: number) {
+  logger.debug({ userId }, 'clearRefreshToken');
+  try {
+    return await db
+      .update(users)
+      .set({ refreshTokenHash: null, refreshTokenExpiresAt: null })
+      .where(eq(users.userId, userId));
+  } catch (e) {
+    logger.error({ err: e }, 'clearRefreshToken failed');
+    throw e;
+  }
+}
+
+// ------------------------------------------------------------------
+// Return user by refresh token hash
+// ------------------------------------------------------------------
+export async function returnUserByRefreshTokenHash(hash: string): Promise<UserDbData[]> {
+  logger.debug('returnUserByRefreshTokenHash');
+  try {
+    return await db.select().from(users).where(eq(users.refreshTokenHash, hash));
+  } catch (e) {
+    logger.error({ err: e }, 'returnUserByRefreshTokenHash failed');
+    throw e;
+  }
+}
+
+// ------------------------------------------------------------------
 // Delete user by Id
 // ------------------------------------------------------------------
 export async function deleteUserById(userId: string) {

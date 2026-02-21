@@ -13,6 +13,8 @@ export const users = sqliteTable('users', {
   passwordHash: text('password_hash').notNull(),
   roles: text('roles', { mode: 'json' }).$type<Role[]>().notNull().default([]),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
+  refreshTokenHash: text('refresh_token_hash').unique(),
+  refreshTokenExpiresAt: integer('refresh_token_expires_at', { mode: 'timestamp' }),
 });
 
 export const tvShows = sqliteTable('tv_shows', {

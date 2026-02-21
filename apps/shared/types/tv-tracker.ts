@@ -34,6 +34,8 @@ export interface UserData extends ProfileData {
 
 export interface UserDbData extends UserData {
   createdAt: Date;
+  refreshTokenHash?: string | null;
+  refreshTokenExpiresAt?: Date | null;
 }
 
 export interface ShowData {
