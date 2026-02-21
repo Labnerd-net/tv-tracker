@@ -1,7 +1,7 @@
 import { MyProviders } from './contexts/Providers.tsx';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import AppAlert from './components/AppAlert.tsx';
-import NavOffcanvas from './components/NavOffcanvas.tsx';
+import Navbar from './components/Navbar.tsx';
 import Splash from './pages/Splash.tsx';
 import Login from './pages/Login.tsx';
 import Registration from './pages/Registration.tsx';
@@ -25,7 +25,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <MyProviders alertProps={alertProps} dataProps={dataProps} viewProps={viewProps}>
-            <NavOffcanvas />
+            <Navbar />
             {alertProps.visibleAlert && <AppAlert alertVariant={alertProps.alertVariant} alertMessage={alertProps.alertMessage} />}
             <Routes>
               <Route path='/' element={<Splash />} />
