@@ -37,7 +37,12 @@ pnpm db:generate    # generate migration files from schema changes
 pnpm db:migrate     # apply migrations
 ```
 
-There are no tests at this time.
+Tests exist in `apps/api/tests/`. Run them:
+
+```bash
+# Run API tests (from repo root)
+pnpm --filter @tv-tracker/api test
+```
 
 ## Environment Setup
 
@@ -53,13 +58,18 @@ The SQLite database file is created at `apps/api/data/local.db` by default (dire
 
 ### API (`apps/api/src/`)
 
-- **`index.ts`** — Hono app entry. Defines all routes. Two sub-routers: `api` (mounted at `/api`) and `auth` (mounted at `/api/auth`).
+- **`index.ts`** — Entry point. Starts the `@hono/node-server` with the app from `app.ts`.
+- **`app.ts`** — Hono app definition. Registers CORS, prettyJSON, logger middleware, and mounts three routers: `authRoutes` at `/api/auth`, `adminRoutes` at `/api/admin`, `userRoutes` at `/api/user`.
+- **`routes/auth.ts`** / **`routes/user.ts`** / **`routes/admin.ts`** — Route handlers per domain. Zod validation via `@hono/zod-validator` using schemas from `schemas/`.
+- **`schemas/auth.ts`** / **`schemas/show.ts`** — Zod schemas for request validation.
 - **`tvmaze.ts`** — `TvMazeData` class. Wraps TVMaze API responses, resolves next/prev episode airdates via additional fetches to the episode links embedded in the show data.
 - **`db/schema.ts`** — Drizzle ORM schema. Two tables: `users` and `tv_shows`. Also exports the `db` client (libsql/SQLite).
 - **`db/dbShowFunctions.ts`** / **`db/dbUserFunctions.ts`** — Thin wrappers around Drizzle queries, one function per operation.
-- **`utils/auth.ts`** — bcrypt password hashing and JWT sign/verify. `authMiddleware` is a Hono middleware that validates Bearer tokens and attaches `userId` to context.
+- **`utils/auth.ts`** — bcrypt password hashing and JWT sign/verify.
+- **`utils/middleware.ts`** — `authMiddleware` (validates Bearer tokens, attaches `userId` to context) and Pino request logger.
+- **`utils/rateLimiter.ts`** — Rate limiting middleware.
+- **`utils/response.ts`** — Helpers for consistent JSON response shapes.
 - **`utils/envVars.ts`** — Single place to read and export env vars.
-- **`utils/logger.ts`** — Pino logger instance, level driven by `logLevel` from `envVars.ts`.
 
 **Shared types (`apps/shared/types/tv-tracker.ts`):** `Role`, `Credentials`, `RegistrationData`, `JwtData`, `ProfileData`, `UserData`, `UserDbData`. Imported by the API as `@shared/types/tv-tracker.js`.
 
@@ -69,7 +79,7 @@ The SQLite database file is created at `apps/api/data/local.db` by default (dire
 
 ### UI (`apps/ui/`)
 
-React 19, React Router 7, Formik + Yup for forms, Axios for HTTP, `jwt-decode` for reading the token client-side. Source lives in `src/` (not yet written at time of writing).
+React 19, React Router 7, MUI (Material UI v7 + Emotion), react-hook-form + `@hookform/resolvers` for forms, Axios for HTTP, `jwt-decode` for reading the token client-side. Key directories under `src/`: `pages/`, `components/`, `contexts/`, `hooks/`, `utils/`.
 
 ## Key Constraints
 
