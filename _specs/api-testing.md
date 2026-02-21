@@ -42,9 +42,9 @@ Add an automated test suite to the API using Hono's built-in testing utilities. 
 
 ## Open Questions
 
-- Should `bcrypt` calls be mocked to keep tests fast, or left real to catch regressions?
-- Is there a preference for where test files live (`tests/` at the api root vs co-located `*.test.ts`)?
-- Should the rate limiter be disabled via an env flag, or mocked outright in tests?
+- Should `bcrypt` calls be mocked to keep tests fast, or left real to catch regressions? - I guess mocked
+- Is there a preference for where test files live (`tests/` at the api root vs co-located `*.test.ts`)? - in a tests directory
+- Should the rate limiter be disabled via an env flag, or mocked outright in tests? - I don't know which is best.  I'll leave it up to you.
 
 ## Testing Guidelines
 
