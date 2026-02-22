@@ -8,19 +8,19 @@ Potential issues, improvements, and edits identified during code review.
 
 ### Issues
 
-- **`/api/auth/refresh` has no rate limit** — the register and login routes apply `authRateLimit`, but the refresh endpoint does not. A stolen refresh token cookie could be used to issue access tokens indefinitely without hitting any limit.
+- ~~**`/api/auth/refresh` has no rate limit**~~ — fixed: `authRateLimit` now applied to the refresh endpoint.
 
-- **`/api/auth/deleteUser` deletes without clearing the refresh cookie** — the user's DB record is deleted but the `refreshToken` cookie is not cleared and no logout is performed. The cookie persists on the client until it expires.
+- ~~**`/api/auth/deleteUser` deletes without clearing the refresh cookie**~~ — fixed: `clearRefreshToken` is called before deletion, and `setCookie` with `maxAge: 0` clears the cookie with matching `secure`/`sameSite` flags.
 
-- **`scheduleDay` data loss** — only the first element of TVMaze's `schedule.days` array is stored. Shows that air on multiple days (e.g. Mon/Tue) lose that data silently. Storing as a JSON array (same pattern as `roles`) would be correct.
+- ~~**`scheduleDay` data loss**~~ — fixed: column now stores a JSON array (`string[]`), same pattern as `roles`. Migration 0002 backfills existing single-day strings.
 
-- **First registered user auto-promoted to admin** — role assignment is based on `returnUsers()` returning an empty array. If the DB is wiped in production and a non-admin re-registers first, they get admin. No mitigation in place.
+- ~~**First registered user auto-promoted to admin**~~ — fixed: replaced with `ADMIN_EMAIL` env var. Only the user registering with that exact email receives the admin role; unset means no auto-promotion.
 
-- **`POST /tvshow` body schema is too loose** — `tvMazeShowBodySchema` only requires `id` (number). The rest of the TVMaze shape is unchecked. Downstream code in `TvMazeData` constructor does optional chaining, so missing fields silently produce empty strings rather than a validation error.
+- **`POST /tvshow` body schema is too loose** — partially addressed: `name` is now required, so `{ id: 123 }` alone returns 400. The broader TVMaze shape (network, image, schedule, etc.) remains unchecked; missing fields still produce empty strings via optional chaining in `TvMazeData`.
 
 ### Improvements
 
-- **In-memory rate limiter** — `rateLimiter.ts` stores state in-process. A server restart resets all counters. Not suitable for multi-instance deployments. Redis or a DB-backed store would be the production-grade fix.
+- **In-memory rate limiter** — `rateLimiter.ts` stores state in-process. A server restart resets all counters. Not suitable for multi-instance deployments. Redis or a DB-backed store would be the production-grade fix. A warning comment and `resetForTesting()` export have been added.
 
 - **Serial TVMaze fetch in `updateEpisodes`** — fixed, but worth noting that `POST /tvshow/:id` and `PATCH /tvshow/:id` also make a separate fetch to TVMaze before calling `updateEpisodes`, meaning each operation hits TVMaze up to three times sequentially. These could be partially parallelised.
 
@@ -28,7 +28,7 @@ Potential issues, improvements, and edits identified during code review.
 
 - **Admin has no endpoint to delete a user** — `DELETE /api/admin/user/:id` does not exist. User deletion is only self-service via `DELETE /api/auth/deleteUser`. An admin delete route may be intentionally omitted, but worth confirming.
 
-- **`validationHook` is duplicated** — identical `any`-typed validation hook is defined in both `routes/auth.ts` and `routes/user.ts`. Could be extracted to a shared utility.
+- ~~**`validationHook` is duplicated**~~ — fixed: extracted to `utils/validationHook.ts` and imported by both route files.
 
 ---
 
