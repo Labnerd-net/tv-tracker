@@ -7,6 +7,7 @@ import type {
   ProfileData,
 } from '@shared/types/tv-tracker.js';
 import { authMiddleware, requireRole } from '../utils/middleware.js';
+import { apiRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
 
 type Variables = {
@@ -14,6 +15,7 @@ type Variables = {
 };
 
 const admin = new Hono<{ Variables: Variables }>();
+admin.use(apiRateLimit);
 admin.use(authMiddleware);
 
 // Return all users' details

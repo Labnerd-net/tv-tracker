@@ -9,6 +9,7 @@ import type {
   ProfileData,
 } from '@shared/types/tv-tracker.js';
 import { authMiddleware } from '../utils/middleware.js';
+import { apiRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
 import TvMazeData from '../tvmaze.js';
 import type { TvMazeShow } from '@shared/types/tvmaze.js';
@@ -20,6 +21,7 @@ type Variables = {
 };
 
 const user = new Hono<{ Variables: Variables }>();
+user.use(apiRateLimit);
 user.use(authMiddleware);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
