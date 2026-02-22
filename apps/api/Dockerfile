@@ -38,5 +38,5 @@ EXPOSE 3000
 VOLUME ["/app/apps/api/data"]
 
 # Run migrations before starting if needed:
-#   docker run ... node apps/api/dist/src/db/migrate.js
-CMD ["node", "apps/api/dist/src/index.js"]
+#   docker run ... node apps/api/dist/api/src/db/migrate.js
+CMD ["node", "apps/api/dist/api/src/index.js"]
