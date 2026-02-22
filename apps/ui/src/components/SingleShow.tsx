@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.ts';
 import { TvShowContext } from '../contexts/Contexts.ts';
 import { AlertContext } from '../contexts/Contexts.ts';
+import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
 
 export default function SingleShow({ showData }: { showData: ShowData }) {
@@ -24,16 +25,15 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
     try {
       await Api.updateShow(showData.id);
       const response = await Api.getAllShows();
-      console.log(response);
       dataProps.setTvShows(response);
       alertProps.setAlertVariant('success');
       alertProps.setAlertMessage(`${showData.title} successfully updated!`);
       alertProps.showAlert();
     } catch (err) {
+      logger.error(err);
       alertProps.setAlertVariant('danger');
       alertProps.setAlertMessage(`Failed to update ${showData.title}!`);
       alertProps.showAlert();
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -41,20 +41,18 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
 
   const deleteOneShow = async () => {
     try {
-      console.log(`Deleting ${showData.title}`);
       await Api.deleteShow(showData.id);
       const response = await Api.getAllShows();
-      console.log(response);
       dataProps.setTvShows(response);
       alertProps.setAlertVariant('success');
       alertProps.setAlertMessage(`${showData.title} successfully deleted!`);
       alertProps.showAlert();
       navigate('/');
     } catch (err) {
+      logger.error(err);
       alertProps.setAlertVariant('danger');
       alertProps.setAlertMessage(`Failed to delete ${showData.title}!`);
       alertProps.showAlert();
-      console.error(err);
     } finally {
       setLoading(false);
     }

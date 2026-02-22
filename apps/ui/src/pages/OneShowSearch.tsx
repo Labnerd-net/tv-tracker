@@ -39,7 +39,7 @@ export default function OneShowSearch() {
           alertProps.showAlert();
           setError(msg);
         }
-      } catch (err) {
+      } catch {
         const msg = 'Failed to retrieve TV Show results';
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage(msg);
@@ -77,7 +77,7 @@ export default function OneShowSearch() {
       if (response2.success && response2.data) {
         dataProps.setTvShows(response2.data);
       }
-    } catch (err) {
+    } catch {
       alertProps.setAlertVariant('danger');
       alertProps.setAlertMessage(`Failed to add ${tvShow.name}!`);
       alertProps.showAlert();

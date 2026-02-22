@@ -11,6 +11,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.ts';
 import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
+import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
 
 export default function OneShow() {
@@ -27,15 +28,14 @@ export default function OneShow() {
       try {
         if (showID) {
           const response = await Api.getOneShow(showID);
-          console.log(response);
           setTvShow(response);
         }
       } catch (err) {
+        logger.error(err);
         setError('Failed to retreive TV Show');
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage('Failed to retrieve TV Show!');
         alertProps.showAlert();
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -48,16 +48,15 @@ export default function OneShow() {
       try {
         await Api.updateShow(showID);
         const response = await Api.getAllShows();
-        console.log(response);
         dataProps.setTvShows(response);
         alertProps.setAlertVariant('success');
         alertProps.setAlertMessage(`${tvShow.title} successfully updated!`);
         alertProps.showAlert();
       } catch (err) {
+        logger.error(err);
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage(`Failed to update ${tvShow.title}!`);
         alertProps.showAlert();
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -67,20 +66,18 @@ export default function OneShow() {
   const deleteOneShow = async () => {
     if (tvShow) {
       try {
-        console.log(`Deleting ${tvShow.title}`);
         await Api.deleteShow(tvShow.id);
         const response = await Api.getAllShows();
-        console.log(response);
         dataProps.setTvShows(response);
         alertProps.setAlertVariant('success');
         alertProps.setAlertMessage(`${tvShow.title} successfully deleted!`);
         alertProps.showAlert();
         navigate('/');
       } catch (err) {
+        logger.error(err);
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage(`Failed to delete ${tvShow.title}!`);
         alertProps.showAlert();
-        console.error(err);
       } finally {
         setLoading(false);
       }

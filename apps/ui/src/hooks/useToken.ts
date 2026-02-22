@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { logger } from '../utils/logger.ts';
 
 export default function useToken() {
   const [time, setTime] = useState(() => Date.now());
@@ -33,7 +34,7 @@ export default function useToken() {
       return token;
     } catch (error) {
       // If decoding fails, token is invalid
-      console.error(error);
+      logger.error(error);
       localStorage.removeItem('token');
       return null;
     }

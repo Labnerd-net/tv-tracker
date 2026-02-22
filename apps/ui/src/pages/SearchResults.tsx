@@ -30,7 +30,7 @@ export default function SearchResults() {
           alertProps.showAlert();
           setError(msg);
         }
-      } catch (err) {
+      } catch {
         const msg = 'Failed to retrieve TV Show results';
         alertProps.setAlertVariant('danger');
         alertProps.setAlertMessage(msg);

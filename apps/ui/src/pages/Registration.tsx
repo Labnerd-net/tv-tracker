@@ -49,7 +49,7 @@ export default function Registration() {
     setLoading(true);
     setError(null);
 
-    const { confirmPassword: _, ...registrationData } = data;
+    const { confirmPassword: _confirmPassword, ...registrationData } = data;
     const result = await registerUser(registrationData);
 
     if (result.success && result.data?.token) {

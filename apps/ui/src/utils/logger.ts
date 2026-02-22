@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 type LogLevel = 'off' | 'error' | 'warn' | 'info' | 'debug';
 
 const levels: LogLevel[] = ['off', 'error', 'warn', 'info', 'debug'];

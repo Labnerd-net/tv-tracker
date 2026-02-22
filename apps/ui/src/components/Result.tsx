@@ -22,7 +22,7 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
         if (response.success && response.data) {
           setNextEpisode(response.data.date);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to get next episode');
       } finally {
         setLoading(false);
@@ -53,7 +53,7 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
       if (response2.success && response2.data) {
         dataProps.setTvShows(response2.data);
       }
-    } catch (err) {
+    } catch {
       alertProps.setAlertVariant('danger');
       alertProps.setAlertMessage(`Failed to add ${showData.show.name}!`);
       alertProps.showAlert();
