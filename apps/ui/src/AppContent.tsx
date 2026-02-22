@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router';
+import { Routes, Route } from 'react-router';
 import AppAlert from './components/AppAlert.tsx';
 import Navbar from './components/Navbar.tsx';
 import Splash from './pages/Splash.tsx';
@@ -14,7 +14,7 @@ export default function AppContent() {
   const alertProps  = useAlert();
 
   return (
-    <BrowserRouter>
+    <>
       <Navbar />
       {alertProps.visibleAlert && <AppAlert alertVariant={alertProps.alertVariant} alertMessage={alertProps.alertMessage} />}
       <Routes>
@@ -26,6 +26,6 @@ export default function AppContent() {
         <Route path='/search/:showName' element={<SearchResults />} />
         <Route path='/search/show/:showID' element={<OneShowSearch />} />
       </Routes>
-    </BrowserRouter>
+    </>
   )
 }
