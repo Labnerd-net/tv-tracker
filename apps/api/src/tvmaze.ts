@@ -35,30 +35,22 @@ export default class TvMazeData {
   }
 
   async updateEpisodes() {
-    if (this.nextEpisodeLink) {
+    const fetchAirdate = async (link: string, label: string): Promise<string> => {
+      if (!link) return '';
       try {
-        const response = await fetch(this.nextEpisodeLink);
-        const nextEpisodeData = await response.json();
-        this.nextEpisode = nextEpisodeData.airdate;
+        const response = await fetch(link);
+        const data = await response.json();
+        return data.airdate ?? '';
       } catch (e) {
-        logger.warn({ err: e }, 'Failed to fetch next episode');
-        this.nextEpisode = '';
+        logger.warn({ err: e }, `Failed to fetch ${label} episode`);
+        return '';
       }
-    } else {
-      this.nextEpisode = '';
-    }
-    if (this.prevEpisodeLink) {
-      try {
-        const response = await fetch(this.prevEpisodeLink);
-        const prevEpisodeData = await response.json();
-        this.prevEpisode = prevEpisodeData.airdate;
-      } catch (e) {
-        logger.warn({ err: e }, 'Failed to fetch previous episode');
-        this.prevEpisode = '';
-      }
-    } else {
-      this.prevEpisode = '';
-    }
+    };
+
+    [this.nextEpisode, this.prevEpisode] = await Promise.all([
+      fetchAirdate(this.nextEpisodeLink, 'next'),
+      fetchAirdate(this.prevEpisodeLink, 'previous'),
+    ]);
   }
 
   async returnImage(): Promise<Response | null> {
