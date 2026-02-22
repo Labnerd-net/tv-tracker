@@ -1,6 +1,3 @@
---> statement-breakpoint
-PRAGMA foreign_keys=OFF;
---> statement-breakpoint
 CREATE TABLE `tv_shows_new` (
   `id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
   `user_id` integer NOT NULL,
@@ -29,5 +26,3 @@ INSERT INTO `tv_shows_new`
 DROP TABLE `tv_shows`;
 --> statement-breakpoint
 ALTER TABLE `tv_shows_new` RENAME TO `tv_shows`;
---> statement-breakpoint
-PRAGMA foreign_keys=ON;
