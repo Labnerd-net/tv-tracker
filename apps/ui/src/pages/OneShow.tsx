@@ -105,7 +105,7 @@ export default function OneShow() {
       <CardActions>
         <Button variant='contained' onClick={refreshData}>Refresh Data</Button>
         <Button variant='contained' color='error' onClick={deleteOneShow}>Delete Show</Button>
-        <Button variant='outlined' onClick={() => navigate('/')}>All Shows</Button>
+        <Button variant='outlined' onClick={() => navigate('/dashboard')}>All Shows</Button>
       </CardActions>
     </Card>
   );

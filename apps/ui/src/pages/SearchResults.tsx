@@ -56,7 +56,7 @@ export default function SearchResults() {
           <Result key={index} showData={data} alertProps={alertProps} />
         ))}
       </List>
-      <Button variant='outlined' onClick={() => navigate('/')}>All Shows</Button>
+      <Button variant='outlined' onClick={() => navigate('/dashboard')}>All Shows</Button>
     </Container>
   );
 }
