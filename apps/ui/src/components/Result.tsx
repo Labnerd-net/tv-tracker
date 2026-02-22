@@ -5,7 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import { TvShowContext } from '../contexts/Contexts.js';
 import * as Api from '../apis/userRequests.ts';
-import { getPlatformName } from '../utils/tvmaze.ts';
+import { getPlatformName } from '@shared/utils/tvmaze';
 import type { AlertProps } from '../types/alert.ts';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze.ts';
 

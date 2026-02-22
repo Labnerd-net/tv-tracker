@@ -23,9 +23,9 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
 
   const refreshData = async () => {
     try {
-      await Api.updateShow(showData.id);
+      await Api.updateShow(String(showData.showId));
       const response = await Api.getAllShows();
-      dataProps.setTvShows(response);
+      dataProps.setTvShows(response.data ?? []);
       alertProps.setAlertVariant('success');
       alertProps.setAlertMessage(`${showData.title} successfully updated!`);
       alertProps.showAlert();
@@ -41,9 +41,9 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
 
   const deleteOneShow = async () => {
     try {
-      await Api.deleteShow(showData.id);
+      await Api.deleteShow(String(showData.showId));
       const response = await Api.getAllShows();
-      dataProps.setTvShows(response);
+      dataProps.setTvShows(response.data ?? []);
       alertProps.setAlertVariant('success');
       alertProps.setAlertMessage(`${showData.title} successfully deleted!`);
       alertProps.showAlert();
@@ -62,7 +62,7 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
 
   return (
     <Card>
-      <CardMedia component='img' image={showData.imageLink} alt={showData.title} />
+      <CardMedia component='img' image={showData.imageLink ?? undefined} alt={showData.title} />
       <CardContent>
         <Typography variant='h6'>{showData.title} on {showData.platform}</Typography>
       </CardContent>

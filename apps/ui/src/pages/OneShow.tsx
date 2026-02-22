@@ -28,7 +28,7 @@ export default function OneShow() {
       try {
         if (showID) {
           const response = await Api.getOneShow(showID);
-          setTvShow(response);
+          if (response.success && response.data) setTvShow(response.data);
         }
       } catch (err) {
         logger.error(err);
@@ -48,7 +48,7 @@ export default function OneShow() {
       try {
         await Api.updateShow(showID);
         const response = await Api.getAllShows();
-        dataProps.setTvShows(response);
+        dataProps.setTvShows(response.data ?? []);
         alertProps.setAlertVariant('success');
         alertProps.setAlertMessage(`${tvShow.title} successfully updated!`);
         alertProps.showAlert();
@@ -66,9 +66,9 @@ export default function OneShow() {
   const deleteOneShow = async () => {
     if (tvShow) {
       try {
-        await Api.deleteShow(tvShow.id);
+        await Api.deleteShow(String(tvShow.showId));
         const response = await Api.getAllShows();
-        dataProps.setTvShows(response);
+        dataProps.setTvShows(response.data ?? []);
         alertProps.setAlertVariant('success');
         alertProps.setAlertMessage(`${tvShow.title} successfully deleted!`);
         alertProps.showAlert();
@@ -90,7 +90,7 @@ export default function OneShow() {
 
   return (
     <Card sx={{ maxWidth: 345, m: 2 }}>
-      <CardMedia component='img' image={tvShow.imageLink} alt={tvShow.title} />
+      <CardMedia component='img' image={tvShow.imageLink ?? undefined} alt={tvShow.title} />
       <CardContent>
         <Typography variant='h6'>{tvShow.title} on {tvShow.platform}</Typography>
       </CardContent>

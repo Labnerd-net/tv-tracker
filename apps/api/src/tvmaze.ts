@@ -1,4 +1,5 @@
 import { type TvMazeShow } from '@shared/types/tvmaze.js';
+import { getPlatformName } from '@shared/utils/tvmaze.js';
 import logger from './utils/logger.js';
 
 export default class TvMazeData {
@@ -30,12 +31,7 @@ export default class TvMazeData {
   }
 
   returnPlatform(showData: TvMazeShow): string {
-    if (showData.network) {
-      return showData.network.name;
-    } else if (showData.webChannel) {
-      return showData.webChannel.name;
-    }
-    return '';
+    return getPlatformName(showData) ?? '';
   }
 
   async updateEpisodes() {

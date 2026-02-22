@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
 import * as Api from '../apis/userRequests.ts';
-import { getPlatformName } from '../utils/tvmaze.ts';
+import { getPlatformName } from '@shared/utils/tvmaze';
 import type { TvMazeShow } from '@shared/types/tvmaze.ts';
 
 export default function OneShowSearch() {

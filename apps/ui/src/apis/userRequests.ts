@@ -33,6 +33,12 @@ export interface ShowResponse {
   error?: string;
 }
 
+export interface SingleShowResponse {
+  success: boolean;
+  data?: ShowData;
+  error?: string;
+}
+
 export async function getAllShows(): Promise<ShowResponse> {
   try {
     const response = await axios.get(`${databaseAPI}/${path}/tvshows`, {
@@ -47,7 +53,7 @@ export async function getAllShows(): Promise<ShowResponse> {
   }
 }
 
-export async function getOneShow(showID: string): Promise<ShowResponse> {
+export async function getOneShow(showID: string): Promise<SingleShowResponse> {
   try {
     const response = await axios.get(`${databaseAPI}/${path}/tvshow/${showID}`, {
       headers: getAuthHeaders(),
