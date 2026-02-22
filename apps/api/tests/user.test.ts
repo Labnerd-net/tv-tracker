@@ -23,6 +23,7 @@ vi.mock('../src/db/dbShowFunctions.js', () => ({
 
 vi.mock('../src/utils/rateLimiter.js', () => ({
   authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
+  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
 }));
 
 const mockUser = {
@@ -41,7 +42,7 @@ const mockShow = {
   tvMazeId: 123,
   platform: 'ABC',
   status: 'Running',
-  scheduleDay: 'Monday',
+  scheduleDay: ['Monday'],
   scheduleTime: '20:00',
   prevEpisode: null,
   nextEpisode: null,

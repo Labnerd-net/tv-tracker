@@ -60,7 +60,7 @@ function makeShowStub(overrides: Partial<typeof fakeShow> = {}) {
     tvMazeId: 42,
     platform: 'HBO',
     status: 'Running',
-    scheduleDays: 'Monday',
+    scheduleDays: ['Monday'],
     scheduleTime: '21:00',
     prevEpisode: '',
     nextEpisode: '',

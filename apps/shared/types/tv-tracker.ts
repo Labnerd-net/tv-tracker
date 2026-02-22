@@ -45,7 +45,7 @@ export interface ShowData {
   tvMazeId: number;
   platform: string | null;
   status: string | null;
-  scheduleDay: string | null;
+  scheduleDay: string[] | null;
   scheduleTime: string | null;
   prevEpisode: string | null;
   nextEpisode: string | null;

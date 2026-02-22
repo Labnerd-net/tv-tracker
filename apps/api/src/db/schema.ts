@@ -24,7 +24,7 @@ export const tvShows = sqliteTable('tv_shows', {
   tvMazeId: int('tvmaze_id').notNull(),
   platform: text('platform'),
   status: text('status'),
-  scheduleDay: text('schedule_day'),
+  scheduleDay: text('schedule_day', { mode: 'json' }).$type<string[]>(),
   scheduleTime: text('schedule_time'),
   prevEpisode: text('prev_episode'),
   nextEpisode: text('next_episode'),
