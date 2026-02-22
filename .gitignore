@@ -12,9 +12,6 @@ dist/
 *.db-wal
 data/
 
-# Drizzle generated migrations
-drizzle/
-
 # Build artifacts
 *.tsbuildinfo
 

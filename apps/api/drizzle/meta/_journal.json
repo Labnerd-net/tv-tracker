@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1771611915485,
+      "tag": "0000_amusing_sandman",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1771639344233,
+      "tag": "0001_next_rumiko_fujikawa",
+      "breakpoints": true
+    }
+  ]
+}

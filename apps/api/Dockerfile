@@ -30,6 +30,7 @@ COPY apps/shared/package.json ./apps/shared/
 RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY apps/api/drizzle ./apps/api/drizzle
 
 # SQLite data directory — mount a volume here in production
 RUN mkdir -p apps/api/data
@@ -37,6 +38,4 @@ RUN mkdir -p apps/api/data
 EXPOSE 3000
 VOLUME ["/app/apps/api/data"]
 
-# Run migrations before starting if needed:
-#   docker run ... node apps/api/dist/api/src/db/migrate.js
-CMD ["node", "apps/api/dist/api/src/index.js"]
+CMD ["sh", "-c", "node apps/api/dist/api/src/migrate.js && node apps/api/dist/api/src/index.js"]
