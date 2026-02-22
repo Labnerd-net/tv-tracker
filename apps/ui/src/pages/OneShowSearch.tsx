@@ -111,7 +111,7 @@ export default function OneShowSearch() {
 
       <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
         <Button variant='contained' onClick={addTvShow}>Add Show</Button>
-        <Button variant='outlined' onClick={() => navigate('/')}>Home</Button>
+        <Button variant='outlined' onClick={() => navigate('/dashboard')}>Home</Button>
       </Box>
     </Container>
   );
