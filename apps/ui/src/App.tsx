@@ -7,8 +7,8 @@ import AppContent from './AppContent.tsx';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider>
         <AuthProvider>
           <AlertProvider>
             <ShowProvider>
@@ -16,7 +16,7 @@ export default function App() {
             </ShowProvider>
           </AlertProvider>
         </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   )
 }

@@ -42,4 +42,4 @@ Potential issues, improvements, and edits identified during code review.
 
 ### Improvements
 
-- **`ThemeProvider` is outside `BrowserRouter`** — unlikely to matter since themes don't navigate, but it cannot use router hooks if that ever changes. Low priority.
+- ~~**`ThemeProvider` is outside `BrowserRouter`**~~ — fixed: `BrowserRouter` is now the outermost wrapper.
