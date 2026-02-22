@@ -17,24 +17,19 @@ import {
   refreshTokenExpiryDays,
   jwtSecret,
   isProduction,
+  adminEmail,
 } from '../utils/envVars.js';
 import { authMiddleware } from '../utils/middleware.js';
 import { authRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
 import { loginSchema, registrationSchema } from '../schemas/auth.js';
+import { validationHook } from '../utils/validationHook.js';
 
 type Variables = {
   jwtPayload: JwtData;
 };
 
 const auth = new Hono<{ Variables: Variables }>();
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const validationHook = (result: any, c: any) => {
-  if (!result.success) {
-    return c.json(err(result.error.issues[0].message), 400);
-  }
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function setRefreshCookie(c: any, raw: string) {
@@ -57,8 +52,7 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
       return c.json(err('User already exists'), 409);
     }
     const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
-    const totalUsers = await dbUserFunctions.returnUsers(db);
-    const roles: Role[] = totalUsers.length === 0 ? ['user', 'admin'] : ['user'];
+    const roles: Role[] = (adminEmail && email === adminEmail) ? ['user', 'admin'] : ['user'];
     const user = { email, passwordHash, roles, displayName } as UserData;
     const result = await dbUserFunctions.addUser(db, user);
     if (!result || !(result.length > 0)) {
@@ -124,7 +118,7 @@ auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHoo
 });
 
 // Refresh access token using the httpOnly cookie
-auth.post('/refresh', async c => {
+auth.post('/refresh', authRateLimit, async c => {
   try {
     const raw = getCookie(c, 'refreshToken');
     if (!raw) {
@@ -191,10 +185,18 @@ auth.delete('/deleteUser', authMiddleware, async c => {
     if (!user || user.length === 0) {
       return c.json(err('User not found'), 404);
     }
+    await dbUserFunctions.clearRefreshToken(db, payload.sub);
     const returnValue = await dbUserFunctions.deleteUserById(db, userIdNumber);
     if (!returnValue) {
       return c.json(err('User not found'), 404);
     }
+    setCookie(c, 'refreshToken', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'None' : 'Lax',
+      maxAge: 0,
+      path: '/api/auth',
+    });
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {
     if (e instanceof Error) {

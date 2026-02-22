@@ -15,6 +15,13 @@
       "when": 1771639344233,
       "tag": "0001_next_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771700000000,
+      "tag": "0002_schedule_day_json_array",
+      "breakpoints": true
     }
   ]
 }

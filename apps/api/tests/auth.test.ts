@@ -16,6 +16,7 @@ vi.mock('../src/db/dbUserFunctions.js', () => ({
 
 vi.mock('../src/utils/rateLimiter.js', () => ({
   authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
+  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
 }));
 
 vi.mock('bcryptjs', () => ({

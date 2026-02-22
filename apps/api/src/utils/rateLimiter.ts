@@ -10,7 +10,9 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-// In-memory store for rate limiting (use Redis in production for distributed systems)
+// WARNING: In-memory store — state resets on process restart and does not
+// synchronise across multiple API instances. Use a shared store (e.g. Redis)
+// for multi-instance deployments.
 const store = new Map<string, RateLimitEntry>();
 
 // Cleanup old entries every 5 minutes to prevent memory leaks
@@ -106,3 +108,5 @@ export const apiRateLimit = rateLimit({
   maxRequests: 100,
   message: 'Too many requests. Please try again later.',
 });
+
+export function resetForTesting() { store.clear(); }

@@ -14,6 +14,7 @@ import logger from '../utils/logger.js';
 import TvMazeData from '../tvmaze.js';
 import type { TvMazeShow } from '@shared/types/tvmaze.js';
 import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
+import { validationHook } from '../utils/validationHook.js';
 const tvMazeAPI = 'https://api.tvmaze.com';
 
 type Variables = {
@@ -23,13 +24,6 @@ type Variables = {
 const user = new Hono<{ Variables: Variables }>();
 user.use(apiRateLimit);
 user.use(authMiddleware);
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const validationHook = (result: any, c: any) => {
-  if (!result.success) {
-    return c.json(err(result.error.issues[0].message), 400);
-  }
-};
 
 // Show user info
 user.get('/profile', async c => {

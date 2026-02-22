@@ -7,7 +7,7 @@ export default class TvMazeData {
   tvMazeId: number;
   platform: string;
   status: string;
-  scheduleDays: string;
+  scheduleDays: string[];
   scheduleTime: string;
   nextEpisodeLink: string;
   prevEpisodeLink: string;
@@ -20,7 +20,7 @@ export default class TvMazeData {
     this.tvMazeId = showData.id ?? -1;
     this.platform = this.returnPlatform(showData);
     this.status = showData.status ?? '';
-    this.scheduleDays = showData.schedule?.days?.[0] ?? '';
+    this.scheduleDays = showData.schedule?.days ?? [];
     this.scheduleTime = showData.schedule?.time ?? '';
     this.nextEpisodeLink = showData._links?.nextepisode?.href ?? '';
     this.prevEpisodeLink = showData._links?.previousepisode?.href ?? '';
