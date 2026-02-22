@@ -46,7 +46,7 @@ let authHeader: string;
 
 beforeAll(async () => {
   const token = await makeToken();
-  authHeader = `Bearer ${token}`;
+  authHeader = `accessToken=${token}`;
 });
 
 beforeEach(() => {
@@ -74,7 +74,7 @@ describe('DELETE /api/auth/deleteUser clears refresh cookie', () => {
 
     const res = await app.request('/api/auth/deleteUser', {
       method: 'DELETE',
-      headers: { Authorization: authHeader },
+      headers: { Cookie: authHeader },
     });
 
     expect(res.status).toBe(200);
@@ -103,7 +103,7 @@ describe('POST /api/user/tvshow stores multi-day schedule', () => {
 
     const res = await app.request('/api/user/tvshow', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      headers: { 'Content-Type': 'application/json', Cookie: authHeader },
       body: JSON.stringify(body),
     });
 
@@ -119,7 +119,7 @@ describe('POST /api/user/tvshow body validation', () => {
   it('returns 400 when name is missing', async () => {
     const res = await app.request('/api/user/tvshow', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      headers: { 'Content-Type': 'application/json', Cookie: authHeader },
       body: JSON.stringify({ id: 123 }),
     });
 

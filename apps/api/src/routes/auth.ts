@@ -15,6 +15,7 @@ import {
   getAccessTokenExpirationSeconds,
   getRefreshTokenExpirationDate,
   refreshTokenExpiryDays,
+  accessTokenExpiryMinutes,
   jwtSecret,
   isProduction,
   adminEmail,
@@ -39,6 +40,17 @@ function setRefreshCookie(c: any, raw: string) {
     sameSite: isProduction ? 'None' : 'Lax',
     maxAge: refreshTokenExpiryDays * 24 * 60 * 60,
     path: '/api/auth',
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function setAccessCookie(c: any, token: string) {
+  setCookie(c, 'accessToken', token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'None' : 'Lax',
+    maxAge: accessTokenExpiryMinutes * 60,
+    path: '/api',
   });
 }
 
@@ -71,8 +83,9 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
     const expiresAt = getRefreshTokenExpirationDate();
     await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, expiresAt);
     setRefreshCookie(c, raw);
+    setAccessCookie(c, token);
 
-    return c.json(ok({ token }));
+    return c.json(ok({}));
   } catch (e: unknown) {
     if (e instanceof Error) {
       return c.json(err(e.message), 500);
@@ -106,8 +119,9 @@ auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHoo
     const expiresAt = getRefreshTokenExpirationDate();
     await dbUserFunctions.updateRefreshToken(db, user[0].userId, hash, expiresAt);
     setRefreshCookie(c, raw);
+    setAccessCookie(c, token);
 
-    return c.json(ok({ token }));
+    return c.json(ok({}));
   } catch (e: unknown) {
     if (e instanceof Error) {
       return c.json(err(e.message), 500);
@@ -149,8 +163,9 @@ auth.post('/refresh', authRateLimit, async c => {
     const expiresAt = getRefreshTokenExpirationDate();
     await dbUserFunctions.updateRefreshToken(db, user.userId, newHash, expiresAt);
     setRefreshCookie(c, newRaw);
+    setAccessCookie(c, token);
 
-    return c.json(ok({ token }));
+    return c.json(ok({}));
   } catch (e: unknown) {
     if (e instanceof Error) {
       return c.json(err(e.message), 500);
@@ -166,6 +181,13 @@ auth.post('/logout', authMiddleware, async c => {
     const payload = c.get('jwtPayload');
     await dbUserFunctions.clearRefreshToken(db, payload.sub);
     deleteCookie(c, 'refreshToken', { path: '/api/auth' });
+    setCookie(c, 'accessToken', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'None' : 'Lax',
+      maxAge: 0,
+      path: '/api',
+    });
     return c.json(ok({ status: 'logged out' }));
   } catch (e: unknown) {
     if (e instanceof Error) {
@@ -196,6 +218,13 @@ auth.delete('/deleteUser', authMiddleware, async c => {
       sameSite: isProduction ? 'None' : 'Lax',
       maxAge: 0,
       path: '/api/auth',
+    });
+    setCookie(c, 'accessToken', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'None' : 'Lax',
+      maxAge: 0,
+      path: '/api',
     });
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {

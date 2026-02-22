@@ -4,8 +4,8 @@ import type { ProfileData } from '@shared/types/tv-tracker';
 interface AuthContextType {
   user: ProfileData | null;
   isLoading: boolean;
-  login: (token: string) => Promise<void>;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

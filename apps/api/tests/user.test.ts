@@ -66,7 +66,7 @@ let authHeader: string;
 
 beforeAll(async () => {
   token = await makeToken();
-  authHeader = `Bearer ${token}`;
+  authHeader = `accessToken=${token}`;
   vi.stubGlobal('fetch', fetchMock);
 });
 
@@ -110,13 +110,13 @@ describe('GET /api/user/profile', () => {
 
   it('returns 404 when user not found', async () => {
     vi.mocked(dbUserFunctions.returnUserById).mockResolvedValueOnce([]);
-    const res = await get('/api/user/profile', { Authorization: authHeader });
+    const res = await get('/api/user/profile', { Cookie: authHeader });
     expect(res.status).toBe(404);
   });
 
   it('returns 200 with profile on success', async () => {
     vi.mocked(dbUserFunctions.returnUserById).mockResolvedValueOnce([mockUser]);
-    const res = await get('/api/user/profile', { Authorization: authHeader });
+    const res = await get('/api/user/profile', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -127,7 +127,7 @@ describe('GET /api/user/profile', () => {
 describe('GET /api/user/tvshows', () => {
   it('returns 200 with shows array', async () => {
     vi.mocked(dbShowFunctions.returnAllShows).mockResolvedValueOnce([mockShow]);
-    const res = await get('/api/user/tvshows', { Authorization: authHeader });
+    const res = await get('/api/user/tvshows', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -138,19 +138,19 @@ describe('GET /api/user/tvshows', () => {
 
 describe('GET /api/user/tvshow/:id', () => {
   it('returns 400 for non-numeric id', async () => {
-    const res = await get('/api/user/tvshow/abc', { Authorization: authHeader });
+    const res = await get('/api/user/tvshow/abc', { Cookie: authHeader });
     expect(res.status).toBe(400);
   });
 
   it('returns 404 when show not found', async () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([]);
-    const res = await get('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await get('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(404);
   });
 
   it('returns 200 with show on success', async () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([mockShow]);
-    const res = await get('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await get('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -163,7 +163,7 @@ describe('POST /api/user/tvshow (body)', () => {
     const res = await post(
       '/api/user/tvshow',
       { name: 'Test Show' },
-      { Authorization: authHeader },
+      { Cookie: authHeader },
     );
     expect(res.status).toBe(400);
   });
@@ -173,7 +173,7 @@ describe('POST /api/user/tvshow (body)', () => {
     const res = await post(
       '/api/user/tvshow',
       { id: 123, name: 'Test Show' },
-      { Authorization: authHeader },
+      { Cookie: authHeader },
     );
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -185,7 +185,7 @@ describe('POST /api/user/tvshow (body)', () => {
     const res = await post(
       '/api/user/tvshow',
       tvMazeShowJson,
-      { Authorization: authHeader },
+      { Cookie: authHeader },
     );
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -195,14 +195,14 @@ describe('POST /api/user/tvshow (body)', () => {
 
 describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
   it('returns 400 for non-numeric id', async () => {
-    const res = await post('/api/user/tvshow/abc', {}, { Authorization: authHeader });
+    const res = await post('/api/user/tvshow/abc', {}, { Cookie: authHeader });
     expect(res.status).toBe(400);
   });
 
   it('returns 502 when TVMaze returns non-OK', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     fetchMock.mockResolvedValueOnce({ ok: false, status: 404 });
-    const res = await post('/api/user/tvshow/123', {}, { Authorization: authHeader });
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(502);
   });
 
@@ -212,7 +212,7 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
       ok: true,
       json: async () => tvMazeShowJson,
     });
-    const res = await post('/api/user/tvshow/123', {}, { Authorization: authHeader });
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('added');
@@ -221,13 +221,13 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
 
 describe('PATCH /api/user/tvshow/:id', () => {
   it('returns 400 for non-numeric id', async () => {
-    const res = await patch('/api/user/tvshow/abc', { Authorization: authHeader });
+    const res = await patch('/api/user/tvshow/abc', { Cookie: authHeader });
     expect(res.status).toBe(400);
   });
 
   it('returns 404 when show not found', async () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([]);
-    const res = await patch('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(404);
   });
 
@@ -237,7 +237,7 @@ describe('PATCH /api/user/tvshow/:id', () => {
       ok: true,
       json: async () => tvMazeShowJson,
     });
-    const res = await patch('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('updated');
@@ -246,19 +246,19 @@ describe('PATCH /api/user/tvshow/:id', () => {
 
 describe('DELETE /api/user/tvshow/:id', () => {
   it('returns 400 for non-numeric id', async () => {
-    const res = await del('/api/user/tvshow/abc', { Authorization: authHeader });
+    const res = await del('/api/user/tvshow/abc', { Cookie: authHeader });
     expect(res.status).toBe(400);
   });
 
   it('returns 404 when no rows affected', async () => {
     vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce({ rowsAffected: 0 });
-    const res = await del('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await del('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(404);
   });
 
   it('returns deleted status on success', async () => {
     vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce({ rowsAffected: 1 });
-    const res = await del('/api/user/tvshow/1', { Authorization: authHeader });
+    const res = await del('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('deleted');
