@@ -38,7 +38,7 @@ Potential issues, improvements, and edits identified during code review.
 
 - **JWT stored in `localStorage`** — accessible to any JavaScript on the page, making it vulnerable to XSS. `httpOnly` cookies are the safer alternative, but that requires API changes to set and forward the token server-side.
 
-- **`ShowProvider` is only populated when `AllShows` mounts** — if a user navigates directly to `/tvshow/:id` without visiting `/dashboard` first, the show context will be empty and the page may behave unexpectedly depending on how it uses the context vs. fetching directly.
+- ~~**`ShowProvider` is only populated when `AllShows` mounts**~~ — fixed: `ShowProvider` now fetches shows whenever the authenticated user changes, so the context is populated on any direct-navigation entry point.
 
 ### Improvements
 
