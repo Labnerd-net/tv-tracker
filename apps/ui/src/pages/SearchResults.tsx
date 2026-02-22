@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import Container from '@mui/material/Container';
 import List from '@mui/material/List';
@@ -6,11 +6,11 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.js';
 import Result from '../components/Result.js';
-import { AlertContext } from '../contexts/Contexts.js';
 import type { TvMazeSeries } from '@shared/types/tvmaze.js';
+import { useAlert } from '../contexts/alert/AlertContext.js';
 
 export default function SearchResults() {
-  const alertProps = useContext(AlertContext);
+  const alertProps = useAlert();
   const { showName } = useParams();
   const [searchResults, setSearchResults] = useState<TvMazeSeries[]>([]);
   const [loading, setLoading] = useState(true);

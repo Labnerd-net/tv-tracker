@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
@@ -10,14 +10,15 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.ts';
-import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
 import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
+import { useAlert } from '../contexts/alert/AlertContext.tsx';
+import { useShow } from '../contexts/show/ShowContext.tsx';
 
 export default function OneShow() {
   const { showID } = useParams();
-  const alertProps = useContext(AlertContext);
-  const dataProps = useContext(TvShowContext);
+  const alertProps = useAlert();
+  const dataProps = useShow();
   const [tvShow, setTvShow] = useState<ShowData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

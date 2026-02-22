@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
@@ -10,14 +10,14 @@ import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import * as Api from '../apis/userRequests.ts';
-import { TvShowContext } from '../contexts/Contexts.ts';
-import { AlertContext } from '../contexts/Contexts.ts';
 import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
+import { useShow } from '../contexts/show/ShowContext.tsx';
+import { useAlert } from '../contexts/alert/AlertContext.tsx';
 
 export default function SingleShow({ showData }: { showData: ShowData }) {
-  const dataProps = useContext(TvShowContext);
-  const alertProps = useContext(AlertContext);
+  const dataProps = useShow();
+  const alertProps = useAlert();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 

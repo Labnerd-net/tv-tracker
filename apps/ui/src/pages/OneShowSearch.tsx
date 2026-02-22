@@ -1,18 +1,19 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { AlertContext, TvShowContext } from '../contexts/Contexts.ts';
 import * as Api from '../apis/userRequests.ts';
 import { getPlatformName } from '@shared/utils/tvmaze';
 import type { TvMazeShow } from '@shared/types/tvmaze.ts';
+import { useAlert } from '../contexts/alert/AlertContext.tsx';
+import { useShow } from '../contexts/show/ShowContext.tsx';
 
 export default function OneShowSearch() {
   const { showID } = useParams();
-  const alertProps = useContext(AlertContext);
-  const dataProps = useContext(TvShowContext);
+  const alertProps = useAlert();
+  const dataProps = useShow();
   const [tvShow, setTvShow] = useState<TvMazeShow>();
   const [nextEpisode, setNextEpisode] = useState('');
   const [platform, setPlatform] = useState('');
