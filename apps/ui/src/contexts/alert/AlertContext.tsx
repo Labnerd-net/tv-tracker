@@ -3,10 +3,8 @@ import { createContext, useContext } from 'react';
 interface AlertProps {
   visibleAlert: boolean,
   alertVariant: string,
-  setAlertVariant: React.Dispatch<React.SetStateAction<string>>
   alertMessage: string,
-  setAlertMessage: React.Dispatch<React.SetStateAction<string>>
-  showAlert: () => void
+  showAlert: (variant: string, message: string) => void
 }
 
 export const AlertContext = createContext<AlertProps | undefined>(undefined);

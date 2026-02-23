@@ -52,14 +52,10 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
       await Api.updateShow(String(show.showId));
       const response = await Api.getAllShows();
       setTvShows(response.data ?? []);
-      alertProps.setAlertVariant('success');
-      alertProps.setAlertMessage(`${show.title} successfully updated!`);
-      alertProps.showAlert();
+      alertProps.showAlert('success', `${show.title} successfully updated!`);
     } catch (err) {
       logger.error(err);
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to update ${show.title}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to update ${show.title}!`);
     }
   };
 
@@ -68,14 +64,10 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
       await Api.deleteShow(String(show.showId));
       const response = await Api.getAllShows();
       setTvShows(response.data ?? []);
-      alertProps.setAlertVariant('success');
-      alertProps.setAlertMessage(`${show.title} successfully deleted!`);
-      alertProps.showAlert();
+      alertProps.showAlert('success', `${show.title} successfully deleted!`);
     } catch (err) {
       logger.error(err);
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to delete ${show.title}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to delete ${show.title}!`);
     }
   };
 

@@ -18,7 +18,7 @@ function getInitialViewMode(): ViewMode {
 }
 
 export default function AllShows() {
-  const { setAlertVariant, setAlertMessage, showAlert } = useAlert();
+  const { showAlert } = useAlert();
   const { tvShows, setTvShows } = useShow();
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
 
@@ -28,13 +28,11 @@ export default function AllShows() {
       if (response.success && response.data) {
         setTvShows(response.data);
       } else if (!response.success) {
-        setAlertVariant('danger');
-        setAlertMessage(response.error ?? 'Failed to retrieve TV Shows');
-        showAlert();
+        showAlert('danger', response.error ?? 'Failed to retrieve TV Shows');
       }
     };
     fetchShows();
-  }, [setTvShows, setAlertVariant, setAlertMessage, showAlert]);
+  }, [setTvShows, showAlert]);
 
   const handleViewChange = (_: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
     if (newMode === null) return;

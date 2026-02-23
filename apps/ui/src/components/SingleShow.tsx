@@ -26,14 +26,10 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
       await Api.updateShow(String(showData.showId));
       const response = await Api.getAllShows();
       dataProps.setTvShows(response.data ?? []);
-      alertProps.setAlertVariant('success');
-      alertProps.setAlertMessage(`${showData.title} successfully updated!`);
-      alertProps.showAlert();
+      alertProps.showAlert('success', `${showData.title} successfully updated!`);
     } catch (err) {
       logger.error(err);
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to update ${showData.title}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to update ${showData.title}!`);
     } finally {
       setLoading(false);
     }
@@ -44,15 +40,11 @@ export default function SingleShow({ showData }: { showData: ShowData }) {
       await Api.deleteShow(String(showData.showId));
       const response = await Api.getAllShows();
       dataProps.setTvShows(response.data ?? []);
-      alertProps.setAlertVariant('success');
-      alertProps.setAlertMessage(`${showData.title} successfully deleted!`);
-      alertProps.showAlert();
+      alertProps.showAlert('success', `${showData.title} successfully deleted!`);
       navigate('/');
     } catch (err) {
       logger.error(err);
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to delete ${showData.title}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to delete ${showData.title}!`);
     } finally {
       setLoading(false);
     }

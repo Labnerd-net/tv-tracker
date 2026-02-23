@@ -25,16 +25,12 @@ export default function SearchResults() {
           setSearchResults(response.data);
         } else {
           const msg = response.error ?? 'Failed to retrieve TV Show results';
-          alertProps.setAlertVariant('danger');
-          alertProps.setAlertMessage(msg);
-          alertProps.showAlert();
+          alertProps.showAlert('danger', msg);
           setError(msg);
         }
       } catch {
         const msg = 'Failed to retrieve TV Show results';
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(msg);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', msg);
         setError(msg);
       } finally {
         setLoading(false);
