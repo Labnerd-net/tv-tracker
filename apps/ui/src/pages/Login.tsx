@@ -41,9 +41,9 @@ export default function Login() {
 
     const result = await loginUser(credentials);
 
-    if (result.success && result.data?.token) {
+    if (result.success) {
       try {
-        await login(result.data.token);
+        await login();
         navigate('/dashboard');
       } catch {
         setError('Failed to load user profile');

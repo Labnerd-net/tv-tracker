@@ -1,10 +1,9 @@
 import axios from 'axios';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
 import type { ProfileData, ShowData } from '@shared/types/tv-tracker';
-import { getAuthHeaders, handleApiError } from '../utils/requests';
+import { apiClient, handleApiError } from '../utils/requests';
 
 const tvMazeAPI = 'https://api.tvmaze.com';
-const databaseAPI = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const path = 'api/user';
 
 export interface ProfileResponse {
@@ -15,9 +14,7 @@ export interface ProfileResponse {
 
 export async function getUserProfile(): Promise<ProfileResponse> {
   try {
-    const response = await axios.get(`${databaseAPI}/${path}/profile`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.get(`/${path}/profile`);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }
@@ -41,9 +38,7 @@ export interface SingleShowResponse {
 
 export async function getAllShows(): Promise<ShowResponse> {
   try {
-    const response = await axios.get(`${databaseAPI}/${path}/tvshows`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.get(`/${path}/tvshows`);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }
@@ -55,9 +50,7 @@ export async function getAllShows(): Promise<ShowResponse> {
 
 export async function getOneShow(showID: string): Promise<SingleShowResponse> {
   try {
-    const response = await axios.get(`${databaseAPI}/${path}/tvshow/${showID}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.get(`/${path}/tvshow/${showID}`);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }
@@ -75,9 +68,7 @@ export interface StringResponse {
 
 export async function addNewShowJson(showData: TvMazeShow): Promise<StringResponse> {
   try {
-    const response = await axios.post(`${databaseAPI}/${path}/tvshow`, showData, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.post(`/${path}/tvshow`, showData);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }
@@ -89,11 +80,7 @@ export async function addNewShowJson(showData: TvMazeShow): Promise<StringRespon
 
 export async function updateShow(showID: string): Promise<StringResponse> {
   try {
-    const response = await axios.patch(
-      `${databaseAPI}/${path}/tvshow/${showID}`,
-      null,
-      { headers: getAuthHeaders() },
-    );
+    const response = await apiClient.patch(`/${path}/tvshow/${showID}`, null);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }
@@ -105,9 +92,7 @@ export async function updateShow(showID: string): Promise<StringResponse> {
 
 export async function deleteShow(showID: string): Promise<StringResponse> {
   try {
-    const response = await axios.delete(`${databaseAPI}/${path}/tvshow/${showID}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.delete(`/${path}/tvshow/${showID}`);
     if (response.data.ok) {
       return { success: true, data: response.data.data };
     }

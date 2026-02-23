@@ -13,7 +13,7 @@ app.use(
   '*',
   cors({
     origin: clientURLs,
-    allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    allowHeaders: ['Content-Type'],
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,

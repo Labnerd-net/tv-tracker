@@ -52,9 +52,9 @@ export default function Registration() {
     const { confirmPassword: _confirmPassword, ...registrationData } = data;
     const result = await registerUser(registrationData);
 
-    if (result.success && result.data?.token) {
+    if (result.success) {
       try {
-        await login(result.data.token);
+        await login();
         navigate('/dashboard');
       } catch {
         setError('Failed to load user profile');

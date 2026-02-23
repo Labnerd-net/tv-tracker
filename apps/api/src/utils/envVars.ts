@@ -16,7 +16,7 @@ if (!process.env.JWT_SECRET) {
 export const jwtSecret = process.env.JWT_SECRET;
 export const jwtAlgorithm = (process.env.JWT_ALGORITHM || 'HS256') as AlgorithmTypes;
 
-const accessTokenExpiryMinutes = Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 15;
+export const accessTokenExpiryMinutes = Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 15;
 export const refreshTokenExpiryDays = Number(process.env.JWT_EXPIRATION_DAYS) || 7;
 
 // Helper: access token exp claim (seconds since epoch)
