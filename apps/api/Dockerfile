@@ -38,4 +38,4 @@ RUN mkdir -p data
 EXPOSE 3000
 VOLUME ["/app/data"]
 
-CMD ["sh", "-c", "node apps/api/dist/api/src/migrate.js && node apps/api/dist/api/src/index.js"]
+CMD ["sh", "-c", "mkdir -p data && node apps/api/dist/api/src/migrate.js && node apps/api/dist/api/src/index.js"]
