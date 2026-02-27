@@ -33,9 +33,9 @@ COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY apps/api/drizzle ./apps/api/drizzle
 
 # SQLite data directory — mount a volume here in production
-RUN mkdir -p apps/api/data
+RUN mkdir -p data
 
 EXPOSE 3000
-VOLUME ["/app/apps/api/data"]
+VOLUME ["/app/data"]
 
 CMD ["sh", "-c", "node apps/api/dist/api/src/migrate.js && node apps/api/dist/api/src/index.js"]
