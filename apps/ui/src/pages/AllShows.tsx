@@ -41,22 +41,97 @@ export default function AllShows() {
   };
 
   return (
-    <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+    <Box sx={{ bgcolor: 'var(--bg)', minHeight: 'calc(100vh - 54px)' }}>
+      {/* Toolbar */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: { xs: 2, md: 3 },
+          py: '12px',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
+        <Box
+          sx={{
+            fontFamily: '"Space Mono", monospace',
+            fontSize: '0.6rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: 'var(--cream-muted)',
+          }}
+        >
+          {tvShows.length > 0 && `${tvShows.length} show${tvShows.length !== 1 ? 's' : ''}`}
+        </Box>
         <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewChange} size="small">
-          <ToggleButton value="card"><GridViewIcon /></ToggleButton>
-          <ToggleButton value="table"><TableRowsIcon /></ToggleButton>
+          <ToggleButton value="card" aria-label="card view">
+            <GridViewIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="table" aria-label="table view">
+            <TableRowsIcon fontSize="small" />
+          </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
+      {/* Content */}
       {viewMode === 'card' ? (
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2, p: 2 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+            gap: '12px',
+            p: { xs: 2, md: 3 },
+          }}
+        >
           {tvShows.map((data, index) => (
-            <SingleShow key={index} showData={data} />
+            <SingleShow key={data.showId} showData={data} index={index} />
           ))}
         </Box>
       ) : (
-        <ShowsTable tvShows={tvShows} />
+        <Box sx={{ p: { xs: 1, md: 2 } }}>
+          <ShowsTable tvShows={tvShows} />
+        </Box>
       )}
-    </>
+
+      {/* Empty state */}
+      {tvShows.length === 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '40vh',
+            gap: '16px',
+            animation: 'fadeIn 0.5s ease both',
+            animationDelay: '0.3s',
+          }}
+        >
+          <Box
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontStyle: 'italic',
+              fontSize: '2rem',
+              color: 'var(--cream-muted)',
+              fontWeight: 300,
+            }}
+          >
+            No shows tracked yet
+          </Box>
+          <Box
+            sx={{
+              fontFamily: '"Space Mono", monospace',
+              fontSize: '0.62rem',
+              letterSpacing: '0.12em',
+              color: 'var(--cream-muted)',
+              textTransform: 'uppercase',
+            }}
+          >
+            Use search to find and add shows
+          </Box>
+        </Box>
+      )}
+    </Box>
   );
 }

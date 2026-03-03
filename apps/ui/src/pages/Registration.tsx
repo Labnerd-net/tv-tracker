@@ -3,14 +3,11 @@ import { useNavigate, Link as RouterLink } from 'react-router';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import Container from '@mui/material/Container';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import type { RegistrationFormData } from '@shared/types/tv-tracker';
 import { registerUser } from '../apis/authRequests';
 import { useAuth } from '../contexts/auth/AuthContext';
@@ -67,35 +64,79 @@ export default function Registration() {
   };
 
   return (
-    <Container maxWidth='xs'>
+    <Box
+      sx={{
+        minHeight: 'calc(100vh - 54px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'var(--bg)',
+        px: 2,
+      }}
+    >
       <Box
         sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2,
+          width: '100%',
+          maxWidth: '380px',
+          animation: 'fadeInUp 0.5s ease both',
+          animationDelay: '0.05s',
         }}
       >
-        <Typography variant='h5' component='h1'>
-          Create Account
-        </Typography>
+        {/* Header */}
+        <Box sx={{ mb: '40px', textAlign: 'center' }}>
+          <Box
+            component="div"
+            sx={{
+              width: '32px',
+              height: '2px',
+              background: 'var(--accent)',
+              mx: 'auto',
+              mb: '20px',
+            }}
+          />
+          <Box
+            component="h1"
+            sx={{
+              fontFamily: '"Cormorant Garamond", serif',
+              fontWeight: 400,
+              fontSize: '2.6rem',
+              color: 'var(--cream)',
+              m: 0,
+              letterSpacing: '0.02em',
+            }}
+          >
+            Create Account
+          </Box>
+        </Box>
 
+        {/* Error */}
         {error && (
-          <Alert severity='error' sx={{ width: '100%' }}>
+          <Box
+            sx={{
+              fontFamily: '"Space Mono", monospace',
+              fontSize: '0.68rem',
+              color: 'var(--accent)',
+              border: '1px solid rgba(230,57,70,0.3)',
+              background: 'rgba(230,57,70,0.08)',
+              p: '10px 14px',
+              mb: '20px',
+              animation: 'fadeIn 0.3s ease both',
+            }}
+          >
             {error}
-          </Alert>
+          </Box>
         )}
 
+        {/* Form */}
         <Box
-          component='form'
+          component="form"
           onSubmit={handleSubmit(onSubmit)}
-          sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
         >
           <TextField
-            label='Email'
-            type='email'
-            autoComplete='email'
+            label="Email"
+            type="email"
+            autoComplete="email"
             fullWidth
             {...register('email')}
             error={!!errors.email}
@@ -103,9 +144,9 @@ export default function Registration() {
           />
 
           <TextField
-            label='Display Name'
-            type='text'
-            autoComplete='nickname'
+            label="Display Name"
+            type="text"
+            autoComplete="nickname"
             fullWidth
             {...register('displayName')}
             error={!!errors.displayName}
@@ -113,9 +154,9 @@ export default function Registration() {
           />
 
           <TextField
-            label='Password'
-            type='password'
-            autoComplete='new-password'
+            label="Password"
+            type="password"
+            autoComplete="new-password"
             fullWidth
             {...register('password')}
             error={!!errors.password}
@@ -123,9 +164,9 @@ export default function Registration() {
           />
 
           <TextField
-            label='Confirm Password'
-            type='password'
-            autoComplete='new-password'
+            label="Confirm Password"
+            type="password"
+            autoComplete="new-password"
             fullWidth
             {...register('confirmPassword')}
             error={!!errors.confirmPassword}
@@ -133,23 +174,43 @@ export default function Registration() {
           />
 
           <Button
-            type='submit'
-            variant='contained'
+            type="submit"
+            variant="contained"
             fullWidth
             disabled={loading || !isValid}
-            startIcon={loading ? <CircularProgress size={18} color='inherit' /> : null}
+            startIcon={loading ? <CircularProgress size={14} sx={{ color: 'inherit' }} /> : null}
+            sx={{
+              mt: '8px',
+              py: '10px',
+              bgcolor: 'var(--accent)',
+              '&:hover': { bgcolor: 'var(--accent-hover)' },
+              '&:disabled': { opacity: 0.45 },
+            }}
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? 'Creating account…' : 'Create Account'}
           </Button>
         </Box>
 
-        <Typography variant='body2'>
+        {/* Footer */}
+        <Box
+          sx={{
+            mt: '28px',
+            textAlign: 'center',
+            fontFamily: '"Space Mono", monospace',
+            fontSize: '0.68rem',
+            color: 'var(--cream-muted)',
+          }}
+        >
           Already have an account?{' '}
-          <Link component={RouterLink} to='/login'>
+          <Link
+            component={RouterLink}
+            to="/login"
+            sx={{ color: 'var(--cream-dim)', textDecorationColor: 'var(--border-strong)', '&:hover': { color: 'var(--cream)' } }}
+          >
             Sign In
           </Link>
-        </Typography>
+        </Box>
       </Box>
-    </Container>
+    </Box>
   );
 }
