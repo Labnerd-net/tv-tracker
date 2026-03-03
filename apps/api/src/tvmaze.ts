@@ -25,8 +25,8 @@ export default class TvMazeData {
     this.nextEpisodeLink = showData._links?.nextepisode?.href ?? '';
     this.prevEpisodeLink = showData._links?.previousepisode?.href ?? '';
     this.imageLink = showData.image?.medium ?? '';
-    this.nextEpisode = '';
-    this.prevEpisode = '';
+    this.nextEpisode = showData._embedded?.nextepisode?.airdate ?? '';
+    this.prevEpisode = showData._embedded?.previousepisode?.airdate ?? '';
     logger.debug({ title: this.title, tvMazeId: this.tvMazeId }, 'TvMazeData constructed');
   }
 
@@ -48,8 +48,8 @@ export default class TvMazeData {
     };
 
     [this.nextEpisode, this.prevEpisode] = await Promise.all([
-      fetchAirdate(this.nextEpisodeLink, 'next'),
-      fetchAirdate(this.prevEpisodeLink, 'previous'),
+      this.nextEpisode ? this.nextEpisode : fetchAirdate(this.nextEpisodeLink, 'next'),
+      this.prevEpisode ? this.prevEpisode : fetchAirdate(this.prevEpisodeLink, 'previous'),
     ]);
   }
 

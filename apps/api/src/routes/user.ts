@@ -120,7 +120,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
-    const response = await fetch(`${tvMazeAPI}/shows/${tvMazeId}`);
+    const response = await fetch(`${tvMazeAPI}/shows/${tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
     if (!response.ok) {
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
@@ -148,7 +148,7 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     if (!existing || existing.length === 0) {
       return c.json(err(`Show with id=${showId} not found`), 404);
     }
-    const response = await fetch(`${tvMazeAPI}/shows/${existing[0].tvMazeId}`);
+    const response = await fetch(`${tvMazeAPI}/shows/${existing[0].tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
     if (!response.ok) {
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
