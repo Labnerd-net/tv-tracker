@@ -35,28 +35,21 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
     try {
       const response1 = await Api.addNewShowJson(showData.show);
       if (!response1.success) {
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(`Failed to add ${showData.show.name}!`);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', `Failed to add ${showData.show.name}!`);
         return;
       }
       if (response1.data?.status === 'exists') {
-        alertProps.setAlertVariant('warning');
-        alertProps.setAlertMessage(`${showData.show.name} already exists!`);
+        alertProps.showAlert('warning', `${showData.show.name} already exists!`);
       } else {
-        alertProps.setAlertVariant('success');
-        alertProps.setAlertMessage(`${showData.show.name} successfully added!`);
+        alertProps.showAlert('success', `${showData.show.name} successfully added!`);
       }
-      alertProps.showAlert();
 
       const response2 = await Api.getAllShows();
       if (response2.success && response2.data) {
         dataProps.setTvShows(response2.data);
       }
     } catch {
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to add ${showData.show.name}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to add ${showData.show.name}!`);
     } finally {
       setLoading(false);
     }

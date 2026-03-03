@@ -35,16 +35,12 @@ export default function OneShowSearch() {
           if (platformName) setPlatform(platformName);
         } else {
           const msg = response.error ?? 'Failed to retrieve TV Show';
-          alertProps.setAlertVariant('danger');
-          alertProps.setAlertMessage(msg);
-          alertProps.showAlert();
+          alertProps.showAlert('danger', msg);
           setError(msg);
         }
       } catch {
         const msg = 'Failed to retrieve TV Show results';
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(msg);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', msg);
         setError(msg);
       } finally {
         setLoading(false);
@@ -60,28 +56,21 @@ export default function OneShowSearch() {
     try {
       const response1 = await Api.addNewShowJson(tvShow);
       if (!response1.success) {
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(`Failed to add ${tvShow.name}!`);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', `Failed to add ${tvShow.name}!`);
         return;
       }
       if (response1.data?.status === 'exists') {
-        alertProps.setAlertVariant('warning');
-        alertProps.setAlertMessage(`${tvShow.name} already exists!`);
+        alertProps.showAlert('warning', `${tvShow.name} already exists!`);
       } else {
-        alertProps.setAlertVariant('success');
-        alertProps.setAlertMessage(`${tvShow.name} successfully added!`);
+        alertProps.showAlert('success', `${tvShow.name} successfully added!`);
       }
-      alertProps.showAlert();
 
       const response2 = await Api.getAllShows();
       if (response2.success && response2.data) {
         dataProps.setTvShows(response2.data);
       }
     } catch {
-      alertProps.setAlertVariant('danger');
-      alertProps.setAlertMessage(`Failed to add ${tvShow.name}!`);
-      alertProps.showAlert();
+      alertProps.showAlert('danger', `Failed to add ${tvShow.name}!`);
     } finally {
       setLoading(false);
     }

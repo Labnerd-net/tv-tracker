@@ -34,9 +34,7 @@ export default function OneShow() {
       } catch (err) {
         logger.error(err);
         setError('Failed to retreive TV Show');
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage('Failed to retrieve TV Show!');
-        alertProps.showAlert();
+        alertProps.showAlert('danger', 'Failed to retrieve TV Show!');
       } finally {
         setLoading(false);
       }
@@ -50,14 +48,10 @@ export default function OneShow() {
         await Api.updateShow(showID);
         const response = await Api.getAllShows();
         dataProps.setTvShows(response.data ?? []);
-        alertProps.setAlertVariant('success');
-        alertProps.setAlertMessage(`${tvShow.title} successfully updated!`);
-        alertProps.showAlert();
+        alertProps.showAlert('success', `${tvShow.title} successfully updated!`);
       } catch (err) {
         logger.error(err);
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(`Failed to update ${tvShow.title}!`);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', `Failed to update ${tvShow.title}!`);
       } finally {
         setLoading(false);
       }
@@ -70,15 +64,11 @@ export default function OneShow() {
         await Api.deleteShow(String(tvShow.showId));
         const response = await Api.getAllShows();
         dataProps.setTvShows(response.data ?? []);
-        alertProps.setAlertVariant('success');
-        alertProps.setAlertMessage(`${tvShow.title} successfully deleted!`);
-        alertProps.showAlert();
+        alertProps.showAlert('success', `${tvShow.title} successfully deleted!`);
         navigate('/');
       } catch (err) {
         logger.error(err);
-        alertProps.setAlertVariant('danger');
-        alertProps.setAlertMessage(`Failed to delete ${tvShow.title}!`);
-        alertProps.showAlert();
+        alertProps.showAlert('danger', `Failed to delete ${tvShow.title}!`);
       } finally {
         setLoading(false);
       }

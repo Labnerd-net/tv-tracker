@@ -52,6 +52,15 @@ export interface Links {
   nextepisode?: Episode | null;
 }
 
+export interface EmbeddedEpisode {
+  airdate: string;
+}
+
+export interface Embedded {
+  nextepisode?: EmbeddedEpisode | null;
+  previousepisode?: EmbeddedEpisode | null;
+}
+
 export interface TvMazeShow {
   id: number;
   url: string;
@@ -74,6 +83,7 @@ export interface TvMazeShow {
   summary: string;
   updated: number;
   _links: Links;
+  _embedded?: Embedded | null;
 }
 
 export interface TvMazeSeries {
