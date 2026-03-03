@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#080b12"/>
+
+  <!-- TV body (outer) -->
+  <rect x="3" y="5" width="26" height="18" rx="1" fill="#0f1420" stroke="#e8e0d0" stroke-width="1" stroke-opacity="0.35"/>
+
+  <!-- Screen (inner) -->
+  <rect x="5.5" y="7.5" width="21" height="13" fill="#080b12"/>
+
+  <!-- Crimson accent bar at top of screen -->
+  <rect x="5.5" y="7.5" width="21" height="2.5" fill="#e63946"/>
+
+  <!-- Scan line hints inside screen -->
+  <line x1="5.5" y1="13" x2="26.5" y2="13" stroke="#e8e0d0" stroke-width="0.4" stroke-opacity="0.12"/>
+  <line x1="5.5" y1="16" x2="26.5" y2="16" stroke="#e8e0d0" stroke-width="0.4" stroke-opacity="0.12"/>
+  <line x1="5.5" y1="19" x2="26.5" y2="19" stroke="#e8e0d0" stroke-width="0.4" stroke-opacity="0.12"/>
+
+  <!-- Stand neck -->
+  <rect x="14.5" y="23" width="3" height="3" fill="#e8e0d0" fill-opacity="0.5"/>
+
+  <!-- Stand base -->
+  <rect x="10" y="26" width="12" height="1.5" rx="0.5" fill="#e8e0d0" fill-opacity="0.45"/>
+</svg>
