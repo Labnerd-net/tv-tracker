@@ -96,6 +96,14 @@ The SQLite database file is created at `apps/api/data/local.db` by default (dire
 
 React 19, React Router 7, MUI (Material UI v7 + Emotion), react-hook-form + `@hookform/resolvers` for forms, Axios for HTTP, `jwt-decode` for reading the token client-side.
 
+**Design system — Broadcast Noir:** The UI uses a custom cinematic dark/light theme defined in `apps/ui/src/utils/theme.ts`. All styling must stay consistent with this system.
+- **Fonts:** Cormorant Garamond (display/titles), Space Mono (metadata, UI, monospace elements)
+- **Dark palette:** bg `#080b12`, surface `#0f1420`, text `#e8e0d0`, accent `#e63946`, amber `#f2a65a`
+- **Light palette:** bg `#f4f0e8`, surface `#ede8de`, text `#1a1510`, accent `#c8102e`, amber `#c8760a`
+- All colors are exposed as CSS custom properties (`--bg`, `--surface`, `--accent`, `--amber`, etc.) via `MuiCssBaseline` overrides — prefer these vars over hardcoded hex in component styles.
+- Border radius is 0 globally (sharp corners throughout).
+- Do not introduce MUI default colors, rounded corners, or generic component styles — they will clash with the theme.
+
 **Context hierarchy** (outermost first): `ThemeProvider` → `AuthProvider` → `AlertProvider` → `ShowProvider` → `AppContent`
 
 - **`AuthProvider`** — stores `ProfileData | null`. On mount, validates any existing `localStorage.jwt` by calling `/api/user/profile`. Exposes `login(token)`, `logout()`.
