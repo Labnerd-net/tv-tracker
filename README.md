@@ -12,12 +12,48 @@ A self-hosted TV show tracker. Add shows from TVMaze, see upcoming and previous 
 | Data source | [TVMaze public API](https://www.tvmaze.com/api) |
 | Runtime | Node.js, pnpm workspaces |
 
+## Self-Hosting with Docker
+
+Pre-built images are published to GitHub Container Registry on every release:
+
+- `ghcr.io/labnerd-net/tv-tracker-api:latest`
+- `ghcr.io/labnerd-net/tv-tracker-ui:latest`
+
+> **Note on the UI image:** `VITE_API_URL` is baked into the bundle at build time. The pre-built image defaults to `http://localhost:3000`. If your API is hosted elsewhere, you need to build the UI image yourself — the `docker-compose.yml` in this repo handles that automatically.
+
+**1. Clone the repo**
+
+```bash
+git clone https://github.com/Labnerd-net/tv-tracker.git
+cd tv-tracker
+```
+
+**2. Edit `docker-compose.yml`**
+
+At minimum, update these values:
+
+| Variable | Description |
+|---|---|
+| `JWT_SECRET` | Random secret — generate with `openssl rand -base64 32` |
+| `CLIENT_URL` | Public URL of the UI (used for CORS on the API) |
+| `VITE_API_URL` | Public URL of the API (baked into the UI bundle at build time) |
+
+**3. Start**
+
+```bash
+docker compose up -d
+```
+
+The UI image is built locally on first run so that your `VITE_API_URL` is embedded correctly. The API runs database migrations automatically on startup. SQLite data is persisted in the named Docker volume `tv-tracker-data`.
+
+---
+
 ## Prerequisites
 
 - Node.js 20+
 - pnpm 9+
 
-## Setup
+## Local Dev Setup
 
 **1. Install dependencies**
 

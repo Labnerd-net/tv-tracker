@@ -1,0 +1,30 @@
+services:
+  api:
+    image: ghcr.io/labnerd-net/tv-tracker-api:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DB_FILE_NAME: file:/app/data/local.db
+      SERVER_PORT: 3000
+      CLIENT_URL: http://localhost:80        # set to your UI's public URL
+      JWT_SECRET: change-me                  # openssl rand -base64 32
+      BCRYPT_SALT_ROUNDS: 10
+      # ADMIN_EMAIL: admin@example.com       # optional
+    volumes:
+      - tv-tracker-data:/app/data
+
+  ui:
+    build:
+      context: .
+      dockerfile: apps/ui/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000  # set to your API's public URL
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  tv-tracker-data:
