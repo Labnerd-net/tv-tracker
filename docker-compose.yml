@@ -15,11 +15,7 @@ services:
       - tv-tracker-data:/app/data
 
   ui:
-    build:
-      context: .
-      dockerfile: apps/ui/Dockerfile
-      args:
-        VITE_API_URL: http://localhost:3000  # set to your API's public URL
+    image: ghcr.io/labnerd-net/tv-tracker-ui:latest
     restart: unless-stopped
     ports:
       - "80:80"

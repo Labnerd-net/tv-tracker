@@ -1,10 +1,8 @@
 import axios from 'axios';
 import { logger } from '../utils/logger';
 
-const databaseAPI = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
 export const apiClient = axios.create({
-  baseURL: databaseAPI,
+  baseURL: '',
   withCredentials: true,
 });
 
@@ -37,7 +35,7 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await axios.post(`${databaseAPI}/api/auth/refresh`, {}, { withCredentials: true });
+      await axios.post('/api/auth/refresh', {}, { withCredentials: true });
       refreshQueue.forEach(({ resolve }) => resolve(undefined));
       refreshQueue = [];
       return apiClient(originalRequest);

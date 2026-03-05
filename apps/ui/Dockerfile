@@ -1,7 +1,5 @@
 # Build from repo root:
-#   docker build -f apps/ui/Dockerfile \
-#     --build-arg VITE_API_URL=http://your-api-host:3000 \
-#     -t tv-tracker-ui .
+#   docker build -f apps/ui/Dockerfile -t tv-tracker-ui .
 
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -17,10 +15,6 @@ RUN pnpm install --frozen-lockfile
 COPY tsconfig.base.json ./
 COPY apps/ui ./apps/ui
 COPY apps/shared ./apps/shared
-
-# VITE_API_URL is baked into the bundle at build time
-ARG VITE_API_URL=http://localhost:3000
-ENV VITE_API_URL=$VITE_API_URL
 
 RUN pnpm --filter @tv-tracker/ui build
 

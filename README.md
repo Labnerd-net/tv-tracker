@@ -19,9 +19,9 @@ Pre-built images are published to GitHub Container Registry on every release:
 - `ghcr.io/labnerd-net/tv-tracker-api:latest`
 - `ghcr.io/labnerd-net/tv-tracker-ui:latest`
 
-> **Note on the UI image:** `VITE_API_URL` is baked into the bundle at build time. The pre-built image defaults to `http://localhost:3000`. If your API is hosted elsewhere, you need to build the UI image yourself — the `docker-compose.yml` in this repo handles that automatically.
+The UI container proxies `/api/*` requests to the API container via nginx — no build-time configuration required. Both images can be pulled and run directly.
 
-**1. Clone the repo**
+**1. Clone the repo (for the compose file)**
 
 ```bash
 git clone https://github.com/Labnerd-net/tv-tracker.git
@@ -30,13 +30,12 @@ cd tv-tracker
 
 **2. Edit `docker-compose.yml`**
 
-At minimum, update these values:
+At minimum, set these values in the `api` service:
 
 | Variable | Description |
 |---|---|
 | `JWT_SECRET` | Random secret — generate with `openssl rand -base64 32` |
-| `CLIENT_URL` | Public URL of the UI (used for CORS on the API) |
-| `VITE_API_URL` | Public URL of the API (baked into the UI bundle at build time) |
+| `CLIENT_URL` | Public URL of the UI (used for CORS) |
 
 **3. Start**
 
@@ -44,7 +43,7 @@ At minimum, update these values:
 docker compose up -d
 ```
 
-The UI image is built locally on first run so that your `VITE_API_URL` is embedded correctly. The API runs database migrations automatically on startup. SQLite data is persisted in the named Docker volume `tv-tracker-data`.
+The API runs database migrations automatically on startup. SQLite data is persisted in the named Docker volume `tv-tracker-data`.
 
 ---
 

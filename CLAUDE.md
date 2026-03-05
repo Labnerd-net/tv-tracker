@@ -53,7 +53,7 @@ Copy `.env.sample` to `.env` in each app before running:
 
 **`apps/api/.env`** — `DB_FILE_NAME`, `SERVER_PORT` (default 3000), `CLIENT_URL` (CORS), `JWT_SECRET`
 
-**`apps/ui/.env`** — `VITE_API_URL` (default `http://localhost:3000`)
+**`apps/ui/.env`** — no required variables; API requests are proxied via Vite dev server (local) or nginx (Docker)
 
 The SQLite database file is created at `apps/api/data/local.db` by default (directory must exist).
 
