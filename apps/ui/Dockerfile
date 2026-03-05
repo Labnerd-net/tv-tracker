@@ -21,7 +21,9 @@ RUN pnpm --filter @tv-tracker/ui build
 
 FROM nginx:alpine
 COPY --from=builder /app/apps/ui/dist /usr/share/nginx/html
-COPY apps/ui/nginx.conf /etc/nginx/conf.d/default.conf
+# Store the template — startup script substitutes API_HOST at runtime
+COPY apps/ui/nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# envsubst replaces ${API_HOST} in the template before nginx starts
+CMD ["/bin/sh", "-c", "envsubst '${API_HOST}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]

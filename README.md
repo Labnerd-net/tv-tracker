@@ -30,12 +30,13 @@ cd tv-tracker
 
 **2. Edit `docker-compose.yml`**
 
-At minimum, set these values in the `api` service:
+At minimum, set these values:
 
-| Variable | Description |
-|---|---|
-| `JWT_SECRET` | Random secret — generate with `openssl rand -base64 32` |
-| `CLIENT_URL` | Public URL of the UI (used for CORS) |
+| Service | Variable | Description |
+|---|---|---|
+| `api` | `JWT_SECRET` | Random secret — generate with `openssl rand -base64 32` |
+| `api` | `CLIENT_URL` | Public URL of the UI (used for CORS) |
+| `ui` | `API_HOST` | Internal hostname of the API container (default: `api`) |
 
 **3. Start**
 

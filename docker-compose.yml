@@ -19,6 +19,8 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+    environment:
+      API_HOST: api                          # Docker service name of the API container
     depends_on:
       - api
 
