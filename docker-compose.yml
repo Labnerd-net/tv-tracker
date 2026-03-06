@@ -10,7 +10,6 @@ services:
       CLIENT_URL: http://localhost:80        # set to your UI's public URL
       JWT_SECRET: change-me                  # openssl rand -base64 32
       BCRYPT_SALT_ROUNDS: 10
-      # ADMIN_EMAIL: admin@example.com       # optional
     volumes:
       - tv-tracker-data:/app/data
 
