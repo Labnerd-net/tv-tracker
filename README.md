@@ -159,10 +159,6 @@ DELETE /api/admin/user/:id
 
 All protected routes require `Authorization: Bearer <token>`.
 
-## Admin Account
-
-The first user to register with the email matching `ADMIN_EMAIL` (optional env var) is granted the admin role. If `ADMIN_EMAIL` is not set, no admin account is created automatically.
-
 ## Notes
 
 - The SQLite file must be at a path prefixed with `file:` (e.g. `file:data/local.db`). A bare path will throw `URL_INVALID` at startup.

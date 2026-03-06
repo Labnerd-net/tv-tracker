@@ -18,7 +18,6 @@ import {
   accessTokenExpiryMinutes,
   jwtSecret,
   isProduction,
-  adminEmail,
 } from '../utils/envVars.js';
 import { authMiddleware } from '../utils/middleware.js';
 import { authRateLimit } from '../utils/rateLimiter.js';
@@ -64,7 +63,7 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
       return c.json(err('User already exists'), 409);
     }
     const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
-    const roles: Role[] = (adminEmail && email === adminEmail) ? ['user', 'admin'] : ['user'];
+    const roles: Role[] = ['user'];
     const user = { email, passwordHash, roles, displayName } as UserData;
     const result = await dbUserFunctions.addUser(db, user);
     if (!result || !(result.length > 0)) {

@@ -38,6 +38,3 @@ export const bcryptSaltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
 export const logLevel = process.env.LOG_LEVEL ?? 'info';
 
-// Optional. If set, only the user registering with this email receives admin role.
-// If unset, no user is auto-promoted to admin.
-export const adminEmail: string | undefined = process.env.ADMIN_EMAIL || undefined;
