@@ -24,7 +24,7 @@ export default class TvMazeData {
     this.scheduleTime = showData.schedule?.time ?? '';
     this.nextEpisodeLink = showData._links?.nextepisode?.href ?? '';
     this.prevEpisodeLink = showData._links?.previousepisode?.href ?? '';
-    this.imageLink = showData.image?.medium ?? '';
+    this.imageLink = this.sanitizeImageUrl(showData.image?.medium ?? '');
     this.nextEpisode = showData._embedded?.nextepisode?.airdate ?? '';
     this.prevEpisode = showData._embedded?.previousepisode?.airdate ?? '';
     logger.debug({ title: this.title, tvMazeId: this.tvMazeId }, 'TvMazeData constructed');
@@ -32,6 +32,21 @@ export default class TvMazeData {
 
   returnPlatform(showData: TvMazeShow): string {
     return getPlatformName(showData) ?? '';
+  }
+
+  private sanitizeImageUrl(url: string): string {
+    if (!url) return '';
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:' || parsed.hostname !== 'static.tvmaze.com') {
+        logger.warn({ url }, 'Rejected non-TVMaze image URL');
+        return '';
+      }
+      return url;
+    } catch {
+      logger.warn({ url }, 'Rejected malformed image URL');
+      return '';
+    }
   }
 
   async updateEpisodes() {
@@ -58,14 +73,4 @@ export default class TvMazeData {
     ]);
   }
 
-  async returnImage(): Promise<Response | null> {
-    if (this.imageLink) {
-      try {
-        return await fetch(this.imageLink);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
 }

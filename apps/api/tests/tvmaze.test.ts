@@ -18,6 +18,43 @@ beforeEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('TvMazeData constructor imageLink validation', () => {
+  it('keeps a valid static.tvmaze.com HTTPS URL', () => {
+    const url = 'https://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg';
+    const show = new TvMazeData({ ...baseMockShow, image: { medium: url, original: url } });
+    expect(show.imageLink).toBe(url);
+  });
+
+  it('clears imageLink for a non-TVMaze hostname', () => {
+    const show = new TvMazeData({
+      ...baseMockShow,
+      image: { medium: 'https://evil.example.com/img.jpg', original: '' },
+    });
+    expect(show.imageLink).toBe('');
+  });
+
+  it('clears imageLink for HTTP (non-HTTPS) URL', () => {
+    const show = new TvMazeData({
+      ...baseMockShow,
+      image: { medium: 'http://static.tvmaze.com/img.jpg', original: '' },
+    });
+    expect(show.imageLink).toBe('');
+  });
+
+  it('clears imageLink for a malformed URL', () => {
+    const show = new TvMazeData({
+      ...baseMockShow,
+      image: { medium: 'not-a-url', original: '' },
+    });
+    expect(show.imageLink).toBe('');
+  });
+
+  it('keeps imageLink as empty string when image is null', () => {
+    const show = new TvMazeData({ ...baseMockShow, image: null });
+    expect(show.imageLink).toBe('');
+  });
+});
+
 describe('TvMazeData.updateEpisodes() URL validation', () => {
   it('fetches airdate for valid api.tvmaze.com URL', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({

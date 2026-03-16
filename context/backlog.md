@@ -11,11 +11,7 @@
 
 ### Medium
 - **[5] [apps/api/src/utils/rateLimiter.ts:46-52]**: Rate limiter trusts `X-Forwarded-For`/`X-Real-IP`/`CF-Connecting-IP` from the client without validation — trivially bypassable by cycling spoofed headers. Only trust these headers when the socket connection originates from a known trusted proxy IP.
-- **[6] [apps/api/src/routes/user.ts:100, 128]**: `POST /api/user/tvshow` (body-based) stores `imageLink` from client-supplied JSON, allowing arbitrary URL injection. Strip and re-fetch image from TVMaze server-side, or validate the URL matches TVMaze CDN pattern.
-- **[46] [apps/api/src/routes/admin.ts:29]**: `err(e.message, 500)` in the admin catch block returns the raw DB/internal error message to the client. Log server-side and return a generic message, matching the pattern already applied to auth routes.
-
 ### Low
-- **[45] [apps/api/src/tvmaze.ts:61-65]**: `returnImage()` fetches `this.imageLink` without hostname validation. The image URL originates from TVMaze API responses (not client-supplied), so SSRF risk is low — but it's inconsistent with the episode URL validation added in fix [4]. Validate the URL matches the TVMaze CDN hostname before fetching.
 
 ---
 
@@ -25,9 +21,6 @@
 - **[11] [apps/ui/src/pages/OneShow.tsx:40]**: `alertProps` (entire `useAlert()` return object) is in the `useEffect` dependency array. It's recreated every render, causing the effect to fire on every render cycle. Destructure `showAlert` and use only that in the array.
 - **[12] [apps/ui/src/pages/OneShowSearch.tsx:54]**: Same `alertProps` in dependency array issue — same fix.
 - **[13] [apps/ui/src/pages/SearchResults.tsx:41]**: Same `alertProps` in dependency array issue — same fix.
-
-### Medium
-- **[14] [apps/api/src/utils/response.ts:2]**: The `err()` helper's `code` parameter in the response body can drift from the actual HTTP status code on `c.json()` call sites. Remove `code` from the helper body and always pass HTTP status explicitly to `c.json()`.
 
 ### Low
 - **[15] [apps/ui/src/pages/SearchResults.tsx:131]**: Array `index` used as `key` prop for `Result` components. Use `showData.show.id` (stable TVMaze ID) instead.
@@ -99,9 +92,9 @@
 
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
-| Security               |  0   |   3    |  2  |   5   |
-| Bugs                   |  3   |   1    |  1  |   5   |
+| Security               |  0   |   1    |  1  |   2   |
+| Bugs                   |  3   |   0    |  1  |   4   |
 | Performance            |  2   |   1    |  1  |   4   |
 | Improvements & Refactors |  1  |   5    |  4  |  10   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **8** | **15** | **16** | **39** |
+| **Total**              | **8** | **11** | **14** | **35** |

@@ -56,7 +56,7 @@ const tvMazeShowJson = {
   schedule: { days: ['Monday'], time: '20:00' },
   network: { name: 'ABC' },
   webChannel: null,
-  image: { medium: 'http://example.com/img.jpg' },
+  image: { medium: 'https://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg', original: '' },
   _links: {},
 };
 
