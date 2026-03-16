@@ -18,12 +18,8 @@
 ## Bugs
 
 ### High
-- **[11] [apps/ui/src/pages/OneShow.tsx:40]**: `alertProps` (entire `useAlert()` return object) is in the `useEffect` dependency array. It's recreated every render, causing the effect to fire on every render cycle. Destructure `showAlert` and use only that in the array.
-- **[12] [apps/ui/src/pages/OneShowSearch.tsx:54]**: Same `alertProps` in dependency array issue — same fix.
-- **[13] [apps/ui/src/pages/SearchResults.tsx:41]**: Same `alertProps` in dependency array issue — same fix.
 
 ### Low
-- **[15] [apps/ui/src/pages/SearchResults.tsx:131]**: Array `index` used as `key` prop for `Result` components. Use `showData.show.id` (stable TVMaze ID) instead.
 
 ---
 
@@ -93,8 +89,8 @@
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
 | Security               |  0   |   0    |  1  |   1   |
-| Bugs                   |  3   |   0    |  1  |   4   |
+| Bugs                   |  0   |   0    |  0  |   0   |
 | Performance            |  2   |   1    |  1  |   4   |
 | Improvements & Refactors |  1  |   5    |  4  |  10   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **8** | **10** | **14** | **34** |
+| **Total**              | **5** | **10** | **14** | **29** |
