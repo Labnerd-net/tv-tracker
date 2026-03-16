@@ -97,7 +97,7 @@ describe('POST /api/user/tvshow stores multi-day schedule', () => {
       schedule: { days: ['Monday', 'Tuesday'], time: '21:00' },
       network: { name: 'HBO' },
       webChannel: null,
-      image: { medium: 'http://example.com/img.jpg' },
+      image: { medium: 'https://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg' },
       _links: {},
     };
 
