@@ -19,6 +19,8 @@
 
 ### High
 
+### Medium
+
 ### Low
 
 ---
@@ -26,8 +28,6 @@
 ## Performance
 
 ### High
-- **[16] [apps/ui/src/components/Result.tsx:18-32, apps/ui/src/pages/SearchResults.tsx:130-133]**: N+1 pattern — each `Result` component fires an independent `fetchNextEpisodeDate()` call to TVMaze on mount. 20 results = 20 concurrent external API calls. Fetch episode dates in bulk in `SearchResults` after initial search completes, or defer to hover/expand.
-- **[17] [apps/ui/src/components/SingleShow.tsx:19-33, apps/ui/src/components/ShowsTable.tsx:67-77, apps/ui/src/pages/OneShow.tsx:42-57]**: Full `getAllShows()` re-fetch triggered after every refresh or delete action across 3 components. Update context state directly from returned data (for refresh) or filter the array (for delete) instead of re-fetching.
 
 ### Medium
 - **[18] [apps/api/src/db/schema.ts]**: No indexes on `tvShows` table. Queries like `WHERE user_id = ?` and `WHERE tvmaze_id = ? AND user_id = ?` run full scans. Add indexes: `idx_user_shows` on `userId`, `idx_tvmaze_user` on `(tvMazeId, userId)`.
@@ -40,7 +40,6 @@
 ## Improvements & Refactors
 
 ### High
-- **[20] [apps/ui/src/components/SingleShow.tsx, ShowsTable.tsx, pages/OneShow.tsx]**: Refresh and delete logic duplicated across 3 components with near-identical implementations. Extract a `useShowActions()` custom hook to consolidate this logic and serve as the single point of change when batch ops are added.
 
 ### Medium
 - **[21] [apps/api/src/db/schema.ts:7]**: `DB_FILE_NAME` is read from `process.env` directly, independent of `envVars.ts` which already exports `dbUrl`. Import `dbUrl` from `envVars.ts` to avoid divergent defaults.
@@ -88,9 +87,9 @@
 
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
-| Security               |  0   |   0    |  1  |   1   |
+| Security               |  0   |   0    |  0  |   0   |
 | Bugs                   |  0   |   0    |  0  |   0   |
-| Performance            |  2   |   1    |  1  |   4   |
-| Improvements & Refactors |  1  |   5    |  4  |  10   |
+| Performance            |  0   |   1    |  1  |   2   |
+| Improvements & Refactors |  0  |   5    |  4  |   9   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **5** | **10** | **14** | **29** |
+| **Total**              | **2** | **11** | **13** | **26** |
