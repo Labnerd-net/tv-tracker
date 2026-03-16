@@ -111,6 +111,20 @@ describe('POST /api/auth/register', () => {
     expect(cookie).toContain('refreshToken=');
     expect(cookie).toContain('HttpOnly');
   });
+
+  it('returns 500 with generic message when DB throws', async () => {
+    vi.mocked(dbUserFunctions.returnUserByEmail).mockResolvedValueOnce([]);
+    vi.mocked(dbUserFunctions.addUser).mockRejectedValueOnce(new Error('DB connection failed'));
+    const res = await post('/api/auth/register', {
+      email: 'test@test.com',
+      password: 'password123',
+      displayName: 'Test',
+    });
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe('An unexpected error occurred');
+    expect(body.error).not.toContain('DB connection');
+  });
 });
 
 describe('POST /api/auth/login', () => {
@@ -163,6 +177,18 @@ describe('POST /api/auth/login', () => {
     expect(cookie).toContain('accessToken=');
     expect(cookie).toContain('refreshToken=');
     expect(cookie).toContain('HttpOnly');
+  });
+
+  it('returns 500 with generic message when DB throws', async () => {
+    vi.mocked(dbUserFunctions.returnUserByEmail).mockRejectedValueOnce(new Error('internal error'));
+    const res = await post('/api/auth/login', {
+      email: 'test@test.com',
+      password: 'password123',
+    });
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe('An unexpected error occurred');
+    expect(body.error).not.toContain('internal error');
   });
 });
 

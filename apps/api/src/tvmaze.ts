@@ -38,6 +38,11 @@ export default class TvMazeData {
     const fetchAirdate = async (link: string, label: string): Promise<string> => {
       if (!link) return '';
       try {
+        const url = new URL(link);
+        if (url.hostname !== 'api.tvmaze.com') {
+          logger.warn({ link }, `Rejected non-TVMaze URL for ${label} episode`);
+          return '';
+        }
         const response = await fetch(link);
         const data = await response.json();
         return data.airdate ?? '';
