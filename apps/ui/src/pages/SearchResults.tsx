@@ -10,6 +10,7 @@ import { useAlert } from '../contexts/alert/AlertContext.js';
 
 export default function SearchResults() {
   const alertProps = useAlert();
+  const { showAlert } = alertProps;
   const { showName } = useParams();
   const [searchResults, setSearchResults] = useState<TvMazeSeries[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,12 +42,12 @@ export default function SearchResults() {
           setEpisodesLoading(false);
         } else {
           const msg = response.error ?? 'Failed to retrieve TV Show results';
-          alertProps.showAlert('danger', msg);
+          showAlert('danger', msg);
           setError(msg);
         }
       } catch {
         const msg = 'Failed to retrieve TV Show results';
-        alertProps.showAlert('danger', msg);
+        showAlert('danger', msg);
         setError(msg);
       } finally {
         setLoading(false);
@@ -55,7 +56,7 @@ export default function SearchResults() {
     if (showName) {
       searchTvShows(showName);
     }
-  }, [alertProps.showAlert, showName]);
+  }, [showAlert, showName]);
 
   return (
     <Box sx={{ minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>

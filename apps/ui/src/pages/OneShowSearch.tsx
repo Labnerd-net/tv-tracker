@@ -14,6 +14,7 @@ const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 export default function OneShowSearch() {
   const { showID } = useParams();
   const alertProps = useAlert();
+  const { showAlert } = alertProps;
   const dataProps = useShow();
   const [tvShow, setTvShow] = useState<TvMazeShow>();
   const [nextEpisode, setNextEpisode] = useState('');
@@ -37,12 +38,12 @@ export default function OneShowSearch() {
           if (platformName) setPlatform(platformName);
         } else {
           const msg = response.error ?? 'Failed to retrieve TV Show';
-          alertProps.showAlert('danger', msg);
+          showAlert('danger', msg);
           setError(msg);
         }
       } catch {
         const msg = 'Failed to retrieve TV Show results';
-        alertProps.showAlert('danger', msg);
+        showAlert('danger', msg);
         setError(msg);
       } finally {
         setLoading(false);
@@ -51,7 +52,7 @@ export default function OneShowSearch() {
     if (showID) {
       searchTvShow(showID);
     }
-  }, [alertProps.showAlert, showID]);
+  }, [showAlert, showID]);
 
   const addTvShow = async () => {
     if (!tvShow) return;
