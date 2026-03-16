@@ -34,7 +34,7 @@ export const requireRole = (role: Role) => {
   return async (c: Context, next: Next) => {
     const payload: JwtData = c.get('jwtPayload');
     if (!payload || !payload.roles.includes(role)) {
-      return c.json(err('Forbidden', 403));
+      return c.json(err('Forbidden'), 403);
     }
     await next();
   };
