@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { sign } from 'hono/jwt';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import * as bcrypt from 'bcryptjs';
@@ -31,8 +32,7 @@ type Variables = {
 
 const auth = new Hono<{ Variables: Variables }>();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function setRefreshCookie(c: any, raw: string) {
+function setRefreshCookie(c: Context, raw: string) {
   setCookie(c, 'refreshToken', raw, {
     httpOnly: true,
     secure: isProduction,
@@ -42,8 +42,7 @@ function setRefreshCookie(c: any, raw: string) {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function setAccessCookie(c: any, token: string) {
+function setAccessCookie(c: Context, token: string) {
   setCookie(c, 'accessToken', token, {
     httpOnly: true,
     secure: isProduction,

@@ -1,10 +1,8 @@
-import 'dotenv/config';
 import { int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { drizzle } from 'drizzle-orm/libsql';
 import { relations } from 'drizzle-orm';
 import type { Role } from '@shared/types/tv-tracker.js';
-
-const sqliteFile = process.env.DB_FILE_NAME || 'file:data/local.db';
+import { dbUrl } from '../utils/envVars.js';
 
 export const users = sqliteTable('users', {
   userId: int('user_id').primaryKey({ autoIncrement: true }),
@@ -31,7 +29,7 @@ export const tvShows = sqliteTable('tv_shows', {
   imageLink: text('image_link'),
 });
 
-export const db = drizzle(sqliteFile);
+export const db = drizzle(dbUrl);
 
 // ------------------------------------------------------------------
 // Relation helpers
