@@ -86,10 +86,7 @@ auth.post('/register', authRateLimit, zValidator('json', registrationSchema, val
 
     return c.json(ok({}));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
-    logger.error({ err: e }, 'Unexpected error in auth route');
+    logger.error({ err: e }, 'Unexpected error in register route');
     return c.json(err('An unexpected error occurred'), 500);
   }
 });
@@ -122,10 +119,7 @@ auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHoo
 
     return c.json(ok({}));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
-    logger.error({ err: e }, 'Unexpected error in auth route');
+    logger.error({ err: e }, 'Unexpected error in login route');
     return c.json(err('An unexpected error occurred'), 500);
   }
 });
@@ -166,9 +160,6 @@ auth.post('/refresh', authRateLimit, async c => {
 
     return c.json(ok({}));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in refresh route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -189,9 +180,6 @@ auth.post('/logout', authMiddleware, async c => {
     });
     return c.json(ok({ status: 'logged out' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in logout route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -227,10 +215,7 @@ auth.delete('/deleteUser', authMiddleware, async c => {
     });
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
-    logger.error({ err: e }, 'Unexpected error in auth route');
+    logger.error({ err: e }, 'Unexpected error in deleteUser route');
     return c.json(err('An unexpected error occurred'), 500);
   }
 });

@@ -22,6 +22,7 @@
 ### Low
 - **[9] [apps/api/src/routes/user.ts (UI side — userRequests.ts)]**: `showName` is interpolated directly into the TVMaze search URL without `encodeURIComponent()`. Characters like `&` or `=` can break or manipulate the query.
 - **[10] [apps/api/src/routes/admin.ts:25]**: `GET /api/admin/users` returns full `UserDbData` rows including `passwordHash`, `refreshTokenHash`, `refreshTokenExpiresAt`. Explicitly map to `ProfileData` fields before responding.
+- **[45] [apps/api/src/tvmaze.ts:61-65]**: `returnImage()` fetches `this.imageLink` without hostname validation. The image URL originates from TVMaze API responses (not client-supplied), so SSRF risk is low — but it's inconsistent with the episode URL validation added in fix [4]. Validate the URL matches the TVMaze CDN hostname before fetching.
 
 ---
 
@@ -105,9 +106,9 @@
 
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
-| Security               |  4   |   4    |  2  |  10   |
+| Security               |  4   |   4    |  3  |  11   |
 | Bugs                   |  3   |   1    |  1  |   5   |
 | Performance            |  2   |   1    |  1  |   4   |
 | Improvements & Refactors |  1  |   5    |  4  |  10   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **12** | **16** | **16** | **44** |
+| **Total**              | **12** | **16** | **17** | **45** |

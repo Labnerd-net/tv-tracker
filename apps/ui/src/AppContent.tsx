@@ -8,6 +8,7 @@ import AllShows from './pages/AllShows.tsx';
 import OneShow from './pages/OneShow.tsx';
 import SearchResults from './pages/SearchResults.tsx';
 import OneShowSearch from './pages/OneShowSearch.tsx';
+import ProtectedRoute from './pages/ProtectedRoute.tsx';
 import { useAlert } from './contexts/alert/AlertContext.tsx';
 
 export default function AppContent() {
@@ -21,10 +22,10 @@ export default function AppContent() {
         <Route path='/' element={<Splash />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Registration />} />
-        <Route path='/dashboard' element={<AllShows />} />
-        <Route path='/tvshow/:showID' element={<OneShow />} />
-        <Route path='/search/:showName' element={<SearchResults />} />
-        <Route path='/search/show/:showID' element={<OneShowSearch />} />
+        <Route path='/dashboard' element={<ProtectedRoute><AllShows /></ProtectedRoute>} />
+        <Route path='/tvshow/:showID' element={<ProtectedRoute><OneShow /></ProtectedRoute>} />
+        <Route path='/search/:showName' element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
+        <Route path='/search/show/:showID' element={<ProtectedRoute><OneShowSearch /></ProtectedRoute>} />
       </Routes>
     </>
   )
