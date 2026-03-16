@@ -27,11 +27,8 @@ admin.get('/users', requireRole('admin'), async c => {
     }));
     return c.json(ok({ allUserProfiles }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message, 500), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in admin route');
-    return c.json(err('An unexpected error occurred', 500), 500);
+    return c.json(err('An unexpected error occurred'), 500);
   }
 });
 

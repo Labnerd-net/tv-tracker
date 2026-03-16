@@ -42,9 +42,6 @@ user.get('/profile', async c => {
     };
     return c.json(ok(profile));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -58,9 +55,6 @@ user.get('/tvshows', async (c) => {
     const shows = await dbShowFunctions.returnAllShows(db, userId);
     return c.json(ok(shows));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -78,9 +72,6 @@ user.get('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook
     }
     return c.json(ok(shows[0]));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -102,9 +93,6 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
     await dbShowFunctions.addOneShow(db, showData, userId);
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -130,9 +118,6 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     await dbShowFunctions.addOneShow(db, showData, userId);
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -158,9 +143,6 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     await dbShowFunctions.updateOneShow(db, showData, showId, userId);
     return c.json(ok({ status: 'updated' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
@@ -178,9 +160,6 @@ user.delete('/tvshow/:id', zValidator('param', numericIdParamSchema, validationH
     }
     return c.json(ok({ status: 'deleted' }));
   } catch (e: unknown) {
-    if (e instanceof Error) {
-      return c.json(err(e.message), 500);
-    }
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);
   }
