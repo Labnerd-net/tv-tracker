@@ -8,20 +8,13 @@
 ## Security
 
 ### High
-- **[1] [apps/ui/src/AppContent.tsx:21-27]**: All protected routes (`/dashboard`, `/tvshow/:showID`, `/search/*`) are NOT wrapped in `<ProtectedRoute>` — any unauthenticated user can navigate directly to them. Wrap them immediately.
-- **[2] [apps/ui/src/pages/ProtectedRoute.tsx:8-10]**: `ProtectedRoute` calls `navigate('/login')` imperatively during render but still returns `children` unconditionally — protected content renders before the redirect. Replace with `<Navigate to="/login" replace />` and return it instead of calling navigate.
-- **[3] [apps/api/src/routes/auth.ts:90, 127]**: Raw `e.message` from DB/internal errors is returned to the client on registration/login failure. Log server-side, return a generic message to the client.
-- **[4] [apps/api/src/tvmaze.ts:41-43]**: SSRF risk — `fetchAirdate()` fetches from a URL in `_links.nextepisode.href`. For the body-based `POST /tvshow` route, this URL comes from the client. Validate that episode link URLs match `api.tvmaze.com` before fetching.
 
 ### Medium
 - **[5] [apps/api/src/utils/rateLimiter.ts:46-52]**: Rate limiter trusts `X-Forwarded-For`/`X-Real-IP`/`CF-Connecting-IP` from the client without validation — trivially bypassable by cycling spoofed headers. Only trust these headers when the socket connection originates from a known trusted proxy IP.
 - **[6] [apps/api/src/routes/user.ts:100, 128]**: `POST /api/user/tvshow` (body-based) stores `imageLink` from client-supplied JSON, allowing arbitrary URL injection. Strip and re-fetch image from TVMaze server-side, or validate the URL matches TVMaze CDN pattern.
-- **[7] [apps/api/src/schemas/auth.ts:14]**: Password minimum length is 6 characters. Raise to at least 8. Update matching client-side schemas in `Login.tsx` and `Registration.tsx`.
-- **[8] [apps/api/src/routes/admin.ts:29, 32]**: `err('...', 500)` is used but `c.json(err(...))` is called without an HTTP status code — all admin error responses return HTTP 200 with `ok: false`. Pass the status code as second arg to `c.json()`.
+- **[46] [apps/api/src/routes/admin.ts:29]**: `err(e.message, 500)` in the admin catch block returns the raw DB/internal error message to the client. Log server-side and return a generic message, matching the pattern already applied to auth routes.
 
 ### Low
-- **[9] [apps/api/src/routes/user.ts (UI side — userRequests.ts)]**: `showName` is interpolated directly into the TVMaze search URL without `encodeURIComponent()`. Characters like `&` or `=` can break or manipulate the query.
-- **[10] [apps/api/src/routes/admin.ts:25]**: `GET /api/admin/users` returns full `UserDbData` rows including `passwordHash`, `refreshTokenHash`, `refreshTokenExpiresAt`. Explicitly map to `ProfileData` fields before responding.
 - **[45] [apps/api/src/tvmaze.ts:61-65]**: `returnImage()` fetches `this.imageLink` without hostname validation. The image URL originates from TVMaze API responses (not client-supplied), so SSRF risk is low — but it's inconsistent with the episode URL validation added in fix [4]. Validate the URL matches the TVMaze CDN hostname before fetching.
 
 ---
@@ -106,9 +99,9 @@
 
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
-| Security               |  4   |   4    |  3  |  11   |
+| Security               |  0   |   3    |  2  |   5   |
 | Bugs                   |  3   |   1    |  1  |   5   |
 | Performance            |  2   |   1    |  1  |   4   |
 | Improvements & Refactors |  1  |   5    |  4  |  10   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **12** | **16** | **17** | **45** |
+| **Total**              | **8** | **15** | **16** | **39** |

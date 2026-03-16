@@ -78,7 +78,31 @@ describe('POST /api/auth/register', () => {
     });
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toBe('Password must be at least 6 characters long');
+    expect(body.error).toBe('Password must be at least 8 characters long');
+  });
+
+  it('returns 400 when password is 7 characters (boundary)', async () => {
+    const res = await post('/api/auth/register', {
+      email: 'test@test.com',
+      password: 'abcdefg',
+      displayName: 'Test',
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Password must be at least 8 characters long');
+  });
+
+  it('accepts password of exactly 8 characters', async () => {
+    vi.mocked(dbUserFunctions.returnUserByEmail).mockResolvedValueOnce([]);
+    vi.mocked(dbUserFunctions.addUser).mockResolvedValueOnce([
+      { userId: 1, email: 'test@test.com', displayName: 'Test', roles: ['user'] },
+    ]);
+    const res = await post('/api/auth/register', {
+      email: 'test@test.com',
+      password: 'abcdefgh',
+      displayName: 'Test',
+    });
+    expect(res.status).toBe(200);
   });
 
   it('returns 409 when user already exists', async () => {
@@ -141,6 +165,16 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe('Invalid email format');
+  });
+
+  it('returns 400 when password is shorter than 8 characters', async () => {
+    const res = await post('/api/auth/login', {
+      email: 'test@test.com',
+      password: 'short',
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Password must be at least 8 characters long');
   });
 
   it('returns 401 for unknown user', async () => {

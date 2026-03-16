@@ -146,7 +146,7 @@ export interface TvMazeShowsResponse {
 
 export async function tvShowResults(showName: string): Promise<TvMazeShowsResponse> {
   try {
-    const response = await axios.get(`${tvMazeAPI}/search/shows?q=${showName}`)
+    const response = await axios.get(`${tvMazeAPI}/search/shows?q=${encodeURIComponent(showName)}`)
     return { success: true, data: response.data };
   } catch(error) {
     return handleApiError('tvShowResults', error);
