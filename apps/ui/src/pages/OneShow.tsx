@@ -7,17 +7,16 @@ import * as Api from '../apis/userRequests.ts';
 import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
 import { useAlert } from '../contexts/alert/AlertContext.tsx';
-import { useShow } from '../contexts/show/ShowContext.tsx';
+import { useShowActions } from '../hooks/useShowActions.ts';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
 export default function OneShow() {
   const { showID } = useParams();
   const { showAlert } = useAlert();
-  const dataProps = useShow();
+  const { loading: actionLoading, refreshShow, deleteShow } = useShowActions();
   const [tvShow, setTvShow] = useState<ShowData>();
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -39,37 +38,15 @@ export default function OneShow() {
     retreiveTvShow();
   }, [showAlert, showID]);
 
-  const refreshData = async () => {
+  const refreshData = () => {
     if (tvShow && showID) {
-      setActionLoading(true);
-      try {
-        await Api.updateShow(showID);
-        const response = await Api.getAllShows();
-        dataProps.setTvShows(response.data ?? []);
-        showAlert('success', `${tvShow.title} updated`);
-      } catch (err) {
-        logger.error(err);
-        showAlert('danger', `Failed to update ${tvShow.title}`);
-      } finally {
-        setActionLoading(false);
-      }
+      refreshShow(showID, tvShow.title);
     }
   };
 
-  const deleteOneShow = async () => {
+  const deleteOneShow = () => {
     if (tvShow) {
-      setActionLoading(true);
-      try {
-        await Api.deleteShow(String(tvShow.showId));
-        const response = await Api.getAllShows();
-        dataProps.setTvShows(response.data ?? []);
-        showAlert('success', `${tvShow.title} removed`);
-        navigate('/');
-      } catch (err) {
-        logger.error(err);
-        showAlert('danger', `Failed to delete ${tvShow.title}`);
-        setActionLoading(false);
-      }
+      deleteShow(String(tvShow.showId), tvShow.title, () => navigate('/'));
     }
   };
 

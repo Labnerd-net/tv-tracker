@@ -9,10 +9,7 @@ import Box from '@mui/material/Box';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
-import { useShow } from '../contexts/show/ShowContext.tsx';
-import { useAlert } from '../contexts/alert/AlertContext.tsx';
-import * as Api from '../apis/userRequests.ts';
-import { logger } from '../utils/logger.ts';
+import { useShowActions } from '../hooks/useShowActions.ts';
 import { sortShows } from '../utils/sortShows.ts';
 
 interface Column {
@@ -50,8 +47,7 @@ const actionBtn = (accent: boolean) => ({
 });
 
 export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
-  const { setTvShows } = useShow();
-  const alertProps = useAlert();
+  const { refreshShow, deleteShow } = useShowActions();
   const [sortCol, setSortCol] = useState<keyof ShowData>('title');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
@@ -61,30 +57,6 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
     } else {
       setSortCol(col);
       setSortDir('asc');
-    }
-  };
-
-  const refreshData = async (show: ShowData) => {
-    try {
-      await Api.updateShow(String(show.showId));
-      const response = await Api.getAllShows();
-      setTvShows(response.data ?? []);
-      alertProps.showAlert('success', `${show.title} updated`);
-    } catch (err) {
-      logger.error(err);
-      alertProps.showAlert('danger', `Failed to update ${show.title}`);
-    }
-  };
-
-  const deleteShow = async (show: ShowData) => {
-    try {
-      await Api.deleteShow(String(show.showId));
-      const response = await Api.getAllShows();
-      setTvShows(response.data ?? []);
-      alertProps.showAlert('success', `${show.title} removed`);
-    } catch (err) {
-      logger.error(err);
-      alertProps.showAlert('danger', `Failed to delete ${show.title}`);
     }
   };
 
@@ -150,10 +122,10 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
               <TableCell>{show.prevEpisode}</TableCell>
               <TableCell>
                 <Box sx={{ display: 'flex', gap: '8px' }}>
-                  <Box component="button" onClick={() => refreshData(show)} sx={actionBtn(false)}>
+                  <Box component="button" onClick={() => refreshShow(String(show.showId), show.title)} sx={actionBtn(false)}>
                     Refresh
                   </Box>
-                  <Box component="button" onClick={() => deleteShow(show)} sx={actionBtn(true)}>
+                  <Box component="button" onClick={() => deleteShow(String(show.showId), show.title)} sx={actionBtn(true)}>
                     Remove
                   </Box>
                 </Box>

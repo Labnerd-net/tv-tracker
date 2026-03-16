@@ -1,52 +1,23 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import * as Api from '../apis/userRequests.ts';
-import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
-import { useShow } from '../contexts/show/ShowContext.tsx';
-import { useAlert } from '../contexts/alert/AlertContext.tsx';
+import { useShowActions } from '../hooks/useShowActions.ts';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
 export default function SingleShow({ showData, index = 0 }: { showData: ShowData; index?: number }) {
-  const dataProps = useShow();
-  const alertProps = useAlert();
-  const [loading, setLoading] = useState(false);
+  const { loading, refreshShow, deleteShow } = useShowActions();
   const navigate = useNavigate();
 
-  const refreshData = async (e: React.MouseEvent) => {
+  const refreshData = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLoading(true);
-    try {
-      await Api.updateShow(String(showData.showId));
-      const response = await Api.getAllShows();
-      dataProps.setTvShows(response.data ?? []);
-      alertProps.showAlert('success', `${showData.title} updated`);
-    } catch (err) {
-      logger.error(err);
-      alertProps.showAlert('danger', `Failed to update ${showData.title}`);
-    } finally {
-      setLoading(false);
-    }
+    refreshShow(String(showData.showId), showData.title);
   };
 
-  const deleteOneShow = async (e: React.MouseEvent) => {
+  const deleteOneShow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setLoading(true);
-    try {
-      await Api.deleteShow(String(showData.showId));
-      const response = await Api.getAllShows();
-      dataProps.setTvShows(response.data ?? []);
-      alertProps.showAlert('success', `${showData.title} removed`);
-      navigate('/');
-    } catch (err) {
-      logger.error(err);
-      alertProps.showAlert('danger', `Failed to delete ${showData.title}`);
-    } finally {
-      setLoading(false);
-    }
+    deleteShow(String(showData.showId), showData.title, () => navigate('/'));
   };
 
   const episodeLabel = showData.nextEpisode ? 'NEXT' : 'LAST';

@@ -14,14 +14,31 @@ export default function SearchResults() {
   const [searchResults, setSearchResults] = useState<TvMazeSeries[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [episodeDates, setEpisodeDates] = useState<Record<number, string>>({});
+  const [episodesLoading, setEpisodesLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const searchTvShows = async (showName: string) => {
+      setEpisodeDates({});
+      setEpisodesLoading(false);
       try {
         const response = await Api.tvShowResults(showName);
         if (response.success && response.data) {
-          setSearchResults(response.data);
+          const data = response.data;
+          setSearchResults(data);
+          setEpisodesLoading(true);
+          const settled = await Promise.allSettled(
+            data.map(item =>
+              Api.fetchNextEpisodeDate(item.show).then(r => [item.show.id, r.data?.date ?? ''] as const)
+            )
+          );
+          const dateMap: Record<number, string> = {};
+          for (const r of settled) {
+            if (r.status === 'fulfilled') dateMap[r.value[0]] = r.value[1];
+          }
+          setEpisodeDates(dateMap);
+          setEpisodesLoading(false);
         } else {
           const msg = response.error ?? 'Failed to retrieve TV Show results';
           alertProps.showAlert('danger', msg);
@@ -128,7 +145,13 @@ export default function SearchResults() {
             }}
           >
             {searchResults.map((data) => (
-              <Result key={data.show.id} showData={data} alertProps={alertProps} />
+              <Result
+                key={data.show.id}
+                showData={data}
+                alertProps={alertProps}
+                nextEpisodeDate={episodeDates[data.show.id] ?? ''}
+                episodeLoading={episodesLoading}
+              />
             ))}
           </Box>
         )}

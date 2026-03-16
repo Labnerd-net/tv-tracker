@@ -1,35 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import * as Api from '../apis/userRequests.ts';
 import { getPlatformName } from '@shared/utils/tvmaze';
 import type { AlertProps } from '../types/alert.ts';
-import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze.ts';
+import type { TvMazeSeries } from '@shared/types/tvmaze.ts';
 import { useShow } from '../contexts/show/ShowContext.tsx';
 
-export default function Result({ showData, alertProps }: { showData: TvMazeSeries; alertProps: AlertProps }) {
+export default function Result({
+  showData,
+  alertProps,
+  nextEpisodeDate,
+  episodeLoading,
+}: {
+  showData: TvMazeSeries;
+  alertProps: AlertProps;
+  nextEpisodeDate: string;
+  episodeLoading: boolean;
+}) {
   const dataProps = useShow();
-  const [nextEpisode, setNextEpisode] = useState('');
-  const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const getNextEpisode = async (show: TvMazeShow) => {
-      try {
-        const response = await Api.fetchNextEpisodeDate(show);
-        if (response.success && response.data) {
-          setNextEpisode(response.data.date);
-        }
-      } catch {
-        setError('—');
-      } finally {
-        setLoading(false);
-      }
-    };
-    getNextEpisode(showData.show);
-  }, [showData.show]);
 
   const addTvShow = async () => {
     setAdding(true);
@@ -57,7 +48,7 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
   };
 
   const platform = getPlatformName(showData.show) ?? '';
-  const episodeText = loading ? '…' : (error || nextEpisode || showData.show.status || '—');
+  const episodeText = episodeLoading ? '…' : (nextEpisodeDate || showData.show.status || '—');
 
   return (
     <Box
@@ -131,9 +122,9 @@ export default function Result({ showData, alertProps }: { showData: TvMazeSerie
           }}
         >
           {platform && <Box component="span" sx={{ mr: '8px' }}>{platform}</Box>}
-          {loading
+          {episodeLoading
             ? <CircularProgress size={8} sx={{ color: 'var(--cream-muted)', verticalAlign: 'middle' }} />
-            : <Box component="span" sx={{ color: nextEpisode ? 'var(--amber)' : 'inherit' }}>{episodeText}</Box>
+            : <Box component="span" sx={{ color: nextEpisodeDate ? 'var(--amber)' : 'inherit' }}>{episodeText}</Box>
           }
         </Box>
       </Box>
