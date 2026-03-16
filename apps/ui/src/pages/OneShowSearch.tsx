@@ -51,7 +51,7 @@ export default function OneShowSearch() {
     if (showID) {
       searchTvShow(showID);
     }
-  }, [alertProps, showID]);
+  }, [alertProps.showAlert, showID]);
 
   const addTvShow = async () => {
     if (!tvShow) return;

@@ -10,7 +10,7 @@
 ### High
 
 ### Medium
-- **[5] [apps/api/src/utils/rateLimiter.ts:46-52]**: Rate limiter trusts `X-Forwarded-For`/`X-Real-IP`/`CF-Connecting-IP` from the client without validation — trivially bypassable by cycling spoofed headers. Only trust these headers when the socket connection originates from a known trusted proxy IP.
+
 ### Low
 
 ---
@@ -92,9 +92,9 @@
 
 | Category               | High | Medium | Low | Total |
 |------------------------|------|--------|-----|-------|
-| Security               |  0   |   1    |  1  |   2   |
+| Security               |  0   |   0    |  1  |   1   |
 | Bugs                   |  3   |   0    |  1  |   4   |
 | Performance            |  2   |   1    |  1  |   4   |
 | Improvements & Refactors |  1  |   5    |  4  |  10   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **8** | **11** | **14** | **35** |
+| **Total**              | **8** | **10** | **14** | **34** |

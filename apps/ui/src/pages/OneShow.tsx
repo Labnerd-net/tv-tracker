@@ -13,7 +13,7 @@ const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
 export default function OneShow() {
   const { showID } = useParams();
-  const alertProps = useAlert();
+  const { showAlert } = useAlert();
   const dataProps = useShow();
   const [tvShow, setTvShow] = useState<ShowData>();
   const [loading, setLoading] = useState(true);
@@ -31,13 +31,13 @@ export default function OneShow() {
       } catch (err) {
         logger.error(err);
         setError('Failed to retrieve TV Show');
-        alertProps.showAlert('danger', 'Failed to retrieve TV Show!');
+        showAlert('danger', 'Failed to retrieve TV Show!');
       } finally {
         setLoading(false);
       }
     };
     retreiveTvShow();
-  }, [alertProps, showID]);
+  }, [showAlert, showID]);
 
   const refreshData = async () => {
     if (tvShow && showID) {
@@ -46,10 +46,10 @@ export default function OneShow() {
         await Api.updateShow(showID);
         const response = await Api.getAllShows();
         dataProps.setTvShows(response.data ?? []);
-        alertProps.showAlert('success', `${tvShow.title} updated`);
+        showAlert('success', `${tvShow.title} updated`);
       } catch (err) {
         logger.error(err);
-        alertProps.showAlert('danger', `Failed to update ${tvShow.title}`);
+        showAlert('danger', `Failed to update ${tvShow.title}`);
       } finally {
         setActionLoading(false);
       }
@@ -63,11 +63,11 @@ export default function OneShow() {
         await Api.deleteShow(String(tvShow.showId));
         const response = await Api.getAllShows();
         dataProps.setTvShows(response.data ?? []);
-        alertProps.showAlert('success', `${tvShow.title} removed`);
+        showAlert('success', `${tvShow.title} removed`);
         navigate('/');
       } catch (err) {
         logger.error(err);
-        alertProps.showAlert('danger', `Failed to delete ${tvShow.title}`);
+        showAlert('danger', `Failed to delete ${tvShow.title}`);
         setActionLoading(false);
       }
     }

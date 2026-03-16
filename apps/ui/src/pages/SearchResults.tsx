@@ -38,7 +38,7 @@ export default function SearchResults() {
     if (showName) {
       searchTvShows(showName);
     }
-  }, [alertProps, showName]);
+  }, [alertProps.showAlert, showName]);
 
   return (
     <Box sx={{ minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
@@ -127,8 +127,8 @@ export default function SearchResults() {
               borderTop: '1px solid var(--border)',
             }}
           >
-            {searchResults.map((data, index) => (
-              <Result key={index} showData={data} alertProps={alertProps} />
+            {searchResults.map((data) => (
+              <Result key={data.show.id} showData={data} alertProps={alertProps} />
             ))}
           </Box>
         )}
