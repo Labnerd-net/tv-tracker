@@ -89,8 +89,13 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
       return c.json(ok({ status: 'exists' }));
     }
     const showData = new TvMazeData(body as unknown as TvMazeShow);
-    await showData.updateEpisodes();
-    await dbShowFunctions.addOneShow(db, showData, userId);
+    const result = await dbShowFunctions.addOneShow(db, showData, userId);
+    const newShowId = result?.[0]?.showId;
+    if (newShowId !== undefined) {
+      showData.updateEpisodes()
+        .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
+        .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+    }
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     logger.error({ err: e }, 'Unexpected error in user route');
@@ -114,8 +119,13 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     }
     const showDataJson = await response.json();
     const showData = new TvMazeData(showDataJson);
-    await showData.updateEpisodes();
-    await dbShowFunctions.addOneShow(db, showData, userId);
+    const result = await dbShowFunctions.addOneShow(db, showData, userId);
+    const newShowId = result?.[0]?.showId;
+    if (newShowId !== undefined) {
+      showData.updateEpisodes()
+        .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
+        .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+    }
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {
     logger.error({ err: e }, 'Unexpected error in user route');

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from 'vites
 import app from '../src/app.js';
 import * as dbUserFunctions from '../src/db/dbUserFunctions.js';
 import * as dbShowFunctions from '../src/db/dbShowFunctions.js';
+import TvMazeData from '../src/tvmaze.js';
 import { makeToken } from './helpers.js';
 
 vi.mock('../src/db/dbUserFunctions.js', () => ({
@@ -16,8 +17,9 @@ vi.mock('../src/db/dbShowFunctions.js', () => ({
   returnAllShows: vi.fn().mockResolvedValue([]),
   returnOneShowId: vi.fn().mockResolvedValue([]),
   returnOneShowTvMazeId: vi.fn().mockResolvedValue([]),
-  addOneShow: vi.fn().mockResolvedValue(undefined),
+  addOneShow: vi.fn().mockResolvedValue([{ showId: 1 }]),
   updateOneShow: vi.fn().mockResolvedValue(undefined),
+  updateShowEpisodes: vi.fn().mockResolvedValue(undefined),
   deleteOneShowId: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
 }));
 
@@ -216,6 +218,56 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('added');
+  });
+
+  it('fires updateEpisodes in background without blocking response', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 42 }]);
+    let resolveEpisodes!: (v: { next: string; prev: string }) => void;
+    const episodesPromise = new Promise<{ next: string; prev: string }>(
+      resolve => (resolveEpisodes = resolve),
+    );
+    const updateSpy = vi
+      .spyOn(TvMazeData.prototype, 'updateEpisodes')
+      .mockReturnValueOnce(episodesPromise);
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => tvMazeShowJson });
+
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(200);
+    // updateEpisodes was called but not awaited before response
+    expect(updateSpy).toHaveBeenCalled();
+    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
+
+    // Resolve the background fetch and verify DB update
+    resolveEpisodes({ next: '2026-03-20', prev: '2026-03-10' });
+    await vi.waitFor(() => {
+      expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).toHaveBeenCalledWith(
+        expect.anything(),
+        42,
+        '2026-03-20',
+        '2026-03-10',
+      );
+    });
+
+    updateSpy.mockRestore();
+  });
+
+  it('logs error and does not crash when background episode fetch fails', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 5 }]);
+    const updateSpy = vi
+      .spyOn(TvMazeData.prototype, 'updateEpisodes')
+      .mockRejectedValueOnce(new Error('TVMaze down'));
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => tvMazeShowJson });
+
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.status).toBe('added');
+
+    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
+
+    updateSpy.mockRestore();
   });
 });
 

@@ -65,9 +65,21 @@ export async function addOneShow(db: LibSQLDatabase, showData: TvMazeData, userI
       prevEpisode: showData.prevEpisode,
       nextEpisode: showData.nextEpisode,
       imageLink: showData.imageLink,
-    });
+    }).returning({ showId: tvShows.showId });
   } catch (e) {
     logger.error({ err: e }, 'addOneShow failed');
+    throw e;
+  }
+}
+
+export async function updateShowEpisodes(db: LibSQLDatabase, id: number, next: string, prev: string) {
+  logger.debug({ id }, 'updateShowEpisodes');
+  try {
+    return await db.update(tvShows)
+      .set({ nextEpisode: next, prevEpisode: prev })
+      .where(eq(tvShows.showId, id));
+  } catch (e) {
+    logger.error({ err: e }, 'updateShowEpisodes failed');
     throw e;
   }
 }
