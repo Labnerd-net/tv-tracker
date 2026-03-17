@@ -95,7 +95,7 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
             fontSize: '1.08rem',
             fontWeight: 500,
             lineHeight: 1.2,
-            color: '#e8e0d0',
+            color: 'var(--cream)',
             mb: '4px',
           }}
         >
@@ -108,7 +108,7 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
               fontFamily: '"Space Mono", monospace',
               fontSize: '0.56rem',
               letterSpacing: '0.14em',
-              color: '#5a5248',
+              color: 'var(--cream-muted)',
               textTransform: 'uppercase',
               mb: '10px',
             }}
@@ -122,7 +122,7 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
           sx={{
             fontFamily: '"Space Mono", monospace',
             fontSize: '0.62rem',
-            color: showData.nextEpisode ? '#f2a65a' : '#7a7266',
+            color: showData.nextEpisode ? 'var(--amber)' : 'var(--cream-muted)',
             letterSpacing: '0.05em',
           }}
         >
@@ -145,7 +145,7 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
           }}
         >
           {loading ? (
-            <CircularProgress size={14} sx={{ color: '#a09688' }} />
+            <CircularProgress size={14} sx={{ color: 'var(--cream-dim)' }} />
           ) : (
             <>
               <Box
@@ -165,7 +165,7 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
                   '&:hover': {
                     background: 'rgba(232,224,208,0.1)',
                     borderColor: 'rgba(232,224,208,0.5)',
-                    color: '#e8e0d0',
+                    color: 'var(--cream)',
                   },
                 }}
               >
@@ -187,8 +187,8 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
                   transition: 'all 0.15s ease',
                   '&:hover': {
                     background: 'rgba(230,57,70,0.12)',
-                    borderColor: '#e63946',
-                    color: '#e63946',
+                    borderColor: 'var(--accent)',
+                    color: 'var(--accent)',
                   },
                 }}
               >
