@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { createHash } from 'node:crypto';
 import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
-import { db } from '../db/schema.js';
+import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
 import { generateRefreshToken } from '../utils/auth.js';
 import type { JwtData, Role, UserData } from '@shared/types/tv-tracker.js';

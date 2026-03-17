@@ -114,7 +114,7 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
                   {show.status}
                 </Box>
               </TableCell>
-              <TableCell>{show.scheduleDay}</TableCell>
+              <TableCell>{show.scheduleDay?.join(', ') ?? ''}</TableCell>
               <TableCell>{show.scheduleTime}</TableCell>
               <TableCell sx={{ color: show.nextEpisode ? 'var(--amber) !important' : 'inherit' }}>
                 {show.nextEpisode}

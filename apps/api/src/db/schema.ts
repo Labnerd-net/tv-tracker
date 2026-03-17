@@ -1,8 +1,6 @@
-import { int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { drizzle } from 'drizzle-orm/libsql';
+import { index, int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 import type { Role } from '@shared/types/tv-tracker.js';
-import { dbUrl } from '../utils/envVars.js';
 
 export const users = sqliteTable('users', {
   userId: int('user_id').primaryKey({ autoIncrement: true }),
@@ -27,9 +25,10 @@ export const tvShows = sqliteTable('tv_shows', {
   prevEpisode: text('prev_episode'),
   nextEpisode: text('next_episode'),
   imageLink: text('image_link'),
-});
-
-export const db = drizzle(dbUrl);
+}, (table) => [
+  index('idx_user_shows').on(table.userId),
+  index('idx_tvmaze_user').on(table.tvMazeId, table.userId),
+]);
 
 // ------------------------------------------------------------------
 // Relation helpers

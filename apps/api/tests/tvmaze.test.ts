@@ -18,6 +18,28 @@ beforeEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('TvMazeData constructor scheduleDays', () => {
+  it('stores a multi-day array as-is', () => {
+    const show = new TvMazeData({ ...baseMockShow, schedule: { days: ['Monday', 'Wednesday'], time: '21:00' } });
+    expect(show.scheduleDays).toEqual(['Monday', 'Wednesday']);
+  });
+
+  it('stores an empty days array as empty array', () => {
+    const show = new TvMazeData({ ...baseMockShow, schedule: { days: [], time: '21:00' } });
+    expect(show.scheduleDays).toEqual([]);
+  });
+
+  it('stores a single-element days array as a one-element array', () => {
+    const show = new TvMazeData({ ...baseMockShow, schedule: { days: ['Friday'], time: '22:00' } });
+    expect(show.scheduleDays).toEqual(['Friday']);
+  });
+
+  it('defaults to empty array when schedule is missing', () => {
+    const show = new TvMazeData({ ...baseMockShow, schedule: undefined });
+    expect(show.scheduleDays).toEqual([]);
+  });
+});
+
 describe('TvMazeData constructor imageLink validation', () => {
   it('keeps a valid static.tvmaze.com HTTPS URL', () => {
     const url = 'https://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg';

@@ -42,11 +42,8 @@
 ### High
 
 ### Medium
-- **[21] [apps/api/src/db/schema.ts:7]**: `DB_FILE_NAME` is read from `process.env` directly, independent of `envVars.ts` which already exports `dbUrl`. Import `dbUrl` from `envVars.ts` to avoid divergent defaults.
-- **[22] [apps/api/src/utils/validationHook.ts:2-3, apps/api/src/routes/auth.ts:35-46]**: Multiple `any` type suppressions with comments. Use proper types from `@hono/zod-validator` and `hono` (`Context`).
 - **[23] [apps/api/src/tvmaze.ts:23]**: Only first element of `schedule.days[]` is stored. Store the full array as JSON to avoid data loss for multi-day shows.
 - **[24] [apps/ui/src/apis/userRequests.ts:9-13]**: API response types are loose. Adopt a discriminated union `ApiResponse<T>` type for all API calls for safer exhaustive handling.
-- **[25] [apps/api/package.json:22]**: `jsonwebtoken` and `@types/jsonwebtoken` are listed as dependencies but never used — the app uses `hono/jwt`. Remove them.
 
 ### Low
 - **[26] [apps/ui/src/components/SingleShow.tsx:127, 140, 154]**: Several color values are hardcoded hex strings instead of CSS custom properties (`var(--cream)`, `var(--amber)`, etc.). This breaks the light/dark theme toggle for those elements.
@@ -90,6 +87,6 @@
 | Security               |  0   |   0    |  0  |   0   |
 | Bugs                   |  0   |   0    |  0  |   0   |
 | Performance            |  0   |   1    |  1  |   2   |
-| Improvements & Refactors |  0  |   5    |  4  |   9   |
+| Improvements & Refactors |  0  |   2    |  4  |   6   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **2** | **11** | **13** | **26** |
+| **Total**              | **2** | **8** | **13** | **23** |

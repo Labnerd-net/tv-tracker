@@ -223,7 +223,7 @@ export default function OneShow() {
                     Airs
                   </Box>
                   <Box sx={{ fontFamily: '"Space Mono", monospace', fontSize: '0.8rem', color: 'var(--cream-dim)' }}>
-                    {[tvShow.scheduleDay, tvShow.scheduleTime].filter(Boolean).join(' at ')}
+                    {[tvShow.scheduleDay?.join(', '), tvShow.scheduleTime].filter(Boolean).join(' at ')}
                   </Box>
                 </>
               )}

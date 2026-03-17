@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { migrate } from 'drizzle-orm/libsql/migrator';
-import { db } from './db/schema.js';
+import { db } from './db/client.js';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 

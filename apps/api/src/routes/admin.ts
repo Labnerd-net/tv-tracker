@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { returnUsers } from '../db/dbUserFunctions.js';
-import { db } from '../db/schema.js';
+import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
 import type {
   JwtData,

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import * as dbShowFunctions from '../db/dbShowFunctions.js';
-import { db } from '../db/schema.js';
+import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
 import type {
   JwtData,
