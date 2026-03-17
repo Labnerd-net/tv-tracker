@@ -30,7 +30,6 @@
 ### High
 
 ### Medium
-- **[18] [apps/api/src/db/schema.ts]**: No indexes on `tvShows` table. Queries like `WHERE user_id = ?` and `WHERE tvmaze_id = ? AND user_id = ?` run full scans. Add indexes: `idx_user_shows` on `userId`, `idx_tvmaze_user` on `(tvMazeId, userId)`.
 
 ### Low
 - **[19] [apps/api/src/routes/user.ts:101]**: `TvMazeData.updateEpisodes()` makes 2-3 sequential HTTP requests synchronously during the add-show request. Consider returning the show to the user immediately and updating episode data asynchronously.
@@ -42,14 +41,9 @@
 ### High
 
 ### Medium
-- **[23] [apps/api/src/tvmaze.ts:23]**: Only first element of `schedule.days[]` is stored. Store the full array as JSON to avoid data loss for multi-day shows.
 - **[24] [apps/ui/src/apis/userRequests.ts:9-13]**: API response types are loose. Adopt a discriminated union `ApiResponse<T>` type for all API calls for safer exhaustive handling.
 
 ### Low
-- **[26] [apps/ui/src/components/SingleShow.tsx:127, 140, 154]**: Several color values are hardcoded hex strings instead of CSS custom properties (`var(--cream)`, `var(--amber)`, etc.). This breaks the light/dark theme toggle for those elements.
-- **[27] [apps/ui/src/pages/Navbar.tsx:35]**: Logo uses `<Box component="a" href="/dashboard">` — full page reload in an SPA. Replace with `<Link to="/dashboard">` from `react-router`.
-- **[28] [apps/ui/src/utils/requests.ts:16-17]**: `refreshQueue` entries typed as `any`. Type as `{ resolve: (value: unknown) => void; reject: (reason?: unknown) => void }`.
-- **[29] [apps/ui/src/components/ShowsTable.tsx:55-56]**: Sort preference resets on page reload. Persist to localStorage (like view mode) so preference survives navigation.
 
 ---
 
@@ -86,7 +80,7 @@
 |------------------------|------|--------|-----|-------|
 | Security               |  0   |   0    |  0  |   0   |
 | Bugs                   |  0   |   0    |  0  |   0   |
-| Performance            |  0   |   1    |  1  |   2   |
-| Improvements & Refactors |  0  |   2    |  4  |   6   |
+| Performance            |  0   |   0    |  1  |   1   |
+| Improvements & Refactors |  0  |   1    |  0  |   1   |
 | Feature Ideas          |  2   |   5    |  8  |  15   |
-| **Total**              | **2** | **8** | **13** | **23** |
+| **Total**              | **2** | **6** | **9** | **17** |
