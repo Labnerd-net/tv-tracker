@@ -49,7 +49,7 @@ export default class TvMazeData {
     }
   }
 
-  async updateEpisodes() {
+  async updateEpisodes(): Promise<{ next: string; prev: string }> {
     const fetchAirdate = async (link: string, label: string): Promise<string> => {
       if (!link) return '';
       try {
@@ -71,6 +71,8 @@ export default class TvMazeData {
       this.nextEpisode ? this.nextEpisode : fetchAirdate(this.nextEpisodeLink, 'next'),
       this.prevEpisode ? this.prevEpisode : fetchAirdate(this.prevEpisodeLink, 'previous'),
     ]);
+
+    return { next: this.nextEpisode, prev: this.prevEpisode };
   }
 
 }
