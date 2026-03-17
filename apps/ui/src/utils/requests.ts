@@ -13,8 +13,7 @@ export function setLogoutCallback(fn: () => void) {
 }
 
 let isRefreshing = false;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let refreshQueue: Array<{ resolve: (value: any) => void; reject: (reason?: unknown) => void }> = [];
+let refreshQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: unknown) => void }> = [];
 
 apiClient.interceptors.response.use(
   response => response,

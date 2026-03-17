@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -27,6 +27,20 @@ const COLUMNS: Column[] = [
   { key: 'prevEpisode', label: 'Prev Ep' },
 ];
 
+const VALID_SORT_COLS = COLUMNS.map(c => c.key);
+
+function getSavedSortCol(): keyof ShowData {
+  const saved = localStorage.getItem('tv-sort-col');
+  return (saved && VALID_SORT_COLS.includes(saved as keyof ShowData))
+    ? (saved as keyof ShowData)
+    : 'title';
+}
+
+function getSavedSortDir(): 'asc' | 'desc' {
+  const saved = localStorage.getItem('tv-sort-dir');
+  return saved === 'asc' || saved === 'desc' ? saved : 'asc';
+}
+
 const actionBtn = (accent: boolean) => ({
   all: 'unset' as const,
   fontFamily: '"Space Mono", monospace',
@@ -48,8 +62,13 @@ const actionBtn = (accent: boolean) => ({
 
 export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
   const { refreshShow, deleteShow } = useShowActions();
-  const [sortCol, setSortCol] = useState<keyof ShowData>('title');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortCol, setSortCol] = useState<keyof ShowData>(getSavedSortCol);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(getSavedSortDir);
+
+  useEffect(() => {
+    localStorage.setItem('tv-sort-col', sortCol);
+    localStorage.setItem('tv-sort-dir', sortDir);
+  }, [sortCol, sortDir]);
 
   const handleSort = (col: keyof ShowData) => {
     if (col === sortCol) {

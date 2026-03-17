@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -31,8 +31,8 @@ export default function Navbar() {
       <Toolbar sx={{ minHeight: '54px !important', px: { xs: 2, md: 3 } }}>
         {/* Logo */}
         <Box
-          component="a"
-          href="/dashboard"
+          component={Link}
+          to="/dashboard"
           sx={{
             textDecoration: 'none',
             display: 'flex',
