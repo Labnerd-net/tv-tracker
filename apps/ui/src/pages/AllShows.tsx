@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -6,8 +6,6 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import SingleShow from '../components/SingleShow.tsx';
 import ShowsTable from '../components/ShowsTable.tsx';
-import * as Api from '../apis/userRequests.ts';
-import { useAlert } from '../contexts/alert/AlertContext.tsx';
 import { useShow } from '../contexts/show/ShowContext.tsx';
 
 type ViewMode = 'card' | 'table';
@@ -18,21 +16,8 @@ function getInitialViewMode(): ViewMode {
 }
 
 export default function AllShows() {
-  const { showAlert } = useAlert();
-  const { tvShows, setTvShows } = useShow();
+  const { tvShows } = useShow();
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
-
-  useEffect(() => {
-    const fetchShows = async () => {
-      const response = await Api.getAllShows();
-      if (response.success && response.data) {
-        setTvShows(response.data);
-      } else if (!response.success) {
-        showAlert('danger', response.error ?? 'Failed to retrieve TV Shows');
-      }
-    };
-    fetchShows();
-  }, [setTvShows, showAlert]);
 
   const handleViewChange = (_: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
     if (newMode === null) return;

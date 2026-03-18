@@ -33,10 +33,14 @@ export function useShowActions() {
   const deleteShow = async (showId: string, title: string, onSuccess?: () => void) => {
     setLoading(true);
     try {
-      await Api.deleteShow(showId);
-      setTvShows(prev => prev.filter(s => String(s.showId) !== showId));
-      showAlert('success', `${title} removed`);
-      onSuccess?.();
+      const response = await Api.deleteShow(showId);
+      if (response.success) {
+        setTvShows(prev => prev.filter(s => String(s.showId) !== showId));
+        showAlert('success', `${title} removed`);
+        onSuccess?.();
+      } else {
+        showAlert('danger', response.error ?? `Failed to delete ${title}`);
+      }
     } catch (err) {
       logger.error(err);
       showAlert('danger', `Failed to delete ${title}`);
