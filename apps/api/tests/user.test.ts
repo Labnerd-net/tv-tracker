@@ -208,6 +208,15 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     expect(res.status).toBe(502);
   });
 
+  it('returns 502 when TVMaze returns an invalid response body', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid response from TVMaze');
+  });
+
   it('returns added status on success', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     fetchMock.mockResolvedValueOnce({
@@ -281,6 +290,15 @@ describe('PATCH /api/user/tvshow/:id', () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([]);
     const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(404);
+  });
+
+  it('returns 502 when TVMaze returns an invalid response body', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([mockShow]);
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid response from TVMaze');
   });
 
   it('returns updated status on success', async () => {

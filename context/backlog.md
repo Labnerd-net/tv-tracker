@@ -8,12 +8,10 @@
 ## Security
 
 ### High
-- **#1 [apps/api/src/routes/auth.ts:188]**: `DELETE /api/auth/deleteUser` has no rate limit. Every other auth mutation applies `authRateLimit`, but this route only uses `authMiddleware`. Add `authRateLimit` to the handler.
-- **#2 [apps/ui/src/apis/userRequests.ts:113-114]**: Episode link URLs from TVMaze search results (`_links.nextepisode.href`, `previousepisode.href`) are followed by the browser without hostname validation. The API-side `tvmaze.ts` already validates against `api.tvmaze.com`; the UI has no equivalent guard. Add `new URL(href).hostname === 'api.tvmaze.com'` check before calling `axios.get(href)`.
-- **#3 [apps/api/src/routes/user.ts:120,150]**: TVMaze JSON is parsed with `response.json()` and passed directly to `new TvMazeData()` and then inserted into the DB with no shape validation. The body-based `POST /tvshow` route validates via `tvMazeShowBodySchema` — apply the same schema check to the `POST /tvshow/:id` and `PATCH /tvshow/:id` TVMaze fetch paths.
+_None identified._
 
 ### Medium
-- **#4 [apps/api/src/schemas/auth.ts:4-5]**: `password` field in both `loginSchema` and `registrationSchema` has no upper bound. A multi-megabyte password is fully buffered before bcrypt truncates it at 72 bytes. Add `.max(128)` to both password fields.
+_None identified._
 
 ### Low
 _None identified._
@@ -104,9 +102,9 @@ _None identified._
 
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
-| Security | 3 | 1 | 0 | 4 |
+| Security | 0 | 0 | 0 | 0 |
 | Bugs | 1 | 1 | 2 | 4 |
 | Performance | 0 | 3 | 2 | 5 |
 | Improvements & Refactors | 1 | 5 | 11 | 17 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **7** | **14** | **22** | **43** |
+| **Total** | **3** | **13** | **22** | **38** |

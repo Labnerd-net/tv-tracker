@@ -111,7 +111,15 @@ export interface DateResponse {
 export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
   try {
     if (searchData._links.nextepisode) {
-      const response = await axios.get(searchData._links.nextepisode.href);
+      const href = searchData._links.nextepisode.href;
+      try {
+        if (new URL(href).hostname !== 'api.tvmaze.com') {
+          return { success: false, error: 'Invalid episode link hostname' };
+        }
+      } catch {
+        return { success: false, error: 'Invalid episode link URL' };
+      }
+      const response = await axios.get(href);
       if (response.data?.airdate) {
         return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
       }
@@ -126,7 +134,15 @@ export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<Date
 export async function fetchPrevEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
   try {
     if (searchData._links.previousepisode) {
-      const response = await axios.get(searchData._links.previousepisode.href);
+      const href = searchData._links.previousepisode.href;
+      try {
+        if (new URL(href).hostname !== 'api.tvmaze.com') {
+          return { success: false, error: 'Invalid episode link hostname' };
+        }
+      } catch {
+        return { success: false, error: 'Invalid episode link URL' };
+      }
+      const response = await axios.get(href);
       if (response.data?.airdate) {
         return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
       }

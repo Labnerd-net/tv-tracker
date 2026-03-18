@@ -118,7 +118,11 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
     const showDataJson = await response.json();
-    const showData = new TvMazeData(showDataJson);
+    const parsed = tvMazeShowBodySchema.safeParse(showDataJson);
+    if (!parsed.success) {
+      return c.json(err('Invalid response from TVMaze'), 502);
+    }
+    const showData = new TvMazeData(parsed.data as unknown as TvMazeShow);
     const result = await dbShowFunctions.addOneShow(db, showData, userId);
     const newShowId = result?.[0]?.showId;
     if (newShowId !== undefined) {
@@ -148,7 +152,11 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
     const showDataJson = await response.json();
-    const showData = new TvMazeData(showDataJson);
+    const parsed = tvMazeShowBodySchema.safeParse(showDataJson);
+    if (!parsed.success) {
+      return c.json(err('Invalid response from TVMaze'), 502);
+    }
+    const showData = new TvMazeData(parsed.data as unknown as TvMazeShow);
     await showData.updateEpisodes();
     await dbShowFunctions.updateOneShow(db, showData, showId, userId);
     return c.json(ok({ status: 'updated' }));
