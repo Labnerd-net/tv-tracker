@@ -3,7 +3,9 @@ import type { ShowData } from "@shared/types/tv-tracker";
 
 export interface ShowProps {
     tvShows: ShowData[]
-    setTvShows: React.Dispatch<React.SetStateAction<ShowData[]>>
+    addShow: (show: ShowData) => void
+    updateShow: (show: ShowData) => void
+    removeShow: (showId: number) => void
 }
 
 export const ShowContext = createContext<ShowProps | undefined>(undefined);

@@ -62,7 +62,7 @@ export async function getOneShow(showID: string): Promise<SingleShowResponse> {
 
 export interface StringResponse {
   success: boolean;
-  data?: { status: string };
+  data?: { status: string; showId?: number };
   error?: string;
 }
 
@@ -108,7 +108,7 @@ export interface DateResponse {
   error?: string;
 }
 
-export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
+export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<DateResponse> {
   try {
     if (searchData._links.nextepisode) {
       const href = searchData._links.nextepisode.href;
@@ -119,7 +119,7 @@ export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<Date
       } catch {
         return { success: false, error: 'Invalid episode link URL' };
       }
-      const response = await axios.get(href);
+      const response = await axios.get(href, { signal });
       if (response.data?.airdate) {
         return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
       }
@@ -131,7 +131,7 @@ export async function fetchNextEpisodeDate(searchData: TvMazeShow): Promise<Date
   }
 }
 
-export async function fetchPrevEpisodeDate(searchData: TvMazeShow): Promise<DateResponse> {
+export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<DateResponse> {
   try {
     if (searchData._links.previousepisode) {
       const href = searchData._links.previousepisode.href;
@@ -142,7 +142,7 @@ export async function fetchPrevEpisodeDate(searchData: TvMazeShow): Promise<Date
       } catch {
         return { success: false, error: 'Invalid episode link URL' };
       }
-      const response = await axios.get(href);
+      const response = await axios.get(href, { signal });
       if (response.data?.airdate) {
         return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
       }

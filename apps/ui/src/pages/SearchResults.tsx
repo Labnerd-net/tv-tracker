@@ -20,20 +20,23 @@ export default function SearchResults() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const controller = new AbortController();
     const searchTvShows = async (showName: string) => {
       setEpisodeDates({});
       setEpisodesLoading(false);
       try {
         const response = await Api.tvShowResults(showName);
+        if (controller.signal.aborted) return;
         if (response.success && response.data) {
           const data = response.data;
           setSearchResults(data);
           setEpisodesLoading(true);
           const settled = await Promise.allSettled(
             data.map(item =>
-              Api.fetchNextEpisodeDate(item.show).then(r => [item.show.id, r.data?.date ?? ''] as const)
+              Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => [item.show.id, r.data?.date ?? ''] as const)
             )
           );
+          if (controller.signal.aborted) return;
           const dateMap: Record<number, string> = {};
           for (const r of settled) {
             if (r.status === 'fulfilled') dateMap[r.value[0]] = r.value[1];
@@ -46,16 +49,18 @@ export default function SearchResults() {
           setError(msg);
         }
       } catch {
+        if (controller.signal.aborted) return;
         const msg = 'Failed to retrieve TV Show results';
         showAlert('danger', msg);
         setError(msg);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
     if (showName) {
       searchTvShows(showName);
     }
+    return () => controller.abort();
   }, [showAlert, showName]);
 
   return (

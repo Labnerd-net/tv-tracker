@@ -78,6 +78,8 @@ export default function OneShow() {
             src={tvShow.imageLink}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             sx={{
               position: 'absolute',
               inset: 0,
@@ -148,6 +150,8 @@ export default function OneShow() {
             component="img"
             src={tvShow.imageLink ?? PLACEHOLDER}
             alt={tvShow.title}
+            loading="lazy"
+            decoding="async"
             sx={{
               width: '100%',
               aspectRatio: '2 / 3',

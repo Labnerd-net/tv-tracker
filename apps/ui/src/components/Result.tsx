@@ -19,7 +19,7 @@ export default function Result({
   nextEpisodeDate: string;
   episodeLoading: boolean;
 }) {
-  const dataProps = useShow();
+  const { addShow } = useShow();
   const [adding, setAdding] = useState(false);
 
   const addTvShow = async () => {
@@ -32,13 +32,15 @@ export default function Result({
       }
       if (response1.data?.status === 'exists') {
         alertProps.showAlert('warning', `${showData.show.name} already in your list`);
-      } else {
-        alertProps.showAlert('success', `${showData.show.name} added`);
+        return;
       }
-
-      const response2 = await Api.getAllShows();
-      if (response2.success && response2.data) {
-        dataProps.setTvShows(response2.data);
+      alertProps.showAlert('success', `${showData.show.name} added`);
+      const newShowId = response1.data?.showId;
+      if (newShowId !== undefined) {
+        const response2 = await Api.getOneShow(String(newShowId));
+        if (response2.success && response2.data) {
+          addShow(response2.data);
+        }
       }
     } catch {
       alertProps.showAlert('danger', `Failed to add ${showData.show.name}!`);
@@ -70,6 +72,8 @@ export default function Result({
           component="img"
           src={showData.show.image.medium}
           alt={showData.show.name}
+          loading="lazy"
+          decoding="async"
           sx={{
             width: '48px',
             height: '68px',

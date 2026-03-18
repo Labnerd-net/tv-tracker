@@ -5,7 +5,7 @@ import { useShow } from '../contexts/show/ShowContext.tsx';
 import { useAlert } from '../contexts/alert/AlertContext.tsx';
 
 export function useShowActions() {
-  const { setTvShows } = useShow();
+  const { updateShow, removeShow } = useShow();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
@@ -15,8 +15,7 @@ export function useShowActions() {
       await Api.updateShow(showId);
       const response = await Api.getOneShow(showId);
       if (response.success && response.data) {
-        const updated = response.data;
-        setTvShows(prev => prev.map(s => String(s.showId) === showId ? updated : s));
+        updateShow(response.data);
         showAlert('success', `${title} updated`);
         onSuccess?.();
       } else {
@@ -35,7 +34,7 @@ export function useShowActions() {
     try {
       const response = await Api.deleteShow(showId);
       if (response.success) {
-        setTvShows(prev => prev.filter(s => String(s.showId) !== showId));
+        removeShow(Number(showId));
         showAlert('success', `${title} removed`);
         onSuccess?.();
       } else {

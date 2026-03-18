@@ -27,8 +27,7 @@ _None identified._
 _None identified._
 
 ### Low
-- **#7 [apps/api/src/routes/auth.ts:191]**: Variable named `userIdNumber` holds the result of `String(payload.sub)` — it's a string. Misleading name causes confusion when reading the route. Rename to `userIdString`.
-- **#8 [apps/ui/src/pages/OneShow.tsx:24]**: Function named `retreiveTvShow` — missing an 'i'. Rename to `retrieveTvShow`.
+- **#45 [apps/api/src/routes/user.ts:92-99]**: `POST /api/user/tvshow` returns `showId: undefined` in the response body if `addOneShow()` yields no rows (silent DB failure). The UI silently skips `addShow()` and the card never appears until the next full dashboard refresh. Add an explicit error response when `newShowId` is undefined after insert.
 
 ---
 
@@ -38,13 +37,11 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#9 [apps/ui/src/pages/SearchResults.tsx:32-41]**: Up to 10 parallel `fetchNextEpisodeDate` calls fire on every search with no `AbortController`. If the user types quickly or navigates away, stale in-flight requests update state on an unmounted component. Add cleanup to the `useEffect` to abort the batch when `showName` changes.
-- **#10 [apps/ui/src/components/SingleShow.tsx:10]**: Each card instantiates its own `useShowActions()` hook. On any refresh, `setTvShows` triggers a full grid re-render across all cards. For large libraries, consider hoisting the hook to `AllShows` and passing handlers as props, or using `useCallback` to stabilize references.
+- **#10 [apps/ui/src/components/SingleShow.tsx:10]**: Each card instantiates its own `useShowActions()` hook. On any refresh, `updateShow` triggers a full grid re-render across all cards. For large libraries, consider hoisting the hook to `AllShows` and passing handlers as props, or using `useCallback` to stabilize references.
 - **#11 [apps/ui]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` windowing for the grid; significant FPS improvement for power users.
 
 ### Low
-- **#12 [apps/ui/src/utils/logger.ts:14-17]**: `getConfiguredLevel()` reads `import.meta.env.VITE_LOG_LEVEL` and scans a levels array on every log call. The value never changes at runtime — compute it once at module load and cache the result.
-- **#13 [apps/ui]**: No `loading="lazy"` or `decoding="async"` on any `<img>` tags (`SingleShow.tsx`, `Result.tsx`, `OneShow.tsx`, `OneShowSearch.tsx`). Trivial one-line fix per image.
+_None identified._
 
 ---
 
@@ -61,12 +58,8 @@ _None identified._
 - **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
 
 ### Low
-- **#20 [apps/ui/src/types/alert.ts, apps/ui/src/contexts/alert/AlertContext.tsx]**: `AlertProps` is defined identically in both files. Remove the local copy from `AlertContext.tsx` and import from `types/alert.ts`.
-- **#21 [apps/ui/src/contexts/show/ShowContext.tsx]**: Raw `setTvShows` setter is exposed on context, allowing any consumer to overwrite the entire array. Replace with named actions (`addShow`, `updateShow`, `removeShow`) for better encapsulation.
 - **#22 [apps/ui/src/utils/validationHook.ts:3]**: `Hook<unknown, any, any>` — use a precise Hono generic instead of bare `any` to surface middleware type mismatches at compile time.
-- **#23 [apps/ui/src/pages/Splash.tsx:171]**: Hardcoded `'#e8e0d0'` should be `'var(--cream)'`.
-- **#24 [apps/ui/src/components/ShowsTable.tsx:59]**: Two instances of hardcoded `'#e63946'` should be `'var(--accent)'`.
-- **#25 [apps/ui/src/]**: Audit remaining hardcoded hex strings across all components. Most have been migrated to CSS custom properties; a few stragglers remain.
+- **#44 [apps/ui/src/contexts/show/ShowProvider.tsx]**: `addShow`, `updateShow`, and `removeShow` are recreated on every `ShowProvider` render — no `useCallback` wrapping. Currently harmless (no consumer puts them in a `useEffect` dep array), but fragile as usage grows. Wrap with `useCallback` to stabilize references.
 - **#26 [apps/ui/src/]**: Add skeleton loading screens (`Skeleton.tsx`) to the card grid and detail page instead of bare `CircularProgress` spinners. Improves perceived performance and avoids layout shift.
 - **#27 [apps/ui/src/]**: Keyboard shortcuts: `/` to focus search, `?` for help, arrow keys to navigate grid. Implement via global `keydown` listener in `AppContent.tsx`.
 - **#28 [apps/ui/src/]**: a11y audit — verify all interactive `<Box>` elements have accessible names/roles, check color contrast on custom theme vars (WCAG AA), ensure form inputs have associated labels.
@@ -103,8 +96,8 @@ _None identified._
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
-| Bugs | 0 | 0 | 2 | 2 |
-| Performance | 0 | 3 | 2 | 5 |
-| Improvements & Refactors | 1 | 5 | 11 | 17 |
+| Bugs | 0 | 0 | 1 | 1 |
+| Performance | 0 | 2 | 0 | 2 |
+| Improvements & Refactors | 1 | 5 | 7 | 13 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **1** | **12** | **22** | **35** |
+| **Total** | **3** | **11** | **15** | **29** |

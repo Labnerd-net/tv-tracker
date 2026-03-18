@@ -96,7 +96,7 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
         .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
         .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
     }
-    return c.json(ok({ status: 'added' }));
+    return c.json(ok({ status: 'added', showId: newShowId }));
   } catch (e: unknown) {
     logger.error({ err: e }, 'Unexpected error in user route');
     return c.json(err('An unexpected error occurred'), 500);

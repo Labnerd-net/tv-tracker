@@ -21,8 +21,12 @@ export function ShowProvider({ children }: { children: ReactNode }) {
     fetchShows();
   }, [user, isLoading]);
 
+  const addShow = (show: ShowData) => setTvShows(prev => [...prev, show]);
+  const updateShow = (show: ShowData) => setTvShows(prev => prev.map(s => s.showId === show.showId ? show : s));
+  const removeShow = (showId: number) => setTvShows(prev => prev.filter(s => s.showId !== showId));
+
   return (
-    <ShowContext.Provider value={{ tvShows, setTvShows }}>
+    <ShowContext.Provider value={{ tvShows, addShow, updateShow, removeShow }}>
       {children}
     </ShowContext.Provider>
   );

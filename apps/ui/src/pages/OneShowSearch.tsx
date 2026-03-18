@@ -15,7 +15,7 @@ export default function OneShowSearch() {
   const { showID } = useParams();
   const alertProps = useAlert();
   const { showAlert } = alertProps;
-  const dataProps = useShow();
+  const { addShow } = useShow();
   const [tvShow, setTvShow] = useState<TvMazeShow>();
   const [nextEpisode, setNextEpisode] = useState('');
   const [platform, setPlatform] = useState('');
@@ -65,13 +65,15 @@ export default function OneShowSearch() {
       }
       if (response1.data?.status === 'exists') {
         alertProps.showAlert('warning', `${tvShow.name} already in your list`);
-      } else {
-        alertProps.showAlert('success', `${tvShow.name} added`);
+        return;
       }
-
-      const response2 = await Api.getAllShows();
-      if (response2.success && response2.data) {
-        dataProps.setTvShows(response2.data);
+      alertProps.showAlert('success', `${tvShow.name} added`);
+      const newShowId = response1.data?.showId;
+      if (newShowId !== undefined) {
+        const response2 = await Api.getOneShow(String(newShowId));
+        if (response2.success && response2.data) {
+          addShow(response2.data);
+        }
       }
     } catch {
       alertProps.showAlert('danger', `Failed to add ${tvShow.name}!`);
@@ -108,6 +110,8 @@ export default function OneShowSearch() {
             src={tvShow.image.medium}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             sx={{
               position: 'absolute',
               inset: 0,
@@ -176,6 +180,8 @@ export default function OneShowSearch() {
             component="img"
             src={tvShow.image?.medium ?? PLACEHOLDER}
             alt={tvShow.name}
+            loading="lazy"
+            decoding="async"
             sx={{
               width: '100%',
               aspectRatio: '2 / 3',

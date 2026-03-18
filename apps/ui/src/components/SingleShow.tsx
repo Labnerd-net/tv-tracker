@@ -55,6 +55,8 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
         className="poster-img"
         src={showData.imageLink ?? PLACEHOLDER}
         alt={showData.title}
+        loading="lazy"
+        decoding="async"
         sx={{
           width: '100%',
           height: '100%',

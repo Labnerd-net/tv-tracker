@@ -11,10 +11,12 @@ function getConfiguredLevel(): LogLevel {
   return 'off';
 }
 
+const configuredLevel = getConfiguredLevel();
+const configuredIndex = levels.indexOf(configuredLevel);
+
 function isEnabled(messageLevel: LogLevel): boolean {
-  const configured = getConfiguredLevel();
-  if (configured === 'off') return false;
-  return levels.indexOf(messageLevel) <= levels.indexOf(configured);
+  if (configuredLevel === 'off') return false;
+  return levels.indexOf(messageLevel) <= configuredIndex;
 }
 
 export const logger = {
