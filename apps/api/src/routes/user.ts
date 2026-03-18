@@ -17,6 +17,12 @@ import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
 import { validationHook } from '../utils/validationHook.js';
 const tvMazeAPI = 'https://api.tvmaze.com';
 
+function scheduleEpisodeUpdate(showData: TvMazeData, newShowId: number): void {
+  showData.updateEpisodes()
+    .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
+    .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+}
+
 type Variables = {
   jwtPayload: JwtData;
 };
@@ -91,11 +97,10 @@ user.post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), a
     const showData = new TvMazeData(body as unknown as TvMazeShow);
     const result = await dbShowFunctions.addOneShow(db, showData, userId);
     const newShowId = result?.[0]?.showId;
-    if (newShowId !== undefined) {
-      showData.updateEpisodes()
-        .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
-        .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+    if (newShowId === undefined) {
+      return c.json(err('Failed to save show'), 500);
     }
+    scheduleEpisodeUpdate(showData, newShowId);
     return c.json(ok({ status: 'added', showId: newShowId }));
   } catch (e: unknown) {
     logger.error({ err: e }, 'Unexpected error in user route');
@@ -126,9 +131,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     const result = await dbShowFunctions.addOneShow(db, showData, userId);
     const newShowId = result?.[0]?.showId;
     if (newShowId !== undefined) {
-      showData.updateEpisodes()
-        .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
-        .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+      scheduleEpisodeUpdate(showData, newShowId);
     }
     return c.json(ok({ status: 'added' }));
   } catch (e: unknown) {

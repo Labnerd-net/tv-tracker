@@ -21,7 +21,7 @@ vi.mock('../src/db/dbShowFunctions.js', () => ({
   returnAllShows: vi.fn().mockResolvedValue([]),
   returnOneShowId: vi.fn().mockResolvedValue([]),
   returnOneShowTvMazeId: vi.fn().mockResolvedValue([]),
-  addOneShow: vi.fn().mockResolvedValue(undefined),
+  addOneShow: vi.fn().mockResolvedValue([{ showId: 1 }]),
   updateOneShow: vi.fn().mockResolvedValue(undefined),
   deleteOneShowId: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
 }));

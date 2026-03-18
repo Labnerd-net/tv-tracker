@@ -182,7 +182,7 @@ describe('POST /api/user/tvshow (body)', () => {
     expect(body.data.status).toBe('exists');
   });
 
-  it('returns added status on success', async () => {
+  it('returns added status and showId on success', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     const res = await post(
       '/api/user/tvshow',
@@ -192,6 +192,50 @@ describe('POST /api/user/tvshow (body)', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('added');
+    expect(body.data.showId).toBe(1);
+  });
+
+  it('returns 500 when DB insert yields no rows', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([]);
+    const res = await post(
+      '/api/user/tvshow',
+      tvMazeShowJson,
+      { Cookie: authHeader },
+    );
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.ok).toBe(false);
+    expect(body.error).toBe('Failed to save show');
+  });
+
+  it('fires updateEpisodes in background without blocking response', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 42 }]);
+    let resolveEpisodes!: (v: { next: string; prev: string }) => void;
+    const episodesPromise = new Promise<{ next: string; prev: string }>(
+      resolve => (resolveEpisodes = resolve),
+    );
+    const updateSpy = vi
+      .spyOn(TvMazeData.prototype, 'updateEpisodes')
+      .mockReturnValueOnce(episodesPromise);
+
+    const res = await post('/api/user/tvshow', tvMazeShowJson, { Cookie: authHeader });
+    expect(res.status).toBe(200);
+    expect(updateSpy).toHaveBeenCalled();
+    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
+
+    resolveEpisodes({ next: '2026-03-20', prev: '2026-03-10' });
+    await vi.waitFor(() => {
+      expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).toHaveBeenCalledWith(
+        expect.anything(),
+        42,
+        '2026-03-20',
+        '2026-03-10',
+      );
+    });
+
+    updateSpy.mockRestore();
   });
 });
 
