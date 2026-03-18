@@ -27,7 +27,7 @@ _None identified._
 _None identified._
 
 ### Low
-- **#45 [apps/api/src/routes/user.ts:92-99]**: `POST /api/user/tvshow` returns `showId: undefined` in the response body if `addOneShow()` yields no rows (silent DB failure). The UI silently skips `addShow()` and the card never appears until the next full dashboard refresh. Add an explicit error response when `newShowId` is undefined after insert.
+_None identified._
 
 ---
 
@@ -51,7 +51,6 @@ _None identified._
 - **#14 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter state is per-process. In a multi-instance deployment (Docker Swarm, K8s), each instance has its own map and users can bypass limits by round-robining. Add a Redis-backed implementation as a drop-in alternative, selected via `REDIS_URL` env var.
 
 ### Medium
-- **#15 [apps/api/src/routes/user.ts:95-98,124-127]**: The fire-and-forget background episode update block (`showData.updateEpisodes().then(...).catch(...)`) is copy-pasted identically in both `POST /tvshow` and `POST /tvshow/:id`. Extract to a named helper `scheduleEpisodeUpdate(showData, newShowId, db)`.
 - **#16 [apps/ui/src/apis/]**: API response types are loose interfaces with optional `data?` and `error?` fields. Consumers must remember to check `response.success` manually. Adopt a discriminated union `type ApiResponse<T> = { success: true; data: T } | { success: false; error: string }` across `authRequests.ts`, `userRequests.ts`, `adminRequests.ts` for safer exhaustive handling.
 - **#17 [apps/api/tests/, apps/ui/src/]**: UI test coverage is minimal (`viewToggle.test.ts` only). No integration tests for `SearchResults`, `AllShows`, `OneShow`, or `useShowActions`. Add react-testing-library tests for core UI interactions and cover API edge cases (concurrent requests, partial failures).
 - **#18 [apps/ui/src/]**: ESLint is UI-only; API has no lint config. Unify with a shared root-level ESLint config and add pre-commit hooks (husky + lint-staged) to gate commits.
@@ -96,8 +95,8 @@ _None identified._
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
-| Bugs | 0 | 0 | 1 | 1 |
+| Bugs | 0 | 0 | 0 | 0 |
 | Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 5 | 7 | 13 |
+| Improvements & Refactors | 1 | 4 | 7 | 12 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **11** | **15** | **29** |
+| **Total** | **3** | **10** | **14** | **27** |
