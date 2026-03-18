@@ -21,10 +21,10 @@ _None identified._
 ## Bugs
 
 ### High
-- **#5 [apps/ui/src/pages/AllShows.tsx:26-35]**: `AllShows` fires `getAllShows()` in its own `useEffect` on every mount. `ShowProvider` also independently fetches all shows when auth state changes. Every dashboard load triggers two redundant parallel calls to `GET /api/user/tvshows`. Remove the `useEffect` fetch from `AllShows` and rely solely on `ShowProvider`. The component should only read from `useShow()` context.
+_None identified._
 
 ### Medium
-- **#6 [apps/ui/src/hooks/useShowActions.ts:35-38]**: `deleteShow` calls `setTvShows(prev => prev.filter(...))` before confirming API success. If the API returns `ok: false` without throwing, the show disappears from the UI but still exists in the DB. Gate the context update on `response.success`.
+_None identified._
 
 ### Low
 - **#7 [apps/api/src/routes/auth.ts:191]**: Variable named `userIdNumber` holds the result of `String(payload.sub)` — it's a string. Misleading name causes confusion when reading the route. Rename to `userIdString`.
@@ -103,8 +103,8 @@ _None identified._
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
-| Bugs | 1 | 1 | 2 | 4 |
+| Bugs | 0 | 0 | 2 | 2 |
 | Performance | 0 | 3 | 2 | 5 |
 | Improvements & Refactors | 1 | 5 | 11 | 17 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **13** | **22** | **38** |
+| **Total** | **1** | **12** | **22** | **35** |
