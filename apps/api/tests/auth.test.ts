@@ -92,6 +92,30 @@ describe('POST /api/auth/register', () => {
     expect(body.error).toBe('Password must be at least 8 characters long');
   });
 
+  it('returns 400 when password exceeds 128 characters', async () => {
+    const res = await post('/api/auth/register', {
+      email: 'test@test.com',
+      password: 'a'.repeat(129),
+      displayName: 'Test',
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Password must be at most 128 characters long');
+  });
+
+  it('accepts password of exactly 128 characters', async () => {
+    vi.mocked(dbUserFunctions.returnUserByEmail).mockResolvedValueOnce([]);
+    vi.mocked(dbUserFunctions.addUser).mockResolvedValueOnce([
+      { userId: 1, email: 'test@test.com', displayName: 'Test', roles: ['user'] },
+    ]);
+    const res = await post('/api/auth/register', {
+      email: 'test@test.com',
+      password: 'a'.repeat(128),
+      displayName: 'Test',
+    });
+    expect(res.status).not.toBe(400);
+  });
+
   it('accepts password of exactly 8 characters', async () => {
     vi.mocked(dbUserFunctions.returnUserByEmail).mockResolvedValueOnce([]);
     vi.mocked(dbUserFunctions.addUser).mockResolvedValueOnce([
@@ -175,6 +199,16 @@ describe('POST /api/auth/login', () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe('Password must be at least 8 characters long');
+  });
+
+  it('returns 400 when password exceeds 128 characters', async () => {
+    const res = await post('/api/auth/login', {
+      email: 'test@test.com',
+      password: 'a'.repeat(129),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Password must be at most 128 characters long');
   });
 
   it('returns 401 for unknown user', async () => {
@@ -303,3 +337,8 @@ describe('POST /api/auth/logout', () => {
     expect(cookie).toContain('accessToken=');
   });
 });
+
+// Note: authRateLimit is mocked to a passthrough in this file (see vi.mock near the top),
+// so 429 rate-limit behavior for DELETE /api/auth/deleteUser cannot be exercised here.
+// The middleware is applied at the route definition level. Actual rate limiting behavior
+// is covered by rateLimiter.test.ts.

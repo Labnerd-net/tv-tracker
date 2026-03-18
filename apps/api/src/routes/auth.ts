@@ -185,7 +185,7 @@ auth.post('/logout', authMiddleware, async c => {
 });
 
 // Delete a user by ID
-auth.delete('/deleteUser', authMiddleware, async c => {
+auth.delete('/deleteUser', authRateLimit, authMiddleware, async c => {
   try {
     const payload = c.get('jwtPayload');
     const userIdNumber = String(payload.sub);
