@@ -188,13 +188,13 @@ auth.post('/logout', authMiddleware, async c => {
 auth.delete('/deleteUser', authRateLimit, authMiddleware, async c => {
   try {
     const payload = c.get('jwtPayload');
-    const userIdNumber = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(db, userIdNumber);
+    const userIdString = String(payload.sub);
+    const user = await dbUserFunctions.returnUserById(db, userIdString);
     if (!user || user.length === 0) {
       return c.json(err('User not found'), 404);
     }
     await dbUserFunctions.clearRefreshToken(db, payload.sub);
-    const returnValue = await dbUserFunctions.deleteUserById(db, userIdNumber);
+    const returnValue = await dbUserFunctions.deleteUserById(db, userIdString);
     if (!returnValue) {
       return c.json(err('User not found'), 404);
     }

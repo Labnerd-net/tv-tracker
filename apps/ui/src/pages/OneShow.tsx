@@ -21,7 +21,7 @@ export default function OneShow() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const retreiveTvShow = async () => {
+    const retrieveTvShow = async () => {
       try {
         if (showID) {
           const response = await Api.getOneShow(showID);
@@ -35,7 +35,7 @@ export default function OneShow() {
         setLoading(false);
       }
     };
-    retreiveTvShow();
+    retrieveTvShow();
   }, [showAlert, showID]);
 
   const refreshData = () => {

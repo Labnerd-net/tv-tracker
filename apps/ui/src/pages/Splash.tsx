@@ -167,7 +167,7 @@ export default function Splash() {
             onClick={() => navigate('/register')}
             sx={{
               bgcolor: 'var(--accent)',
-              color: '#e8e0d0',
+              color: 'var(--cream)',
               '&:hover': { bgcolor: 'var(--accent-hover)' },
             }}
           >

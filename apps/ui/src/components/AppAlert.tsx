@@ -2,8 +2,8 @@ import Box from '@mui/material/Box';
 
 const VARIANTS: Record<string, { bg: string; border: string; color: string; label: string }> = {
   success: { bg: 'rgba(76, 175, 80, 0.12)', border: 'rgba(76, 175, 80, 0.35)', color: '#4caf50', label: 'OK' },
-  danger:  { bg: 'rgba(230, 57, 70, 0.12)', border: 'rgba(230, 57, 70, 0.35)', color: '#e63946', label: 'ERR' },
-  warning: { bg: 'rgba(242, 166, 90, 0.12)', border: 'rgba(242, 166, 90, 0.35)', color: '#f2a65a', label: 'WARN' },
+  danger:  { bg: 'rgba(230, 57, 70, 0.12)', border: 'rgba(230, 57, 70, 0.35)', color: 'var(--accent)', label: 'ERR' },
+  warning: { bg: 'rgba(242, 166, 90, 0.12)', border: 'rgba(242, 166, 90, 0.35)', color: 'var(--amber)', label: 'WARN' },
   info:    { bg: 'rgba(144, 202, 249, 0.12)', border: 'rgba(144, 202, 249, 0.35)', color: '#90caf9', label: 'INFO' },
   primary: { bg: 'rgba(144, 202, 249, 0.12)', border: 'rgba(144, 202, 249, 0.35)', color: '#90caf9', label: 'INFO' },
 };

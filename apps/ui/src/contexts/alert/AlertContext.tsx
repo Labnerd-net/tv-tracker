@@ -1,11 +1,5 @@
 import { createContext, useContext } from 'react';
-
-interface AlertProps {
-  visibleAlert: boolean,
-  alertVariant: string,
-  alertMessage: string,
-  showAlert: (variant: string, message: string) => void
-}
+import type { AlertProps } from '../../types/alert.ts';
 
 export const AlertContext = createContext<AlertProps | undefined>(undefined);
 

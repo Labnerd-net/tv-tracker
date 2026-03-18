@@ -56,7 +56,7 @@ const actionBtn = (accent: boolean) => ({
   transition: 'all 0.15s ease',
   whiteSpace: 'nowrap' as const,
   '&:hover': accent
-    ? { background: 'rgba(230,57,70,0.1)', borderColor: '#e63946', color: '#e63946' }
+    ? { background: 'rgba(230,57,70,0.1)', borderColor: 'var(--accent)', color: 'var(--accent)' }
     : { background: 'var(--surface-elevated)', borderColor: 'var(--cream-dim)', color: 'var(--cream)' },
 });
 
