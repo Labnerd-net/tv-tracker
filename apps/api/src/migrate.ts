@@ -7,4 +7,5 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 await migrate(db, { migrationsFolder: join(__dirname, '../../../drizzle') });
+// eslint-disable-next-line no-console
 console.log('Migrations complete');
