@@ -51,7 +51,6 @@ _None identified._
 
 ### Medium
 - **#17 [apps/api/tests/, apps/ui/src/]**: UI test coverage is minimal (`viewToggle.test.ts` only). No integration tests for `SearchResults`, `AllShows`, `OneShow`, or `useShowActions`. Add react-testing-library tests for core UI interactions and cover API edge cases (concurrent requests, partial failures).
-- **#18 [apps/ui/src/]**: ESLint is UI-only; API has no lint config. Unify with a shared root-level ESLint config and add pre-commit hooks (husky + lint-staged) to gate commits.
 - **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
 
 ### Low
@@ -90,6 +89,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
 | Performance | 0 | 1 | 0 | 1 |
-| Improvements & Refactors | 1 | 3 | 2 | 6 |
+| Improvements & Refactors | 1 | 2 | 2 | 5 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **8** | **9** | **20** |
+| **Total** | **3** | **7** | **9** | **19** |
