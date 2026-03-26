@@ -8,6 +8,7 @@ import { getPlatformName } from '@shared/utils/tvmaze';
 import type { TvMazeShow } from '@shared/types/tvmaze.ts';
 import { useAlert } from '../contexts/alert/AlertContext.tsx';
 import { useShow } from '../contexts/show/ShowContext.tsx';
+import ShowDetailSkeleton from '../components/ShowDetailSkeleton.tsx';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
@@ -83,11 +84,7 @@ export default function OneShowSearch() {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
-        <CircularProgress sx={{ color: 'var(--accent)' }} />
-      </Box>
-    );
+    return <ShowDetailSkeleton />;
   }
 
   if (error || !tvShow) {

@@ -6,6 +6,7 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import SingleShow from '../components/SingleShow.tsx';
 import ShowsTable from '../components/ShowsTable.tsx';
+import ShowCardSkeleton from '../components/ShowCardSkeleton.tsx';
 import { useShow } from '../contexts/show/ShowContext.tsx';
 
 type ViewMode = 'card' | 'table';
@@ -16,7 +17,7 @@ function getInitialViewMode(): ViewMode {
 }
 
 export default function AllShows() {
-  const { tvShows } = useShow();
+  const { tvShows, loading } = useShow();
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
 
   const handleViewChange = (_: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
@@ -47,7 +48,7 @@ export default function AllShows() {
             color: 'var(--cream-muted)',
           }}
         >
-          {tvShows.length > 0 && `${tvShows.length} show${tvShows.length !== 1 ? 's' : ''}`}
+          {!loading && tvShows.length > 0 && `${tvShows.length} show${tvShows.length !== 1 ? 's' : ''}`}
         </Box>
         <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewChange} size="small">
           <ToggleButton value="card" aria-label="card view">
@@ -60,7 +61,20 @@ export default function AllShows() {
       </Box>
 
       {/* Content */}
-      {viewMode === 'card' ? (
+      {loading ? (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
+            gap: '12px',
+            p: { xs: 2, md: 3 },
+          }}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ShowCardSkeleton key={i} />
+          ))}
+        </Box>
+      ) : viewMode === 'card' ? (
         <Box
           sx={{
             display: 'grid',
@@ -80,7 +94,7 @@ export default function AllShows() {
       )}
 
       {/* Empty state */}
-      {tvShows.length === 0 && (
+      {!loading && tvShows.length === 0 && (
         <Box
           sx={{
             display: 'flex',

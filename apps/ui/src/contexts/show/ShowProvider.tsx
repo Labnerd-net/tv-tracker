@@ -6,6 +6,7 @@ import { getAllShows } from '../../apis/userRequests';
 
 export function ShowProvider({ children }: { children: ReactNode }) {
   const [tvShows, setTvShows] = useState<ShowData[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
@@ -13,10 +14,12 @@ export function ShowProvider({ children }: { children: ReactNode }) {
     const fetchShows = async () => {
       if (!user) {
         setTvShows([]);
+        setLoading(false);
         return;
       }
       const response = await getAllShows();
       if (response.success && response.data) setTvShows(response.data);
+      setLoading(false);
     };
     fetchShows();
   }, [user, isLoading]);
@@ -26,7 +29,7 @@ export function ShowProvider({ children }: { children: ReactNode }) {
   const removeShow = useCallback((showId: number) => setTvShows(prev => prev.filter(s => s.showId !== showId)), []);
 
   return (
-    <ShowContext.Provider value={{ tvShows, addShow, updateShow, removeShow }}>
+    <ShowContext.Provider value={{ tvShows, loading, addShow, updateShow, removeShow }}>
       {children}
     </ShowContext.Provider>
   );

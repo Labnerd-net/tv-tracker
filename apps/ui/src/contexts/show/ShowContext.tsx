@@ -3,6 +3,7 @@ import type { ShowData } from "@shared/types/tv-tracker";
 
 export interface ShowProps {
     tvShows: ShowData[]
+    loading: boolean
     addShow: (show: ShowData) => void
     updateShow: (show: ShowData) => void
     removeShow: (showId: number) => void
