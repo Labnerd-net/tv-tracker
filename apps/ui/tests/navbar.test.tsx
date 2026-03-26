@@ -48,7 +48,7 @@ describe('Navbar — unauthenticated', () => {
 
   it('does not render a search field', () => {
     renderNavbar();
-    expect(screen.queryByPlaceholderText(/search tv shows/i)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/search shows/i)).not.toBeInTheDocument();
   });
 
   it('does not render a Logout button', () => {
@@ -66,12 +66,12 @@ describe('Navbar — authenticated', () => {
 
   it('shows a search field', () => {
     renderNavbar();
-    expect(screen.getByPlaceholderText(/search tv shows/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/search shows/i)).toBeInTheDocument();
   });
 
   it('search form navigates to /search/:query', async () => {
     renderNavbar();
-    const input = screen.getByPlaceholderText(/search tv shows/i);
+    const input = screen.getByPlaceholderText(/search shows/i);
     fireEvent.change(input, { target: { value: 'breaking bad' } });
     await act(async () => {
       screen.getByRole('button', { name: /^go$/i }).click();

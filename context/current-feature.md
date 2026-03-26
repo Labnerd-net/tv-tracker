@@ -2,13 +2,7 @@
 
 ## Current Feature Spec File
 
-Title:
-Spec file:
-Branch:
-
 ## Current Feature Plan File
-
-Plan File:
 
 ## History
 
@@ -36,3 +30,4 @@ Plan File:
 - **Stabilize Show Card Re-renders** — Wrapped `SingleShow` in `React.memo` so cards skip re-rendering when their `showData` prop is unchanged. Stabilized `addShow`, `updateShow`, and `removeShow` in `ShowProvider` with `useCallback([])` (functional updaters, no closure over state). Stabilized `refreshShow` and `deleteShow` in `useShowActions` with `useCallback` and correct deps. Closes backlog #10 and #44.
 - **Code Quality Type and Constant Fixes** — Tightened `validationHook.ts` type annotation from `Hook<unknown, any, any>` to `Hook<unknown, BlankEnv, string>` using `BlankEnv` from `hono/types` (backlog #22). Extracted duplicated TVMaze base URL into `apps/shared/constants/tvmaze.ts` as `TV_MAZE_API_BASE`; updated `apps/api/src/routes/user.ts` and `apps/ui/src/apis/userRequests.ts` to import from shared (backlog #30).
 - **Unified ESLint Config and Pre-commit Hooks** — Consolidated ESLint to a single root-level `eslint.config.mjs` covering both packages: shared base rules (TypeScript recommended, `no-console`, `no-unused-vars` with `_` patterns), UI section (React hooks/refresh plugins + browser globals), API section (Node globals). Removed per-package ESLint devDeps from `apps/ui`; added `lint` script to `apps/api`. Added husky + lint-staged at root with a pre-commit hook that blocks commits with lint errors. Fixed one `no-console` violation in `migrate.ts` with an inline disable comment. Closes backlog #18.
+- **UI Test Coverage Expansion** — Added RTL tests for the four highest-value surfaces: `AllShows` (loading, populated, empty), `SearchResults` (loading, results, empty, abort on unmount), `OneShow` (loading, detail, error), and `useShowActions` (refreshShow success/failure, deleteShow success/failure, concurrent refreshes). Added shared `testUtils.tsx` with factory helpers and a render wrapper. Added `tsconfig.test.json` to give the editor proper type coverage for test files including jest-dom matchers. Fixed 3 pre-existing stale placeholder assertions in `navbar.test.tsx`. 45 tests pass, build clean. Closes backlog #17.
