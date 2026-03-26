@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useEffect } from 'react';
+import { type ReactNode, useState, useEffect, useCallback } from 'react';
 import { ShowContext } from './ShowContext';
 import type { ShowData } from '@shared/types/tv-tracker';
 import { useAuth } from '../auth/AuthContext';
@@ -21,9 +21,9 @@ export function ShowProvider({ children }: { children: ReactNode }) {
     fetchShows();
   }, [user, isLoading]);
 
-  const addShow = (show: ShowData) => setTvShows(prev => [...prev, show]);
-  const updateShow = (show: ShowData) => setTvShows(prev => prev.map(s => s.showId === show.showId ? show : s));
-  const removeShow = (showId: number) => setTvShows(prev => prev.filter(s => s.showId !== showId));
+  const addShow = useCallback((show: ShowData) => setTvShows(prev => [...prev, show]), []);
+  const updateShow = useCallback((show: ShowData) => setTvShows(prev => prev.map(s => s.showId === show.showId ? show : s)), []);
+  const removeShow = useCallback((showId: number) => setTvShows(prev => prev.filter(s => s.showId !== showId)), []);
 
   return (
     <ShowContext.Provider value={{ tvShows, addShow, updateShow, removeShow }}>

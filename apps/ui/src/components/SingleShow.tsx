@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -6,7 +7,7 @@ import { useShowActions } from '../hooks/useShowActions.ts';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
-export default function SingleShow({ showData, index = 0 }: { showData: ShowData; index?: number }) {
+export default memo(function SingleShow({ showData, index = 0 }: { showData: ShowData; index?: number }) {
   const { loading, refreshShow, deleteShow } = useShowActions();
   const navigate = useNavigate();
 
@@ -202,4 +203,4 @@ export default function SingleShow({ showData, index = 0 }: { showData: ShowData
       </Box>
     </Box>
   );
-}
+});
