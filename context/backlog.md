@@ -50,7 +50,6 @@ _None identified._
 - **#14 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter state is per-process. In a multi-instance deployment (Docker Swarm, K8s), each instance has its own map and users can bypass limits by round-robining. Add a Redis-backed implementation as a drop-in alternative, selected via `REDIS_URL` env var.
 
 ### Medium
-- **#17 [apps/api/tests/, apps/ui/src/]**: UI test coverage is minimal (`viewToggle.test.ts` only). No integration tests for `SearchResults`, `AllShows`, `OneShow`, or `useShowActions`. Add react-testing-library tests for core UI interactions and cover API edge cases (concurrent requests, partial failures).
 - **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
 
 ### Low
@@ -89,6 +88,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
 | Performance | 0 | 1 | 0 | 1 |
-| Improvements & Refactors | 1 | 2 | 2 | 5 |
+| Improvements & Refactors | 1 | 1 | 2 | 4 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **7** | **9** | **19** |
+| **Total** | **3** | **6** | **9** | **18** |
