@@ -8,6 +8,7 @@ import { logger } from '../utils/logger.ts';
 import type { ShowData } from '@shared/types/tv-tracker.ts';
 import { useAlert } from '../contexts/alert/AlertContext.tsx';
 import { useShowActions } from '../hooks/useShowActions.ts';
+import ShowDetailSkeleton from '../components/ShowDetailSkeleton.tsx';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
@@ -51,11 +52,7 @@ export default function OneShow() {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
-        <CircularProgress sx={{ color: 'var(--accent)' }} />
-      </Box>
-    );
+    return <ShowDetailSkeleton />;
   }
 
   if (error || !tvShow) {
