@@ -15,7 +15,7 @@ import TvMazeData from '../tvmaze.js';
 import type { TvMazeShow } from '@shared/types/tvmaze.js';
 import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
 import { validationHook } from '../utils/validationHook.js';
-const tvMazeAPI = 'https://api.tvmaze.com';
+import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze.js';
 
 function scheduleEpisodeUpdate(showData: TvMazeData, newShowId: number): void {
   showData.updateEpisodes()
@@ -118,7 +118,7 @@ user.post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHoo
     if (existing && existing.length > 0) {
       return c.json(ok({ status: 'exists' }));
     }
-    const response = await fetch(`${tvMazeAPI}/shows/${tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
+    const response = await fetch(`${TV_MAZE_API_BASE}/shows/${tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
     if (!response.ok) {
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }
@@ -150,7 +150,7 @@ user.patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHo
     if (!existing || existing.length === 0) {
       return c.json(err(`Show with id=${showId} not found`), 404);
     }
-    const response = await fetch(`${tvMazeAPI}/shows/${existing[0].tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
+    const response = await fetch(`${TV_MAZE_API_BASE}/shows/${existing[0].tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
     if (!response.ok) {
       return c.json(err(`TvMaze response status: ${response.status}`), 502);
     }

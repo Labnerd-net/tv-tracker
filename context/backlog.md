@@ -37,7 +37,6 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#10 [apps/ui/src/components/SingleShow.tsx:10]**: Each card instantiates its own `useShowActions()` hook. On any refresh, `updateShow` triggers a full grid re-render across all cards. For large libraries, consider hoisting the hook to `AllShows` and passing handlers as props, or using `useCallback` to stabilize references.
 - **#11 [apps/ui]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` windowing for the grid; significant FPS improvement for power users.
 
 ### Low
@@ -57,13 +56,10 @@ _None identified._
 - **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
 
 ### Low
-- **#22 [apps/ui/src/utils/validationHook.ts:3]**: `Hook<unknown, any, any>` — use a precise Hono generic instead of bare `any` to surface middleware type mismatches at compile time.
-- **#44 [apps/ui/src/contexts/show/ShowProvider.tsx]**: `addShow`, `updateShow`, and `removeShow` are recreated on every `ShowProvider` render — no `useCallback` wrapping. Currently harmless (no consumer puts them in a `useEffect` dep array), but fragile as usage grows. Wrap with `useCallback` to stabilize references.
 - **#26 [apps/ui/src/]**: Add skeleton loading screens (`Skeleton.tsx`) to the card grid and detail page instead of bare `CircularProgress` spinners. Improves perceived performance and avoids layout shift.
 - **#27 [apps/ui/src/]**: Keyboard shortcuts: `/` to focus search, `?` for help, arrow keys to navigate grid. Implement via global `keydown` listener in `AppContent.tsx`.
 - **#28 [apps/ui/src/]**: a11y audit — verify all interactive `<Box>` elements have accessible names/roles, check color contrast on custom theme vars (WCAG AA), ensure form inputs have associated labels.
 - **#29 [apps/ui/src/components/SingleShow.tsx, Result.tsx]**: Both share similar card/list item layout but duplicate markup and styles. Extract a `ShowCard.tsx` base component to reduce duplication.
-- **#30 [apps/api/src/routes/user.ts:18, apps/ui/src/apis/userRequests.ts]**: `tvMazeAPI` base URL constant is duplicated in both the API and UI. Move to `apps/shared/` if the project expands further.
 
 ---
 
@@ -96,7 +92,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
-| Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 4 | 7 | 12 |
+| Performance | 0 | 1 | 0 | 1 |
+| Improvements & Refactors | 1 | 4 | 4 | 9 |
 | Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **10** | **14** | **27** |
+| **Total** | **3** | **9** | **11** | **23** |

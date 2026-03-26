@@ -1,9 +1,8 @@
 import axios from 'axios';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
 import type { ProfileData, ShowData } from '@shared/types/tv-tracker';
+import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze';
 import { apiClient, handleApiError } from '../utils/requests';
-
-const tvMazeAPI = 'https://api.tvmaze.com';
 const path = 'api/user';
 
 export interface ProfileResponse {
@@ -162,7 +161,7 @@ export interface TvMazeShowsResponse {
 
 export async function tvShowResults(showName: string): Promise<TvMazeShowsResponse> {
   try {
-    const response = await axios.get(`${tvMazeAPI}/search/shows?q=${encodeURIComponent(showName)}`)
+    const response = await axios.get(`${TV_MAZE_API_BASE}/search/shows?q=${encodeURIComponent(showName)}`)
     return { success: true, data: response.data };
   } catch(error) {
     return handleApiError('tvShowResults', error);
@@ -177,7 +176,7 @@ export interface TvMazeShowResponse {
 
 export async function returnSearchShow(showId: string): Promise<TvMazeShowResponse> {
   try {
-    const response = await axios.get(`${tvMazeAPI}/shows/${showId}`)
+    const response = await axios.get(`${TV_MAZE_API_BASE}/shows/${showId}`)
     return { success: true, data: response.data };
   } catch(error) {
     return handleApiError('returnSearchShow', error);
