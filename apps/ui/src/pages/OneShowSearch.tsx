@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import * as Api from '../apis/userRequests.ts';
-import { getPlatformName } from '@shared/utils/tvmaze';
+import { getPlatformName, sanitizeTvMazeImageUrl } from '@shared/utils/tvmaze';
 import type { TvMazeShow } from '@shared/types/tvmaze.ts';
 import { useAlert } from '../contexts/alert/AlertContext.tsx';
 import { useShow } from '../contexts/show/ShowContext.tsx';
@@ -87,6 +87,8 @@ export default function OneShowSearch() {
     return <ShowDetailSkeleton />;
   }
 
+  const heroSrc = sanitizeTvMazeImageUrl(tvShow?.image?.medium);
+
   if (error || !tvShow) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
@@ -101,10 +103,10 @@ export default function OneShowSearch() {
     <Box sx={{ minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
       {/* Blurred hero */}
       <Box sx={{ position: 'relative', height: { xs: '180px', md: '280px' }, overflow: 'hidden' }}>
-        {tvShow.image?.medium && (
+        {heroSrc && (
           <Box
             component="img"
-            src={tvShow.image.medium}
+            src={heroSrc}
             alt=""
             aria-hidden
             loading="lazy"
@@ -175,7 +177,7 @@ export default function OneShowSearch() {
           {/* Poster */}
           <Box
             component="img"
-            src={tvShow.image?.medium ?? PLACEHOLDER}
+            src={sanitizeTvMazeImageUrl(tvShow.image?.medium) || PLACEHOLDER}
             alt={tvShow.name}
             loading="lazy"
             decoding="async"
