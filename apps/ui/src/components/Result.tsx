@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import * as Api from '../apis/userRequests.ts';
-import { getPlatformName } from '@shared/utils/tvmaze';
+import { getPlatformName, sanitizeTvMazeImageUrl } from '@shared/utils/tvmaze';
 import type { AlertProps } from '../types/alert.ts';
 import type { TvMazeSeries } from '@shared/types/tvmaze.ts';
 import { useShow } from '../contexts/show/ShowContext.tsx';
@@ -83,7 +83,7 @@ export default function Result({
   return (
     <ShowCard
       variant="list"
-      image={showData.show.image?.medium ?? ''}
+      image={sanitizeTvMazeImageUrl(showData.show.image?.medium)}
       title={showData.show.name}
       titleHref={`/search/show/${showData.show.id}/`}
       platform={platform}
