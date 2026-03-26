@@ -9,7 +9,8 @@
     "start": "node dist/api/src/index.js",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",
