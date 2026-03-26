@@ -1,6 +1,6 @@
 # Project Backlog
 
-> Generated: 2026-03-16
+> Generated: 2026-03-26
 > Focus: Full audit
 
 ---
@@ -11,7 +11,8 @@
 _None identified._
 
 ### Medium
-_None identified._
+- **#3 [apps/api/src/routes/auth.ts:183]**: `DELETE /api/auth/deleteUser` uses `authRateLimit` (5 req/15 min, keyed by IP+path). An attacker can burn a victim IP's quota before they attempt deletion. Self-service account operations should not share a bucket with brute-force login protection. Fix: apply `apiRateLimit` or a dedicated moderate limiter.
+- **#4 [apps/api/src/db/dbUserFunctions.ts:17]**: `returnUsers()` selects all columns including `passwordHash`, `refreshTokenHash`, and `refreshTokenExpiresAt`. The admin route projects only `ProfileData` so hashes are never sent, but they cross the DB→Node boundary unnecessarily. Fix: use Drizzle column selection to omit sensitive fields at query time.
 
 ### Low
 _None identified._
@@ -24,7 +25,9 @@ _None identified._
 _None identified._
 
 ### Medium
-_None identified._
+- **#5 [apps/ui/src/pages/OneShow.tsx:29]**: When `response.success` is false (e.g., 404), neither `setError` nor `showAlert` is called — `tvShow` stays undefined and the component renders a silent "Show not found" fallback with no user notification. The catch block only handles network errors. Fix: add an `else` branch on `!response.success` that sets error state and calls `showAlert`.
+- **#6 [apps/ui/src/pages/OneShow.tsx:42]**: `refreshData` and `deleteOneShow` callbacks guard on `tvShow` but not `showID`. Since `showID` comes from `useParams()` typed as `string | undefined`, passing undefined to the underlying action functions is possible if the component is ever reused on a loosened route. Fix: add `showID` check to both callbacks.
+- **#7 [apps/api/src/tvmaze.ts:62]**: `fetchAirdate` calls `response.json()` without first checking `response.ok`. A non-200 response from TVMaze returns silently as an empty string — no error is logged. Fix: check `response.ok` before parsing and log the status code on failure.
 
 ### Low
 _None identified._
@@ -37,7 +40,8 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#11 [apps/ui]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` windowing for the grid; significant FPS improvement for power users.
+- **#8 [apps/ui/src/pages/SearchResults.tsx:34]**: One `fetchNextEpisodeDate` Axios call fires per search result via `Promise.allSettled`. For 10 results this is 10 concurrent cross-origin requests to TVMaze, which has undocumented rate limits. A single slow response also blocks the shared `episodesLoading` indicator for all cards. Fix: fetch episode data server-side in a search proxy endpoint, or add per-card loading state for incremental display.
+- **#9 [apps/ui/src/components/SingleShow.tsx:9]**: Each card in `AllShows` instantiates its own `useShowActions()` hook — N shows means N independent loading states and N memoized closures in memory. Acceptable for typical usage but degrades with large libraries. Fix: lift action state into `ShowContext` or use `useReducer` if library size becomes a concern.
 
 ### Low
 _None identified._
@@ -47,37 +51,44 @@ _None identified._
 ## Improvements & Refactors
 
 ### High
-- **#14 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter state is per-process. In a multi-instance deployment (Docker Swarm, K8s), each instance has its own map and users can bypass limits by round-robining. Add a Redis-backed implementation as a drop-in alternative, selected via `REDIS_URL` env var.
+- **#10 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter is per-process. In multi-instance deployments (Docker Swarm, K8s) each instance tracks separately, allowing limit bypass by round-robining. Fix: add a Redis-backed implementation as a drop-in alternative selected via `REDIS_URL` env var; fall back to in-memory when unset.
 
 ### Medium
-- **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
+- **#11 [apps/api/src/utils/middleware.ts:25]**: `payload as unknown as JwtData` casts the result of Hono's `verify()` with no runtime field validation. A JWT signed with the correct secret but missing `sub`, `email`, or `roles` would pass silently and cause downstream `undefined` access. Fix: add a Zod parse or manual field check after `verify()` before casting.
+- **#12 [apps/api/src/routes/user.ts:93]**: `body as unknown as TvMazeShow` double-cast silences TypeScript — `TvMazeData` could access fields validated by schema (e.g., `genres`, `runtime`) that are `undefined` at runtime without error. Same pattern at lines 125 and 156. Fix: define a `TvMazeShowInput` type matching the Zod schema and accept it in `TvMazeData`'s constructor, eliminating the cast.
+- **#13 [apps/ui/src/]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` for the `AllShows.tsx` grid (lines 77–89).
+- **#14 [apps/ui/src/]**: Accessibility — interactive `<Box>` elements lack semantic roles/keyboard access. `ShowCard.tsx` card is a `<Box onClick>` without `role="button"` or `tabIndex`. Back button in `OneShow.tsx:115` has no `aria-label`. Action buttons in `ShowsTable.tsx` are missing labels. Fix: convert to semantic elements or add `role`/`tabIndex`/`aria-label` attributes.
+- **#15 [apps/ui/src/]**: No error boundary. If any page component throws, the entire app goes blank. Fix: add an `ErrorBoundary` class component wrapping the router in `App.tsx`.
 
 ### Low
-- **#27 [apps/ui/src/]**: Keyboard shortcuts: `/` to focus search, `?` for help, arrow keys to navigate grid. Implement via global `keydown` listener in `AppContent.tsx`.
-- **#28 [apps/ui/src/]**: a11y audit — verify all interactive `<Box>` elements have accessible names/roles, check color contrast on custom theme vars (WCAG AA), ensure form inputs have associated labels.
+- **#16 [apps/ui/src/types/data.ts]**: `DataProps` interface contains `sortOrder`, `setSortOrder`, `sortCol`, `setSortCol` — none are in `ShowContext`. Sort state lives entirely in `ShowsTable.tsx`. Dead interface. Fix: remove or update to reflect actual context shape.
+- **#17 [apps/api/src/routes/auth.ts:167]**: Logout clears `refreshToken` via `deleteCookie` but clears `accessToken` via `setCookie` with empty value and `maxAge: 0`. Inconsistent. Fix: use `deleteCookie` for both.
+- **#18 [apps/ui/src/hooks/useShowActions.ts:2]**: Imports use explicit `.ts`/`.tsx` extensions inconsistent with the rest of the UI codebase. Fix: remove extensions to match project convention.
+- **#19 [apps/api/src/db/schema.ts:23]**: `scheduleDay` is typed `string[]` but CLAUDE.md states only the first element is stored. The type and documentation contradict. Fix: either store the full array and remove the caveat, or type as `string` and rename to `scheduleDay` (singular).
+- **#20 [apps/api/src/routes/auth.ts]**: Cookie-setting logic (`setRefreshCookie`, `setAccessCookie`) is duplicated across `register`, `login`, and `refresh` routes. Fix: move to `apps/api/src/utils/auth.ts` as `setAuthCookies(c, tokens)`.
+- **#21 [apps/ui/src/pages/SearchResults.tsx:12]**: `alertProps` is destructured from `useAlert()` and passed to `Result` components, but `showAlert` is also locally destructured. `Result` only needs `showAlert`, not the full `alertProps` bag. Fix: pass `showAlert` directly to `Result` instead of the whole object.
+- **#22 [apps/ui/src/]**: Search navigation triggers on every keystroke. Add 300ms debounce to the search input before calling `navigate()` to reduce unnecessary route transitions.
 
 ---
 
 ## Feature Ideas
 
 ### High
-- **#31** **Advanced filtering within library**: Client-side filters for show status (Running/Ended/Cancelled), network/platform, and "has upcoming episode". Text search within tracked shows. `AllShows.tsx` only sorts today; filter logic belongs in a new `useShowFilter()` hook alongside `sortShows.ts`. No DB changes needed.
-- **#32** **Episode / watch progress tracking**: Allow users to mark which episodes they've watched (airdate or season/episode). Requires new `user_episode_progress` DB table, `POST /api/user/tvshow/:id/mark-watched` endpoint, and a "Mark as caught up" action on `OneShow.tsx`. TVMaze already provides episode links.
+- **#23 [apps/ui/src/pages/AllShows.tsx]**: Advanced library filtering — filter by `status` (Running/Ended/Cancelled), `platform`, and "has upcoming episode". Text search across titles. Data is already in memory; implement a `useShowFilter()` hook alongside `sortShows.ts`. No API or DB changes needed.
+- **#24 [apps/api, apps/ui]**: Watch progress tracking — allow users to mark episodes as watched. Requires new `user_episode_progress` DB table, `PATCH /api/user/tvshow/:id/progress` endpoint, and "Mark as caught up" action on `OneShow.tsx`. TVMaze episode links are already resolved in `TvMazeData`.
+- **#25 [apps/api/src/db/schema.ts, apps/ui/src/pages/AllShows.tsx]**: Multi-status list management — add `listStatus` enum (`tracking | watchlist | completed | dropped`) to `tvShows` schema with `tracking` as default. Add tabs in `AllShows.tsx` and `PATCH /api/user/tvshow/:id/status` endpoint.
 
 ### Medium
-- **#33** **Watchlist / list status**: Add `listStatus` enum (`tracking | watchlist | completed | dropped`) to `tvShows` schema. Separate tabs in `AllShows.tsx`. New `PATCH /api/user/tvshow/:id/status` route. Low DB/API effort.
-- **#34** **Genre storage and filtering**: TVMaze provides `genres[]` but `TvMazeData` discards it. Store as JSON column, display as badges on cards and detail page, use as a filter dimension alongside #31.
-- **#35** **Batch operations**: Checkbox multi-select on table and card views for bulk refresh or bulk delete. `useShowActions` provides individual handlers; add a batch variant using `Promise.allSettled`.
-- **#36** **Stats/insights page**: New `/stats` route + `GET /api/user/stats` endpoint returning counts by status, by platform, upcoming episodes in next 7/30 days. Drizzle aggregation queries on existing schema — no new tables needed.
+- **#26 [apps/api/src/tvmaze.ts, apps/api/src/db/schema.ts]**: Genre storage — TVMaze provides `genres[]` but `TvMazeData` discards it. Store as a JSON column, display as badges on `OneShow.tsx`, and use as a filter dimension for #23.
+- **#27 [apps/ui/src/components/ShowsTable.tsx]**: Batch operations — checkbox multi-select on table/card views for bulk refresh or delete. Extend `useShowActions` with a batch variant using `Promise.allSettled`.
+- **#28 [apps/api/src/routes/user.ts, apps/ui/src/]**: Stats/insights page — new `/stats` route and `GET /api/user/stats` endpoint returning counts by status, platform, and upcoming episodes in next 7/30 days. Drizzle aggregation on existing schema; no new tables.
 
 ### Low
-- **#37** **Upcoming episode air-date badge**: Calculate if `nextEpisode` airdate is today/tomorrow/this week and show a colored badge on `SingleShow.tsx` cards. Client-side utility only — no API/DB changes.
-- **#38** **AI — "Why should I watch this?" summary**: On `OneShow.tsx` / `OneShowSearch.tsx`, proxy a Claude call from a new `GET /api/user/tvshow/:id/summary` endpoint using the TVMaze synopsis, genres, and rating. Keeps the API key server-side.
-- **#39** **AI — Smart show recommendations**: Send the user's tracked show list to Claude via a new `POST /api/user/recommendations` endpoint; resolve returned suggestions through TVMaze search and display on a `/recommendations` page.
-- **#40** **Export/Import**: `GET /api/user/export` (JSON) and `POST /api/user/import` for library portability. Low API effort.
-- **#41** **Better empty state / onboarding**: Empty state in `AllShows.tsx` (current text at line 131) gives no CTA. Add a button linking to search or surface TVMaze trending shows.
-- **#42** **User ratings**: TVMaze `rating.average` is available but unused. Add per-user rating field and display alongside TVMaze score on `OneShow.tsx`.
-- **#43** **User-to-user show sharing**: Share a show with another registered user. Requires new `SharedShows` table and social UI. Higher complexity, lower priority for a personal tracker.
+- **#29 [apps/ui/src/components/ShowCard.tsx]**: Upcoming episode urgency badge — compute `today | tomorrow | this-week | upcoming` from `nextEpisode` airdate and display a colored badge on cards. Client-side utility only.
+- **#30 [apps/api/src/routes/user.ts]**: Export/import — `GET /api/user/export` returns JSON of all shows; `POST /api/user/import` bulk-adds from JSON (skip duplicates). Low implementation effort, good portability feature.
+- **#31 [apps/ui/src/pages/AllShows.tsx]**: Better empty state — current fallback (line 131) shows no CTA. Add a link to search or surface TVMaze trending shows (public API, no auth).
+- **#32 [apps/api/src/routes/user.ts]**: AI show summaries — `GET /api/user/tvshow/:id/summary` proxies a Claude API call using TVMaze synopsis/genres/rating. Cache result for 7 days in a `summaryCache` column. Requires `ANTHROPIC_API_KEY`.
+- **#33 [apps/api/src/routes/user.ts]**: Smart recommendations — `POST /api/user/recommendations` sends tracked show list to Claude, resolves suggestions via TVMaze search, and displays on `/recommendations` page.
 
 ---
 
@@ -85,9 +96,9 @@ _None identified._
 
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
-| Security | 0 | 0 | 0 | 0 |
-| Bugs | 0 | 0 | 0 | 0 |
-| Performance | 0 | 1 | 0 | 1 |
-| Improvements & Refactors | 1 | 1 | 2 | 4 |
-| Feature Ideas | 2 | 4 | 7 | 13 |
-| **Total** | **3** | **6** | **9** | **18** |
+| Security | 0 | 2 | 0 | 2 |
+| Bugs | 0 | 3 | 0 | 3 |
+| Performance | 0 | 2 | 0 | 2 |
+| Improvements & Refactors | 1 | 5 | 7 | 13 |
+| Feature Ideas | 3 | 3 | 5 | 11 |
+| **Total** | **4** | **15** | **12** | **31** |
