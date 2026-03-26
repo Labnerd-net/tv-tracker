@@ -8,12 +8,14 @@ RUN corepack enable
 # Copy workspace manifests first for layer caching
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/ui/package.json ./apps/ui/
+COPY apps/api/package.json ./apps/api/
 COPY apps/shared/package.json ./apps/shared/
 RUN pnpm install --frozen-lockfile
 
 # Copy source
 COPY tsconfig.base.json ./
 COPY apps/ui ./apps/ui
+COPY apps/api/src ./apps/api/src
 COPY apps/shared ./apps/shared
 
 RUN pnpm --filter @tv-tracker/ui build
