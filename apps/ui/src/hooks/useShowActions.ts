@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import * as Api from '../apis/userRequests.ts';
 import { logger } from '../utils/logger.ts';
 import { useShow } from '../contexts/show/ShowContext.tsx';
@@ -9,7 +9,7 @@ export function useShowActions() {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
 
-  const refreshShow = async (showId: string, title: string, onSuccess?: () => void) => {
+  const refreshShow = useCallback(async (showId: string, title: string, onSuccess?: () => void) => {
     setLoading(true);
     try {
       await Api.updateShow(showId);
@@ -27,9 +27,9 @@ export function useShowActions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [updateShow, showAlert]);
 
-  const deleteShow = async (showId: string, title: string, onSuccess?: () => void) => {
+  const deleteShow = useCallback(async (showId: string, title: string, onSuccess?: () => void) => {
     setLoading(true);
     try {
       const response = await Api.deleteShow(showId);
@@ -46,7 +46,7 @@ export function useShowActions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [removeShow, showAlert]);
 
   return { loading, refreshShow, deleteShow };
 }
