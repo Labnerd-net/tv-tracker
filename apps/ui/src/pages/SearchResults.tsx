@@ -33,7 +33,7 @@ export default function SearchResults() {
           setEpisodesLoading(true);
           const settled = await Promise.allSettled(
             data.map(item =>
-              Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => [item.show.id, r.data?.date ?? ''] as const)
+              Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => [item.show.id, r.success ? r.data.date : ''] as const)
             )
           );
           if (controller.signal.aborted) return;
@@ -44,7 +44,7 @@ export default function SearchResults() {
           setEpisodeDates(dateMap);
           setEpisodesLoading(false);
         } else {
-          const msg = response.error ?? 'Failed to retrieve TV Show results';
+          const msg = !response.success ? response.error : 'Failed to retrieve TV Show results';
           showAlert('danger', msg);
           setError(msg);
         }
