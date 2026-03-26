@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async () => {
     const profileData = await getUserProfile();
-    if (profileData.success && profileData.data) {
+    if (profileData.success) {
       setUser(profileData.data);
     } else {
       throw new Error(profileData.error || 'Failed to fetch user profile');

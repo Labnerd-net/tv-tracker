@@ -53,3 +53,6 @@ export interface ShowData {
 }
 
 export type TvShows = ShowData[]
+
+export type ApiResponse<T> = { success: true; data: T } | { success: false; error: string };
+export type ApiVoidResponse = { success: true } | { success: false; error: string };

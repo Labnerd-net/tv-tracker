@@ -38,7 +38,7 @@ export default function OneShowSearch() {
           const platformName = getPlatformName(response.data);
           if (platformName) setPlatform(platformName);
         } else {
-          const msg = response.error ?? 'Failed to retrieve TV Show';
+          const msg = !response.success ? response.error : 'Failed to retrieve TV Show';
           showAlert('danger', msg);
           setError(msg);
         }

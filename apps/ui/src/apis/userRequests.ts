@@ -1,17 +1,11 @@
 import axios from 'axios';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
-import type { ProfileData, ShowData } from '@shared/types/tv-tracker';
+import type { ApiResponse, ProfileData, ShowData } from '@shared/types/tv-tracker';
 import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze';
 import { apiClient, handleApiError } from '../utils/requests';
 const path = 'api/user';
 
-export interface ProfileResponse {
-  success: boolean;
-  data?: ProfileData;
-  error?: string;
-}
-
-export async function getUserProfile(): Promise<ProfileResponse> {
+export async function getUserProfile(): Promise<ApiResponse<ProfileData>> {
   try {
     const response = await apiClient.get(`/${path}/profile`);
     if (response.data.ok) {
@@ -23,19 +17,7 @@ export async function getUserProfile(): Promise<ProfileResponse> {
   }
 }
 
-export interface ShowResponse {
-  success: boolean;
-  data?: ShowData[];
-  error?: string;
-}
-
-export interface SingleShowResponse {
-  success: boolean;
-  data?: ShowData;
-  error?: string;
-}
-
-export async function getAllShows(): Promise<ShowResponse> {
+export async function getAllShows(): Promise<ApiResponse<ShowData[]>> {
   try {
     const response = await apiClient.get(`/${path}/tvshows`);
     if (response.data.ok) {
@@ -47,7 +29,7 @@ export async function getAllShows(): Promise<ShowResponse> {
   }
 }
 
-export async function getOneShow(showID: string): Promise<SingleShowResponse> {
+export async function getOneShow(showID: string): Promise<ApiResponse<ShowData>> {
   try {
     const response = await apiClient.get(`/${path}/tvshow/${showID}`);
     if (response.data.ok) {
@@ -59,13 +41,7 @@ export async function getOneShow(showID: string): Promise<SingleShowResponse> {
   }
 }
 
-export interface StringResponse {
-  success: boolean;
-  data?: { status: string; showId?: number };
-  error?: string;
-}
-
-export async function addNewShowJson(showData: TvMazeShow): Promise<StringResponse> {
+export async function addNewShowJson(showData: TvMazeShow): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
     const response = await apiClient.post(`/${path}/tvshow`, showData);
     if (response.data.ok) {
@@ -77,7 +53,7 @@ export async function addNewShowJson(showData: TvMazeShow): Promise<StringRespon
   }
 }
 
-export async function updateShow(showID: string): Promise<StringResponse> {
+export async function updateShow(showID: string): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
     const response = await apiClient.patch(`/${path}/tvshow/${showID}`, null);
     if (response.data.ok) {
@@ -89,7 +65,7 @@ export async function updateShow(showID: string): Promise<StringResponse> {
   }
 }
 
-export async function deleteShow(showID: string): Promise<StringResponse> {
+export async function deleteShow(showID: string): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
     const response = await apiClient.delete(`/${path}/tvshow/${showID}`);
     if (response.data.ok) {
@@ -101,13 +77,7 @@ export async function deleteShow(showID: string): Promise<StringResponse> {
   }
 }
 
-export interface DateResponse {
-  success: boolean;
-  data?: { date: string };
-  error?: string;
-}
-
-export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<DateResponse> {
+export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<ApiResponse<{ date: string }>> {
   try {
     if (searchData._links.nextepisode) {
       const href = searchData._links.nextepisode.href;
@@ -130,7 +100,7 @@ export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: Abor
   }
 }
 
-export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<DateResponse> {
+export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<ApiResponse<{ date: string }>> {
   try {
     if (searchData._links.previousepisode) {
       const href = searchData._links.previousepisode.href;
@@ -153,13 +123,7 @@ export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: Abor
   }
 }
 
-export interface TvMazeShowsResponse {
-  success: boolean;
-  data?: TvMazeSeries[];
-  error?: string;
-}
-
-export async function tvShowResults(showName: string): Promise<TvMazeShowsResponse> {
+export async function tvShowResults(showName: string): Promise<ApiResponse<TvMazeSeries[]>> {
   try {
     const response = await axios.get(`${TV_MAZE_API_BASE}/search/shows?q=${encodeURIComponent(showName)}`)
     return { success: true, data: response.data };
@@ -168,13 +132,7 @@ export async function tvShowResults(showName: string): Promise<TvMazeShowsRespon
   }
 }
 
-export interface TvMazeShowResponse {
-  success: boolean;
-  data?: TvMazeShow;
-  error?: string;
-}
-
-export async function returnSearchShow(showId: string): Promise<TvMazeShowResponse> {
+export async function returnSearchShow(showId: string): Promise<ApiResponse<TvMazeShow>> {
   try {
     const response = await axios.get(`${TV_MAZE_API_BASE}/shows/${showId}`)
     return { success: true, data: response.data };

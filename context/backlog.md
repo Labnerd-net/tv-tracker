@@ -56,10 +56,8 @@ _None identified._
 - **#19 [apps/api/src/]**: No OpenAPI/Swagger spec. Add `hono-openapi` or a manual spec at `/api/docs`. All routes and Zod schemas already exist — generating the spec is low-hanging fruit.
 
 ### Low
-- **#26 [apps/ui/src/]**: Add skeleton loading screens (`Skeleton.tsx`) to the card grid and detail page instead of bare `CircularProgress` spinners. Improves perceived performance and avoids layout shift.
 - **#27 [apps/ui/src/]**: Keyboard shortcuts: `/` to focus search, `?` for help, arrow keys to navigate grid. Implement via global `keydown` listener in `AppContent.tsx`.
 - **#28 [apps/ui/src/]**: a11y audit — verify all interactive `<Box>` elements have accessible names/roles, check color contrast on custom theme vars (WCAG AA), ensure form inputs have associated labels.
-- **#29 [apps/ui/src/components/SingleShow.tsx, Result.tsx]**: Both share similar card/list item layout but duplicate markup and styles. Extract a `ShowCard.tsx` base component to reduce duplication.
 
 ---
 
