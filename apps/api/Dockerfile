@@ -27,7 +27,7 @@ RUN corepack enable
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
 COPY apps/shared/package.json ./apps/shared/
-RUN pnpm install --frozen-lockfile --prod
+RUN HUSKY=0 pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY apps/api/drizzle ./apps/api/drizzle
