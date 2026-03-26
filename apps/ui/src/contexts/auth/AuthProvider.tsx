@@ -1,7 +1,8 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { getUserProfile } from '../../apis/userRequests';
-import { apiClient, setLogoutCallback } from '../../utils/requests';
+import { setLogoutCallback } from '../../utils/requests';
+import { logoutUser } from '../../apis/authRequests';
 import type { ProfileData } from '@shared/types/tv-tracker';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -10,7 +11,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await apiClient.post('/api/auth/logout');
+      await logoutUser();
     } catch {
       // Ignore errors — clear state regardless
     }

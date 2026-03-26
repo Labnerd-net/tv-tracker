@@ -30,8 +30,6 @@ type Variables = {
   jwtPayload: JwtData;
 };
 
-const auth = new Hono<{ Variables: Variables }>();
-
 function setRefreshCookie(c: Context, raw: string) {
   setCookie(c, 'refreshToken', raw, {
     httpOnly: true,
@@ -52,171 +50,168 @@ function setAccessCookie(c: Context, token: string) {
   });
 }
 
-// Register a new user
-auth.post('/register', authRateLimit, zValidator('json', registrationSchema, validationHook), async c => {
-  try {
-    const { email, password, displayName } = c.req.valid('json');
+const auth = new Hono<{ Variables: Variables }>()
+  // Register a new user
+  .post('/register', authRateLimit, zValidator('json', registrationSchema, validationHook), async c => {
+    try {
+      const { email, password, displayName } = c.req.valid('json');
 
-    const existing = await dbUserFunctions.returnUserByEmail(db, email);
-    if (existing?.length) {
-      return c.json(err('User already exists'), 409);
+      const existing = await dbUserFunctions.returnUserByEmail(db, email);
+      if (existing?.length) {
+        return c.json(err('User already exists'), 409);
+      }
+      const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
+      const roles: Role[] = ['user'];
+      const user = { email, passwordHash, roles, displayName } as UserData;
+      const result = await dbUserFunctions.addUser(db, user);
+      if (!result || !(result.length > 0)) {
+        throw new Error(`Could not add new user with email=${email}`);
+      }
+      const payload = {
+        sub: result[0].userId,
+        email: result[0].email,
+        displayName: result[0].displayName,
+        roles: result[0].roles,
+        exp: getAccessTokenExpirationSeconds(),
+      };
+      const token = await sign(payload, jwtSecret, jwtAlgorithm);
+
+      const { raw, hash } = generateRefreshToken();
+      const expiresAt = getRefreshTokenExpirationDate();
+      await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, expiresAt);
+      setRefreshCookie(c, raw);
+      setAccessCookie(c, token);
+
+      return c.json(ok({}));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in register route');
+      return c.json(err('An unexpected error occurred'), 500);
     }
-    const passwordHash = await bcrypt.hash(password, bcryptSaltRounds);
-    const roles: Role[] = ['user'];
-    const user = { email, passwordHash, roles, displayName } as UserData;
-    const result = await dbUserFunctions.addUser(db, user);
-    if (!result || !(result.length > 0)) {
-      throw new Error(`Could not add new user with email=${email}`);
+  })
+  // Log in an existing user
+  .post('/login', authRateLimit, zValidator('json', loginSchema, validationHook), async c => {
+    try {
+      const { email, password } = c.req.valid('json');
+
+      const user = await dbUserFunctions.returnUserByEmail(db, email);
+      if (!user || user.length === 0) {
+        return c.json(err('Invalid credentials'), 401);
+      }
+      const isValid = await bcrypt.compare(password, user[0].passwordHash);
+      if (!isValid) return c.json(err('Invalid credentials'), 401);
+      const payload = {
+        sub: user[0].userId,
+        email: user[0].email,
+        displayName: user[0].displayName,
+        roles: user[0].roles,
+        exp: getAccessTokenExpirationSeconds(),
+      };
+      const token = await sign(payload, jwtSecret, jwtAlgorithm);
+
+      const { raw, hash } = generateRefreshToken();
+      const expiresAt = getRefreshTokenExpirationDate();
+      await dbUserFunctions.updateRefreshToken(db, user[0].userId, hash, expiresAt);
+      setRefreshCookie(c, raw);
+      setAccessCookie(c, token);
+
+      return c.json(ok({}));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in login route');
+      return c.json(err('An unexpected error occurred'), 500);
     }
-    const payload = {
-      sub: result[0].userId,
-      email: result[0].email,
-      displayName: result[0].displayName,
-      roles: result[0].roles,
-      exp: getAccessTokenExpirationSeconds(),
-    };
-    const token = await sign(payload, jwtSecret, jwtAlgorithm);
+  })
+  // Refresh access token using the httpOnly cookie
+  .post('/refresh', authRateLimit, async c => {
+    try {
+      const raw = getCookie(c, 'refreshToken');
+      if (!raw) {
+        return c.json(err('Missing refresh token'), 401);
+      }
 
-    const { raw, hash } = generateRefreshToken();
-    const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, expiresAt);
-    setRefreshCookie(c, raw);
-    setAccessCookie(c, token);
+      const hash = createHash('sha256').update(raw).digest('hex');
+      const users = await dbUserFunctions.returnUserByRefreshTokenHash(db, hash);
+      if (!users || users.length === 0) {
+        return c.json(err('Invalid refresh token'), 401);
+      }
+      const user = users[0];
 
-    return c.json(ok({}));
-  } catch (e: unknown) {
-    logger.error({ err: e }, 'Unexpected error in register route');
-    return c.json(err('An unexpected error occurred'), 500);
-  }
-});
+      if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
+        return c.json(err('Refresh token expired'), 401);
+      }
 
-// Log in an existing user
-auth.post('/login', authRateLimit, zValidator('json', loginSchema, validationHook), async c => {
-  try {
-    const { email, password } = c.req.valid('json');
+      const payload = {
+        sub: user.userId,
+        email: user.email,
+        displayName: user.displayName,
+        roles: user.roles,
+        exp: getAccessTokenExpirationSeconds(),
+      };
+      const token = await sign(payload, jwtSecret, jwtAlgorithm);
 
-    const user = await dbUserFunctions.returnUserByEmail(db, email);
-    if (!user || user.length === 0) {
-      return c.json(err('Invalid credentials'), 401);
+      const { raw: newRaw, hash: newHash } = generateRefreshToken();
+      const expiresAt = getRefreshTokenExpirationDate();
+      await dbUserFunctions.updateRefreshToken(db, user.userId, newHash, expiresAt);
+      setRefreshCookie(c, newRaw);
+      setAccessCookie(c, token);
+
+      return c.json(ok({}));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in refresh route');
+      return c.json(err('An unexpected error occurred'), 500);
     }
-    const isValid = await bcrypt.compare(password, user[0].passwordHash);
-    if (!isValid) return c.json(err('Invalid credentials'), 401);
-    const payload = {
-      sub: user[0].userId,
-      email: user[0].email,
-      displayName: user[0].displayName,
-      roles: user[0].roles,
-      exp: getAccessTokenExpirationSeconds(),
-    };
-    const token = await sign(payload, jwtSecret, jwtAlgorithm);
-
-    const { raw, hash } = generateRefreshToken();
-    const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(db, user[0].userId, hash, expiresAt);
-    setRefreshCookie(c, raw);
-    setAccessCookie(c, token);
-
-    return c.json(ok({}));
-  } catch (e: unknown) {
-    logger.error({ err: e }, 'Unexpected error in login route');
-    return c.json(err('An unexpected error occurred'), 500);
-  }
-});
-
-// Refresh access token using the httpOnly cookie
-auth.post('/refresh', authRateLimit, async c => {
-  try {
-    const raw = getCookie(c, 'refreshToken');
-    if (!raw) {
-      return c.json(err('Missing refresh token'), 401);
+  })
+  // Logout — clear refresh token cookie and DB record
+  .post('/logout', authMiddleware, async c => {
+    try {
+      const payload = c.get('jwtPayload');
+      await dbUserFunctions.clearRefreshToken(db, payload.sub);
+      deleteCookie(c, 'refreshToken', { path: '/api/auth' });
+      setCookie(c, 'accessToken', '', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'None' : 'Lax',
+        maxAge: 0,
+        path: '/api',
+      });
+      return c.json(ok({ status: 'logged out' }));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in logout route');
+      return c.json(err('An unexpected error occurred'), 500);
     }
-
-    const hash = createHash('sha256').update(raw).digest('hex');
-    const users = await dbUserFunctions.returnUserByRefreshTokenHash(db, hash);
-    if (!users || users.length === 0) {
-      return c.json(err('Invalid refresh token'), 401);
+  })
+  // Delete a user by ID
+  .delete('/deleteUser', authRateLimit, authMiddleware, async c => {
+    try {
+      const payload = c.get('jwtPayload');
+      const userIdString = String(payload.sub);
+      const user = await dbUserFunctions.returnUserById(db, userIdString);
+      if (!user || user.length === 0) {
+        return c.json(err('User not found'), 404);
+      }
+      await dbUserFunctions.clearRefreshToken(db, payload.sub);
+      const returnValue = await dbUserFunctions.deleteUserById(db, userIdString);
+      if (!returnValue) {
+        return c.json(err('User not found'), 404);
+      }
+      setCookie(c, 'refreshToken', '', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'None' : 'Lax',
+        maxAge: 0,
+        path: '/api/auth',
+      });
+      setCookie(c, 'accessToken', '', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'None' : 'Lax',
+        maxAge: 0,
+        path: '/api',
+      });
+      return c.json(ok({ status: 'deleted' }));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in deleteUser route');
+      return c.json(err('An unexpected error occurred'), 500);
     }
-    const user = users[0];
-
-    if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
-      return c.json(err('Refresh token expired'), 401);
-    }
-
-    const payload = {
-      sub: user.userId,
-      email: user.email,
-      displayName: user.displayName,
-      roles: user.roles,
-      exp: getAccessTokenExpirationSeconds(),
-    };
-    const token = await sign(payload, jwtSecret, jwtAlgorithm);
-
-    const { raw: newRaw, hash: newHash } = generateRefreshToken();
-    const expiresAt = getRefreshTokenExpirationDate();
-    await dbUserFunctions.updateRefreshToken(db, user.userId, newHash, expiresAt);
-    setRefreshCookie(c, newRaw);
-    setAccessCookie(c, token);
-
-    return c.json(ok({}));
-  } catch (e: unknown) {
-    logger.error({ err: e }, 'Unexpected error in refresh route');
-    return c.json(err('An unexpected error occurred'), 500);
-  }
-});
-
-// Logout — clear refresh token cookie and DB record
-auth.post('/logout', authMiddleware, async c => {
-  try {
-    const payload = c.get('jwtPayload');
-    await dbUserFunctions.clearRefreshToken(db, payload.sub);
-    deleteCookie(c, 'refreshToken', { path: '/api/auth' });
-    setCookie(c, 'accessToken', '', {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'None' : 'Lax',
-      maxAge: 0,
-      path: '/api',
-    });
-    return c.json(ok({ status: 'logged out' }));
-  } catch (e: unknown) {
-    logger.error({ err: e }, 'Unexpected error in logout route');
-    return c.json(err('An unexpected error occurred'), 500);
-  }
-});
-
-// Delete a user by ID
-auth.delete('/deleteUser', authRateLimit, authMiddleware, async c => {
-  try {
-    const payload = c.get('jwtPayload');
-    const userIdString = String(payload.sub);
-    const user = await dbUserFunctions.returnUserById(db, userIdString);
-    if (!user || user.length === 0) {
-      return c.json(err('User not found'), 404);
-    }
-    await dbUserFunctions.clearRefreshToken(db, payload.sub);
-    const returnValue = await dbUserFunctions.deleteUserById(db, userIdString);
-    if (!returnValue) {
-      return c.json(err('User not found'), 404);
-    }
-    setCookie(c, 'refreshToken', '', {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'None' : 'Lax',
-      maxAge: 0,
-      path: '/api/auth',
-    });
-    setCookie(c, 'accessToken', '', {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'None' : 'Lax',
-      maxAge: 0,
-      path: '/api',
-    });
-    return c.json(ok({ status: 'deleted' }));
-  } catch (e: unknown) {
-    logger.error({ err: e }, 'Unexpected error in deleteUser route');
-    return c.json(err('An unexpected error occurred'), 500);
-  }
-});
+  });
 
 export default auth;

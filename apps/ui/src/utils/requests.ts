@@ -1,11 +1,6 @@
 import axios from 'axios';
 import { logger } from '../utils/logger';
 
-export const apiClient = axios.create({
-  baseURL: '',
-  withCredentials: true,
-});
-
 let logoutCallback: (() => void) | null = null;
 
 export function setLogoutCallback(fn: () => void) {
@@ -13,41 +8,45 @@ export function setLogoutCallback(fn: () => void) {
 }
 
 let isRefreshing = false;
-let refreshQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: unknown) => void }> = [];
+let refreshQueue: Array<{ resolve: () => void; reject: (reason?: unknown) => void }> = [];
 
-apiClient.interceptors.response.use(
-  response => response,
-  async error => {
-    const originalRequest = error.config;
-
-    if (error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        refreshQueue.push({ resolve, reject });
-      }).then(() => apiClient(originalRequest));
-    }
-
-    originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      await axios.post('/api/auth/refresh', {}, { withCredentials: true });
-      refreshQueue.forEach(({ resolve }) => resolve(undefined));
-      refreshQueue = [];
-      return apiClient(originalRequest);
-    } catch (refreshError) {
-      refreshQueue.forEach(({ reject }) => reject(refreshError));
-      refreshQueue = [];
-      logoutCallback?.();
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
-    }
+function processQueue(error: unknown) {
+  if (error) {
+    refreshQueue.forEach(({ reject }) => reject(error));
+  } else {
+    refreshQueue.forEach(({ resolve }) => resolve());
   }
-);
+  refreshQueue = [];
+}
+
+export async function authenticatedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const response = await fetch(input, { ...init, credentials: 'include' });
+
+  if (response.status !== 401) return response;
+
+  if (isRefreshing) {
+    return new Promise<void>((resolve, reject) => {
+      refreshQueue.push({ resolve, reject });
+    }).then(() => fetch(input, { ...init, credentials: 'include' }));
+  }
+
+  isRefreshing = true;
+  try {
+    const refreshResponse = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (!refreshResponse.ok) throw new Error('Refresh failed');
+    processQueue(null);
+    return fetch(input, { ...init, credentials: 'include' });
+  } catch (err) {
+    processQueue(err);
+    logoutCallback?.();
+    throw err;
+  } finally {
+    isRefreshing = false;
+  }
+}
 
 export function handleApiError(caller: string, error: unknown): { success: false; error: string } {
   if (axios.isAxiosError(error) && error.response?.data?.error) {

@@ -27,8 +27,11 @@ app.get('/', c => c.text('Welcome to TV Tracker!'));
 app.notFound(c => c.json({ message: 'Not Found', ok: false }, 404));
 app.get('/health', c => c.json({ status: 'UP' }));
 
-app.route('/api/auth', authRoutes);
-app.route('/api/admin', adminRoutes);
-app.route('/api/user', userRoutes);
+// Chain .route() calls so TypeScript captures the full route schema for RPC type inference
+const routes = app
+  .route('/api/auth', authRoutes)
+  .route('/api/admin', adminRoutes)
+  .route('/api/user', userRoutes);
 
-export default app;
+export default routes;
+export type AppType = typeof routes;

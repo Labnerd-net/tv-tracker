@@ -1,40 +1,46 @@
 import type { ApiVoidResponse, Credentials, RegistrationData } from '@shared/types/tv-tracker';
-import { apiClient, handleApiError } from '../utils/requests';
-
-const path = 'api/auth';
+import { client } from '../utils/honoClient';
 
 export async function loginUser(credentials: Credentials): Promise<ApiVoidResponse> {
   try {
-    const response = await apiClient.post(`/${path}/login`, credentials);
-    if (response.data.ok) {
-      return { success: true };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('loginUser', error);
+    const response = await client.api.auth.login.$post({ json: credentials });
+    const data = await response.json();
+    if (data.ok) return { success: true };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function registerUser(data: RegistrationData): Promise<ApiVoidResponse> {
   try {
-    const response = await apiClient.post(`/${path}/register`, data);
-    if (response.data.ok) {
-      return { success: true };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('registerUser', error);
+    const response = await client.api.auth.register.$post({ json: data });
+    const body = await response.json();
+    if (body.ok) return { success: true };
+    return { success: false, error: body.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
+  }
+}
+
+export async function logoutUser(): Promise<ApiVoidResponse> {
+  try {
+    const response = await client.api.auth.logout.$post();
+    const data = await response.json();
+    if (data.ok) return { success: true };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function deleteUser(): Promise<ApiVoidResponse> {
   try {
-    const response = await apiClient.delete(`/${path}/deleteUser`);
-    if (response.data.ok) {
-      return { success: true };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('deleteUser', error);
+    const response = await client.api.auth.deleteUser.$delete();
+    const data = await response.json();
+    if (data.ok) return { success: true };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }

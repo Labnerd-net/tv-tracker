@@ -2,80 +2,76 @@ import axios from 'axios';
 import type { TvMazeSeries, TvMazeShow } from '@shared/types/tvmaze';
 import type { ApiResponse, ProfileData, ShowData } from '@shared/types/tv-tracker';
 import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze';
-import { apiClient, handleApiError } from '../utils/requests';
-const path = 'api/user';
+import { handleApiError } from '../utils/requests';
+import { client } from '../utils/honoClient';
 
 export async function getUserProfile(): Promise<ApiResponse<ProfileData>> {
   try {
-    const response = await apiClient.get(`/${path}/profile`);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('getUserProfile', error);
+    const response = await client.api.user.profile.$get();
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function getAllShows(): Promise<ApiResponse<ShowData[]>> {
   try {
-    const response = await apiClient.get(`/${path}/tvshows`);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('getAllShows', error);
+    const response = await client.api.user.tvshows.$get();
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function getOneShow(showID: string): Promise<ApiResponse<ShowData>> {
   try {
-    const response = await apiClient.get(`/${path}/tvshow/${showID}`);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('getOneShow', error);
+    const response = await client.api.user.tvshow[':id'].$get({ param: { id: showID } });
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function addNewShowJson(showData: TvMazeShow): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
-    const response = await apiClient.post(`/${path}/tvshow`, showData);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('addNewShowJson', error);
+    const response = await client.api.user.tvshow.$post({ json: showData });
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function updateShow(showID: string): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
-    const response = await apiClient.patch(`/${path}/tvshow/${showID}`, null);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('updateShow', error);
+    const response = await client.api.user.tvshow[':id'].$patch({ param: { id: showID } });
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
 
 export async function deleteShow(showID: string): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
-    const response = await apiClient.delete(`/${path}/tvshow/${showID}`);
-    if (response.data.ok) {
-      return { success: true, data: response.data.data };
-    }
-    return { success: false, error: response.data.error };
-  } catch (error) {
-    return handleApiError('deleteShow', error);
+    const response = await client.api.user.tvshow[':id'].$delete({ param: { id: showID } });
+    const data = await response.json();
+    if (data.ok) return { success: true, data: data.data };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
   }
 }
+
+// TVMaze-direct functions — these call api.tvmaze.com directly, not our API
 
 export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<ApiResponse<{ date: string }>> {
   try {
@@ -125,18 +121,18 @@ export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: Abor
 
 export async function tvShowResults(showName: string): Promise<ApiResponse<TvMazeSeries[]>> {
   try {
-    const response = await axios.get(`${TV_MAZE_API_BASE}/search/shows?q=${encodeURIComponent(showName)}`)
+    const response = await axios.get(`${TV_MAZE_API_BASE}/search/shows?q=${encodeURIComponent(showName)}`);
     return { success: true, data: response.data };
-  } catch(error) {
+  } catch (error) {
     return handleApiError('tvShowResults', error);
   }
 }
 
 export async function returnSearchShow(showId: string): Promise<ApiResponse<TvMazeShow>> {
   try {
-    const response = await axios.get(`${TV_MAZE_API_BASE}/shows/${showId}`)
+    const response = await axios.get(`${TV_MAZE_API_BASE}/shows/${showId}`);
     return { success: true, data: response.data };
-  } catch(error) {
+  } catch (error) {
     return handleApiError('returnSearchShow', error);
   }
 }

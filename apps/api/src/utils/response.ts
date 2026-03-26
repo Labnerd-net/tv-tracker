@@ -1,2 +1,2 @@
-export const ok = (data: unknown) => ({ ok: true, data });
-export const err = (msg: string) => ({ ok: false, error: msg });
+export const ok = <T>(data: T) => ({ ok: true as const, data });
+export const err = (msg: string) => ({ ok: false as const, error: msg });
