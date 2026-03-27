@@ -52,7 +52,6 @@ _None identified._
 - **#10 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter is per-process. In multi-instance deployments (Docker Swarm, K8s) each instance tracks separately, allowing limit bypass by round-robining. Fix: add a Redis-backed implementation as a drop-in alternative selected via `REDIS_URL` env var; fall back to in-memory when unset.
 
 ### Medium
-- **#12 [apps/api/src/routes/user.ts:93]**: `body as unknown as TvMazeShow` double-cast silences TypeScript — `TvMazeData` could access fields validated by schema (e.g., `genres`, `runtime`) that are `undefined` at runtime without error. Same pattern at lines 125 and 156. Fix: define a `TvMazeShowInput` type matching the Zod schema and accept it in `TvMazeData`'s constructor, eliminating the cast.
 - **#13 [apps/ui/src/]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` for the `AllShows.tsx` grid (lines 77–89).
 - **#14 [apps/ui/src/]**: Accessibility — interactive `<Box>` elements lack semantic roles/keyboard access. `ShowCard.tsx` card is a `<Box onClick>` without `role="button"` or `tabIndex`. Back button in `OneShow.tsx:115` has no `aria-label`. Action buttons in `ShowsTable.tsx` are missing labels. Fix: convert to semantic elements or add `role`/`tabIndex`/`aria-label` attributes.
 - **#15 [apps/ui/src/]**: No error boundary. If any page component throws, the entire app goes blank. Fix: add an `ErrorBoundary` class component wrapping the router in `App.tsx`.
@@ -96,6 +95,6 @@ _None identified._
 | Security | 0 | 2 | 0 | 2 |
 | Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 4 | 7 | 12 |
+| Improvements & Refactors | 1 | 3 | 7 | 11 |
 | Feature Ideas | 3 | 3 | 5 | 11 |
-| **Total** | **4** | **13** | **12** | **29** |
+| **Total** | **4** | **12** | **12** | **28** |
