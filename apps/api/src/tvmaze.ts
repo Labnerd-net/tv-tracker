@@ -59,6 +59,10 @@ export default class TvMazeData {
           return '';
         }
         const response = await fetch(link);
+        if (!response.ok) {
+          logger.warn({ link, status: response.status }, `Non-OK response from TVMaze for ${label} episode`);
+          return '';
+        }
         const data = await response.json();
         return data.airdate ?? '';
       } catch (e) {
