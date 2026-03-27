@@ -35,6 +35,13 @@ const mockAdminUser = {
   refreshTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 };
 
+const mockAdminProfile = {
+  userId: mockAdminUser.userId,
+  email: mockAdminUser.email,
+  displayName: mockAdminUser.displayName,
+  roles: mockAdminUser.roles,
+};
+
 function post(path: string, body: unknown) {
   return app.request(path, {
     method: 'POST',
@@ -63,7 +70,7 @@ describe('GET /api/admin/users', () => {
   it('returns 200 with user profiles that do not include sensitive fields', async () => {
     const token = await getAdminAccessToken();
 
-    vi.mocked(dbUserFunctions.returnUsers).mockResolvedValueOnce([mockAdminUser]);
+    vi.mocked(dbUserFunctions.returnUsers).mockResolvedValueOnce([mockAdminProfile]);
 
     const res = await app.request('/api/admin/users', {
       headers: { Cookie: `accessToken=${token}` },

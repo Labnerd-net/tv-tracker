@@ -21,7 +21,7 @@ import {
   isProduction,
 } from '../utils/envVars.js';
 import { authMiddleware } from '../utils/middleware.js';
-import { authRateLimit } from '../utils/rateLimiter.js';
+import { authRateLimit, apiRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
 import { loginSchema, registrationSchema } from '../schemas/auth.js';
 import { validationHook } from '../utils/validationHook.js';
@@ -174,7 +174,7 @@ const auth = new Hono<{ Variables: Variables }>()
     }
   })
   // Delete a user by ID
-  .delete('/deleteUser', authRateLimit, authMiddleware, async c => {
+  .delete('/deleteUser', apiRateLimit, authMiddleware, async c => {
     try {
       const payload = c.get('jwtPayload');
       const userIdString = String(payload.sub);

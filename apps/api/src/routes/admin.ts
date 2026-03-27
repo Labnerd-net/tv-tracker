@@ -2,10 +2,7 @@ import { Hono } from 'hono';
 import { returnUsers } from '../db/dbUserFunctions.js';
 import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
-import type {
-  JwtData,
-  ProfileData,
-} from '@shared/types/tv-tracker.js';
+import type { JwtData } from '@shared/types/tv-tracker.js';
 import { authMiddleware, requireRole } from '../utils/middleware.js';
 import { apiRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
@@ -20,10 +17,7 @@ const admin = new Hono<{ Variables: Variables }>()
   // Return all users' details
   .get('/users', requireRole('admin'), async c => {
     try {
-      const allUsers = await returnUsers(db);
-      const allUserProfiles: ProfileData[] = allUsers.map(({ userId, email, displayName, roles }) => ({
-        userId, email, displayName, roles,
-      }));
+      const allUserProfiles = await returnUsers(db);
       return c.json(ok({ allUserProfiles }));
     } catch (e: unknown) {
       logger.error({ err: e }, 'Unexpected error in admin route');
