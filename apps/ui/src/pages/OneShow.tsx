@@ -26,7 +26,13 @@ export default function OneShow() {
       try {
         if (showID) {
           const response = await Api.getOneShow(showID);
-          if (response.success && response.data) setTvShow(response.data);
+          if (response.success) {
+            setTvShow(response.data);
+          } else {
+            const msg = response.error ?? 'Failed to retrieve TV Show';
+            setError(msg);
+            showAlert('danger', msg);
+          }
         }
       } catch (err) {
         logger.error(err);
@@ -46,7 +52,7 @@ export default function OneShow() {
   };
 
   const deleteOneShow = () => {
-    if (tvShow) {
+    if (tvShow && showID) {
       deleteShow(String(tvShow.showId), tvShow.title, () => navigate('/'));
     }
   };
