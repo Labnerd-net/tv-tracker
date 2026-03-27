@@ -25,8 +25,6 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#5 [apps/ui/src/pages/OneShow.tsx:29]**: When `response.success` is false (e.g., 404), neither `setError` nor `showAlert` is called — `tvShow` stays undefined and the component renders a silent "Show not found" fallback with no user notification. The catch block only handles network errors. Fix: add an `else` branch on `!response.success` that sets error state and calls `showAlert`.
-- **#6 [apps/ui/src/pages/OneShow.tsx:42]**: `refreshData` and `deleteOneShow` callbacks guard on `tvShow` but not `showID`. Since `showID` comes from `useParams()` typed as `string | undefined`, passing undefined to the underlying action functions is possible if the component is ever reused on a loosened route. Fix: add `showID` check to both callbacks.
 - **#7 [apps/api/src/tvmaze.ts:62]**: `fetchAirdate` calls `response.json()` without first checking `response.ok`. A non-200 response from TVMaze returns silently as an empty string — no error is logged. Fix: check `response.ok` before parsing and log the status code on failure.
 
 ### Low
