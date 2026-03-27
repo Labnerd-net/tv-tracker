@@ -6,6 +6,7 @@ import { jwtAlgorithm, jwtSecret } from '../utils/envVars.js';
 import type { JwtData, Role } from '@shared/types/tv-tracker.js';
 import { err } from './response.js';
 import pinoLogger from './logger.js';
+import { jwtDataSchema } from '../schemas/auth.js';
 
 export const logger = createMiddleware(async (c, next) => {
   const start = Date.now();
@@ -22,7 +23,11 @@ export const authMiddleware = createMiddleware(async (c, next) => {
   }
   try {
     const payload = await verify(token, jwtSecret, jwtAlgorithm);
-    c.set('jwtPayload', payload as unknown as JwtData);
+    const parsed = jwtDataSchema.safeParse(payload);
+    if (!parsed.success) {
+      return c.json(err('Unauthorized'), 401);
+    }
+    c.set('jwtPayload', parsed.data);
   } catch {
     return c.json(err('Unauthorized'), 401);
   }

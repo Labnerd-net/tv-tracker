@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TvMazeData from '../src/tvmaze.js';
+import logger from '../src/utils/logger.js';
 import type { TvMazeShow } from '@shared/types/tvmaze.js';
 
 const baseMockShow: TvMazeShow = {
@@ -80,6 +81,7 @@ describe('TvMazeData constructor imageLink validation', () => {
 describe('TvMazeData.updateEpisodes() URL validation', () => {
   it('fetches airdate for valid api.tvmaze.com URL', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
       json: async () => ({ airdate: '2024-01-01' }),
     } as Response);
 
@@ -117,5 +119,25 @@ describe('TvMazeData.updateEpisodes() URL validation', () => {
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(show.nextEpisode).toBe('');
+  });
+
+  it('returns empty string and logs a warning when TVMaze returns a non-200 response', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 429,
+    } as Response);
+    const warnSpy = vi.spyOn(logger, 'warn');
+
+    const show = new TvMazeData({
+      ...baseMockShow,
+      _links: { nextepisode: { href: 'https://api.tvmaze.com/episodes/123' } },
+    });
+    const result = await show.updateEpisodes();
+
+    expect(result).toEqual({ next: '', prev: '' });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 429 }),
+      expect.any(String),
+    );
   });
 });
