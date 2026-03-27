@@ -166,13 +166,7 @@ const auth = new Hono<{ Variables: Variables }>()
       const payload = c.get('jwtPayload');
       await dbUserFunctions.clearRefreshToken(db, payload.sub);
       deleteCookie(c, 'refreshToken', { path: '/api/auth' });
-      setCookie(c, 'accessToken', '', {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? 'None' : 'Lax',
-        maxAge: 0,
-        path: '/api',
-      });
+      deleteCookie(c, 'accessToken', { path: '/api' });
       return c.json(ok({ status: 'logged out' }));
     } catch (e: unknown) {
       logger.error({ err: e }, 'Unexpected error in logout route');

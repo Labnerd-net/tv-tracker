@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import * as Api from '../apis/userRequests.ts';
-import { logger } from '../utils/logger.ts';
-import { useShow } from '../contexts/show/ShowContext.tsx';
-import { useAlert } from '../contexts/alert/AlertContext.tsx';
+import * as Api from '../apis/userRequests.js';
+import { logger } from '../utils/logger.js';
+import { useShow } from '../contexts/show/ShowContext.js';
+import { useAlert } from '../contexts/alert/AlertContext.js';
 
 export function useShowActions() {
   const { updateShow, removeShow } = useShow();

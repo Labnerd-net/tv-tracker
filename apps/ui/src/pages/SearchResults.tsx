@@ -9,8 +9,7 @@ import type { TvMazeSeries } from '@shared/types/tvmaze.js';
 import { useAlert } from '../contexts/alert/AlertContext.js';
 
 export default function SearchResults() {
-  const alertProps = useAlert();
-  const { showAlert } = alertProps;
+  const { showAlert } = useAlert();
   const { showName } = useParams();
   const [searchResults, setSearchResults] = useState<TvMazeSeries[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,7 +153,7 @@ export default function SearchResults() {
               <Result
                 key={data.show.id}
                 showData={data}
-                alertProps={alertProps}
+                showAlert={showAlert}
                 nextEpisodeDate={episodeDates[data.show.id] ?? ''}
                 episodeLoading={episodesLoading}
               />

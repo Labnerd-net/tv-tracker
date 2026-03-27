@@ -2,19 +2,18 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import * as Api from '../apis/userRequests.ts';
 import { getPlatformName, sanitizeTvMazeImageUrl } from '@shared/utils/tvmaze';
-import type { AlertProps } from '../types/alert.ts';
 import type { TvMazeSeries } from '@shared/types/tvmaze.ts';
 import { useShow } from '../contexts/show/ShowContext.tsx';
 import ShowCard from './ShowCard.tsx';
 
 export default function Result({
   showData,
-  alertProps,
+  showAlert,
   nextEpisodeDate,
   episodeLoading,
 }: {
   showData: TvMazeSeries;
-  alertProps: AlertProps;
+  showAlert: (variant: string, message: string) => void;
   nextEpisodeDate: string;
   episodeLoading: boolean;
 }) {
@@ -26,14 +25,14 @@ export default function Result({
     try {
       const response1 = await Api.addNewShowJson(showData.show);
       if (!response1.success) {
-        alertProps.showAlert('danger', `Failed to add ${showData.show.name}!`);
+        showAlert('danger', `Failed to add ${showData.show.name}!`);
         return;
       }
       if (response1.data?.status === 'exists') {
-        alertProps.showAlert('warning', `${showData.show.name} already in your list`);
+        showAlert('warning', `${showData.show.name} already in your list`);
         return;
       }
-      alertProps.showAlert('success', `${showData.show.name} added`);
+      showAlert('success', `${showData.show.name} added`);
       const newShowId = response1.data?.showId;
       if (newShowId !== undefined) {
         const response2 = await Api.getOneShow(String(newShowId));
@@ -42,7 +41,7 @@ export default function Result({
         }
       }
     } catch {
-      alertProps.showAlert('danger', `Failed to add ${showData.show.name}!`);
+      showAlert('danger', `Failed to add ${showData.show.name}!`);
     } finally {
       setAdding(false);
     }
