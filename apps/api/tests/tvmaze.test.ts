@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TvMazeData from '../src/tvmaze.js';
 import logger from '../src/utils/logger.js';
-import type { TvMazeShow } from '@shared/types/tvmaze.js';
+import type { TvMazeShowInput } from '../src/schemas/show.js';
 
-const baseMockShow: TvMazeShow = {
+const baseMockShow: TvMazeShowInput = {
   id: 1,
   name: 'Test Show',
   status: 'Running',
@@ -44,14 +44,14 @@ describe('TvMazeData constructor scheduleDays', () => {
 describe('TvMazeData constructor imageLink validation', () => {
   it('keeps a valid static.tvmaze.com HTTPS URL', () => {
     const url = 'https://static.tvmaze.com/uploads/images/medium_portrait/0/1.jpg';
-    const show = new TvMazeData({ ...baseMockShow, image: { medium: url, original: url } });
+    const show = new TvMazeData({ ...baseMockShow, image: { medium: url } });
     expect(show.imageLink).toBe(url);
   });
 
   it('clears imageLink for a non-TVMaze hostname', () => {
     const show = new TvMazeData({
       ...baseMockShow,
-      image: { medium: 'https://evil.example.com/img.jpg', original: '' },
+      image: { medium: 'https://evil.example.com/img.jpg' },
     });
     expect(show.imageLink).toBe('');
   });
@@ -59,7 +59,7 @@ describe('TvMazeData constructor imageLink validation', () => {
   it('clears imageLink for HTTP (non-HTTPS) URL', () => {
     const show = new TvMazeData({
       ...baseMockShow,
-      image: { medium: 'http://static.tvmaze.com/img.jpg', original: '' },
+      image: { medium: 'http://static.tvmaze.com/img.jpg' },
     });
     expect(show.imageLink).toBe('');
   });
@@ -67,7 +67,7 @@ describe('TvMazeData constructor imageLink validation', () => {
   it('clears imageLink for a malformed URL', () => {
     const show = new TvMazeData({
       ...baseMockShow,
-      image: { medium: 'not-a-url', original: '' },
+      image: { medium: 'not-a-url' },
     });
     expect(show.imageLink).toBe('');
   });
@@ -139,5 +139,34 @@ describe('TvMazeData.updateEpisodes() URL validation', () => {
       expect.objectContaining({ status: 429 }),
       expect.any(String),
     );
+  });
+});
+
+describe('TvMazeData constructor _embedded episode data', () => {
+  it('populates nextEpisode and prevEpisode from _embedded when present', () => {
+    const show = new TvMazeData({
+      ...baseMockShow,
+      _embedded: {
+        nextepisode: { airdate: '2025-06-01' },
+        previousepisode: { airdate: '2025-05-25' },
+      },
+    });
+    expect(show.nextEpisode).toBe('2025-06-01');
+    expect(show.prevEpisode).toBe('2025-05-25');
+  });
+
+  it('defaults nextEpisode and prevEpisode to empty string when _embedded is absent', () => {
+    const show = new TvMazeData({ ...baseMockShow, _embedded: undefined });
+    expect(show.nextEpisode).toBe('');
+    expect(show.prevEpisode).toBe('');
+  });
+
+  it('handles minimal input (only id and name) without runtime errors', () => {
+    const show = new TvMazeData({ id: 42, name: 'Minimal Show' });
+    expect(show.tvMazeId).toBe(42);
+    expect(show.title).toBe('Minimal Show');
+    expect(show.scheduleDays).toEqual([]);
+    expect(show.nextEpisode).toBe('');
+    expect(show.prevEpisode).toBe('');
   });
 });

@@ -1,4 +1,4 @@
-import { type TvMazeShow } from '@shared/types/tvmaze.js';
+import { type TvMazeShowInput } from './schemas/show.js';
 import { getPlatformName } from '@shared/utils/tvmaze.js';
 import logger from './utils/logger.js';
 
@@ -15,7 +15,7 @@ export default class TvMazeData {
   nextEpisode: string;
   prevEpisode: string;
 
-  constructor(showData: TvMazeShow) {
+  constructor(showData: TvMazeShowInput) {
     this.title = showData.name ?? '';
     this.tvMazeId = showData.id ?? -1;
     this.platform = this.returnPlatform(showData);
@@ -30,7 +30,7 @@ export default class TvMazeData {
     logger.debug({ title: this.title, tvMazeId: this.tvMazeId }, 'TvMazeData constructed');
   }
 
-  returnPlatform(showData: TvMazeShow): string {
+  returnPlatform(showData: TvMazeShowInput): string {
     return getPlatformName(showData) ?? '';
   }
 

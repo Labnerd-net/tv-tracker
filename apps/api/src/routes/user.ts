@@ -12,7 +12,6 @@ import { authMiddleware } from '../utils/middleware.js';
 import { apiRateLimit } from '../utils/rateLimiter.js';
 import logger from '../utils/logger.js';
 import TvMazeData from '../tvmaze.js';
-import type { TvMazeShow } from '@shared/types/tvmaze.js';
 import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
 import { validationHook } from '../utils/validationHook.js';
 import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze.js';
@@ -90,7 +89,7 @@ const user = new Hono<{ Variables: Variables }>()
       if (existing && existing.length > 0) {
         return c.json(ok({ status: 'exists' }));
       }
-      const showData = new TvMazeData(body as unknown as TvMazeShow);
+      const showData = new TvMazeData(body);
       const result = await dbShowFunctions.addOneShow(db, showData, userId);
       const newShowId = result?.[0]?.showId;
       if (newShowId === undefined) {
@@ -122,7 +121,7 @@ const user = new Hono<{ Variables: Variables }>()
       if (!parsed.success) {
         return c.json(err('Invalid response from TVMaze'), 502);
       }
-      const showData = new TvMazeData(parsed.data as unknown as TvMazeShow);
+      const showData = new TvMazeData(parsed.data);
       const result = await dbShowFunctions.addOneShow(db, showData, userId);
       const newShowId = result?.[0]?.showId;
       if (newShowId !== undefined) {
@@ -153,7 +152,7 @@ const user = new Hono<{ Variables: Variables }>()
       if (!parsed.success) {
         return c.json(err('Invalid response from TVMaze'), 502);
       }
-      const showData = new TvMazeData(parsed.data as unknown as TvMazeShow);
+      const showData = new TvMazeData(parsed.data);
       await showData.updateEpisodes();
       await dbShowFunctions.updateOneShow(db, showData, showId, userId);
       return c.json(ok({ status: 'updated' }));

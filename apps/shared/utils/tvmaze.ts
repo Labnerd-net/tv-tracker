@@ -1,6 +1,9 @@
-import type { TvMazeShow } from '../types/tvmaze.js';
+type ShowPlatformData = {
+  network?: { name: string } | null;
+  webChannel?: { name: string } | null;
+};
 
-export function getPlatformName(show: TvMazeShow): string | null {
+export function getPlatformName(show: ShowPlatformData): string | null {
   return show.network?.name ?? show.webChannel?.name ?? null;
 }
 

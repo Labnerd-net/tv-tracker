@@ -25,7 +25,7 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#7 [apps/api/src/tvmaze.ts:62]**: `fetchAirdate` calls `response.json()` without first checking `response.ok`. A non-200 response from TVMaze returns silently as an empty string — no error is logged. Fix: check `response.ok` before parsing and log the status code on failure.
+_None identified._
 
 ### Low
 _None identified._
@@ -52,7 +52,6 @@ _None identified._
 - **#10 [apps/api/src/utils/rateLimiter.ts]**: In-memory rate limiter is per-process. In multi-instance deployments (Docker Swarm, K8s) each instance tracks separately, allowing limit bypass by round-robining. Fix: add a Redis-backed implementation as a drop-in alternative selected via `REDIS_URL` env var; fall back to in-memory when unset.
 
 ### Medium
-- **#11 [apps/api/src/utils/middleware.ts:25]**: `payload as unknown as JwtData` casts the result of Hono's `verify()` with no runtime field validation. A JWT signed with the correct secret but missing `sub`, `email`, or `roles` would pass silently and cause downstream `undefined` access. Fix: add a Zod parse or manual field check after `verify()` before casting.
 - **#12 [apps/api/src/routes/user.ts:93]**: `body as unknown as TvMazeShow` double-cast silences TypeScript — `TvMazeData` could access fields validated by schema (e.g., `genres`, `runtime`) that are `undefined` at runtime without error. Same pattern at lines 125 and 156. Fix: define a `TvMazeShowInput` type matching the Zod schema and accept it in `TvMazeData`'s constructor, eliminating the cast.
 - **#13 [apps/ui/src/]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` for the `AllShows.tsx` grid (lines 77–89).
 - **#14 [apps/ui/src/]**: Accessibility — interactive `<Box>` elements lack semantic roles/keyboard access. `ShowCard.tsx` card is a `<Box onClick>` without `role="button"` or `tabIndex`. Back button in `OneShow.tsx:115` has no `aria-label`. Action buttons in `ShowsTable.tsx` are missing labels. Fix: convert to semantic elements or add `role`/`tabIndex`/`aria-label` attributes.
@@ -95,8 +94,8 @@ _None identified._
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
 | Security | 0 | 2 | 0 | 2 |
-| Bugs | 0 | 3 | 0 | 3 |
+| Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 5 | 7 | 13 |
+| Improvements & Refactors | 1 | 4 | 7 | 12 |
 | Feature Ideas | 3 | 3 | 5 | 11 |
-| **Total** | **4** | **15** | **12** | **31** |
+| **Total** | **4** | **13** | **12** | **29** |
