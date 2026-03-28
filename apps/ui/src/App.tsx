@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/auth/AuthProvider.tsx';
 import { AlertProvider } from './contexts/alert/AlertProvider.tsx';
 import { ShowProvider } from './contexts/show/ShowProvider.tsx';
 import AppContent from './AppContent.tsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 export default function App() {
   return (
@@ -12,7 +13,9 @@ export default function App() {
         <AuthProvider>
           <AlertProvider>
             <ShowProvider>
-              <AppContent />
+              <ErrorBoundary>
+                <AppContent />
+              </ErrorBoundary>
             </ShowProvider>
           </AlertProvider>
         </AuthProvider>

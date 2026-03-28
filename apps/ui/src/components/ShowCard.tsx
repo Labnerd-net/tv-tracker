@@ -36,6 +36,9 @@ export default function ShowCard({
     return (
       <Box
         onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(); }}
         style={{ animationDelay: `${Math.min(index * 55, 900)}ms` }}
         sx={{
           position: 'relative',

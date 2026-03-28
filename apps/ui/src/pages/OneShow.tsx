@@ -119,6 +119,7 @@ export default function OneShow() {
         {/* Back button */}
         <Box
           component="button"
+          aria-label="Go back"
           onClick={() => navigate('/dashboard')}
           sx={{
             all: 'unset',
