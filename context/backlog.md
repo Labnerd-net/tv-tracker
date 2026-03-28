@@ -34,7 +34,7 @@ _None identified._
 ## Performance
 
 ### High
-- **#6 [apps/ui/src/pages/SearchResults.tsx:33–44]**: After receiving search results, one `fetchNextEpisodeDate()` request is fired per result in an unbounded loop with no concurrency limit (up to 20+ parallel requests). Fix: batch in groups of 5 with `Promise.allSettled`, or document the intentional tradeoff.
+_None identified._
 
 ### Medium
 _None identified._
@@ -55,9 +55,7 @@ _None identified._
 - **#11 [apps/api/src/routes/user.ts]**: Background `scheduleEpisodeUpdate()` calls are fire-and-forget with no error visibility. Failures are silently swallowed. Fix: introduce a simple in-memory job queue with retry and structured logging.
 
 ### Low
-- **#14 [apps/ui/src/contexts/alert/AlertContext.tsx:9]**: `alertVariant` is typed as `string` instead of `'danger' | 'warning' | 'success'`. Fix: define an `AlertVariant` union type and apply it to `AlertProps`.
-- **#15 [apps/api/src/routes/auth.ts:142–143]**: Cookie paths (`/api/auth`, `/api`) are duplicated across logout and `deleteUser`. Export path constants from `utils/auth.ts` and reference them in all four call sites.
-- **#18 [apps/api/src/db/dbShowFunctions.ts]**: Multiple DB functions manually call `Number()` on string IDs. Extract a shared `ensureNumericId(id: string): number` helper to reduce duplication.
+_None identified._
 
 ---
 
@@ -69,7 +67,6 @@ _None identified._
 ### Medium
 - **#20 [Episode Watch Tracking]**: Add a `watched_episodes` table (FK to `tv_shows`) and let users mark episodes as watched on the show detail page. Natural next step given the app already surfaces next/prev episode data.
 - **#21 [Show Collections / Custom Lists]**: Let users organize shows into custom lists (e.g., "Sci-Fi", "Watching now"). Collections are a tagging layer on the existing `tvShows` table — medium scope (new DB table, filter UI).
-- **#22 [TVMaze Client-Side Cache]**: Cache `fetchNextEpisodeDate()` results in a `Map` with a TTL (e.g., 7 days). Episode airdates change infrequently; this would reduce redundant TVMaze calls on every search and show list mount.
 
 ### Low
 - **#23 [Dashboard Stats Widgets]**: Quick computed stats on the AllShows page: "airing this week", "show statuses breakdown", etc. No new DB schema — derived from existing show data.
@@ -84,7 +81,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
-| Performance | 1 | 0 | 2 | 3 |
-| Improvements & Refactors | 0 | 2 | 4 | 6 |
-| Feature Ideas | 1 | 4 | 3 | 8 |
-| **Total** | **2** | **5** | **9** | **16** |
+| Performance | 0 | 0 | 2 | 2 |
+| Improvements & Refactors | 0 | 2 | 0 | 2 |
+| Feature Ideas | 1 | 3 | 3 | 7 |
+| **Total** | **1** | **5** | **5** | **11** |
