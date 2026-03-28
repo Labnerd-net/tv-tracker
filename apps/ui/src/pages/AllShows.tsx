@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import Box from '@mui/material/Box';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -119,15 +120,22 @@ export default function AllShows() {
             No shows tracked yet
           </Box>
           <Box
+            component={Link}
+            to="/search/"
             sx={{
               fontFamily: '"Space Mono", monospace',
               fontSize: '0.62rem',
               letterSpacing: '0.12em',
-              color: 'var(--cream-muted)',
+              color: 'var(--accent)',
               textTransform: 'uppercase',
+              textDecoration: 'none',
+              border: '1px solid rgba(230,57,70,0.3)',
+              padding: '8px 20px',
+              transition: 'all 0.15s ease',
+              '&:hover': { background: 'rgba(230,57,70,0.1)', borderColor: 'var(--accent)' },
             }}
           >
-            Use search to find and add shows
+            Search for shows
           </Box>
         </Box>
       )}
