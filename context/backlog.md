@@ -37,7 +37,6 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#8 [apps/ui/src/pages/SearchResults.tsx:34]**: One `fetchNextEpisodeDate` Axios call fires per search result via `Promise.allSettled`. For 10 results this is 10 concurrent cross-origin requests to TVMaze, which has undocumented rate limits. A single slow response also blocks the shared `episodesLoading` indicator for all cards. Fix: fetch episode data server-side in a search proxy endpoint, or add per-card loading state for incremental display.
 - **#9 [apps/ui/src/components/SingleShow.tsx:9]**: Each card in `AllShows` instantiates its own `useShowActions()` hook — N shows means N independent loading states and N memoized closures in memory. Acceptable for typical usage but degrades with large libraries. Fix: lift action state into `ShowContext` or use `useReducer` if library size becomes a concern.
 
 ### Low
@@ -55,7 +54,6 @@ _None identified._
 
 ### Low
 - **#16 [apps/api/src/db/schema.ts:23]**: `scheduleDay` is typed `string[]` but CLAUDE.md states only the first element is stored. The type and documentation contradict. Fix: either store the full array and remove the caveat, or type as `string` and rename to `scheduleDay` (singular).
-- **#19 [apps/ui/src/]**: Search navigation triggers on every keystroke. Add 300ms debounce to the search input before calling `navigate()` to reduce unnecessary route transitions.
 
 ---
 
@@ -85,7 +83,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
-| Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 1 | 2 | 4 |
+| Performance | 0 | 1 | 0 | 1 |
+| Improvements & Refactors | 1 | 1 | 1 | 3 |
 | Feature Ideas | 3 | 3 | 4 | 10 |
-| **Total** | **4** | **8** | **6** | **18** |
+| **Total** | **4** | **7** | **5** | **16** |
