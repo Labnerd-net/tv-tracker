@@ -60,10 +60,10 @@ export default function OneShowSearch() {
   }, [showAlert, showID]);
 
   const addTvShow = async () => {
-    if (!tvShow) return;
+    if (!tvShow || !showID) return;
     setAdding(true);
     try {
-      const response1 = await Api.addNewShowJson(tvShow);
+      const response1 = await Api.addNewShowById(showID);
       if (!response1.success) {
         alertProps.showAlert('danger', `Failed to add ${tvShow.name}!`);
         return;

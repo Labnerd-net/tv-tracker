@@ -38,9 +38,9 @@ export async function getOneShow(showID: string): Promise<ApiResponse<ShowData>>
   }
 }
 
-export async function addNewShowJson(showData: TvMazeShow): Promise<ApiResponse<{ status: string; showId?: number }>> {
+export async function addNewShowById(tvMazeId: string): Promise<ApiResponse<{ status: string; showId?: number }>> {
   try {
-    const response = await client.api.user.tvshow.$post({ json: showData });
+    const response = await client.api.user.tvshow[':id'].$post({ param: { id: tvMazeId } });
     const data = await response.json();
     if (data.ok) return { success: true, data: data.data };
     return { success: false, error: data.error };

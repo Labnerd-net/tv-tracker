@@ -23,7 +23,7 @@ export default function Result({
   const addTvShow = async () => {
     setAdding(true);
     try {
-      const response1 = await Api.addNewShowJson(showData.show);
+      const response1 = await Api.addNewShowById(String(showData.show.id));
       if (!response1.success) {
         showAlert('danger', `Failed to add ${showData.show.name}!`);
         return;

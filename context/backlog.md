@@ -37,7 +37,7 @@ _None identified._
 - **#6 [apps/ui/src/pages/SearchResults.tsx:33–44]**: After receiving search results, one `fetchNextEpisodeDate()` request is fired per result in an unbounded loop with no concurrency limit (up to 20+ parallel requests). Fix: batch in groups of 5 with `Promise.allSettled`, or document the intentional tradeoff.
 
 ### Medium
-- **#7 [apps/api/src/tvmaze.ts:74–77]**: `POST /tvshow` (add from body) always fires two extra TVMaze episode fetches because client-sent JSON typically lacks `_embedded`. The `POST /tvshow/:id` route correctly pre-populates `_embedded`. Consider switching the client-side add flow to call `POST /tvshow/:id` instead.
+_None identified._
 
 ### Low
 - **#8 [apps/api/src/utils/rateLimiter.ts:14–30]**: Rate limiter cleanup relies on a 5-minute `setInterval`. Expired entries linger between runs and the store can grow unbounded. Fix: check expiry on every request and do probabilistic cleanup (e.g., 1% of requests) instead of interval-based cleanup.
@@ -55,11 +55,8 @@ _None identified._
 - **#11 [apps/api/src/routes/user.ts]**: Background `scheduleEpisodeUpdate()` calls are fire-and-forget with no error visibility. Failures are silently swallowed. Fix: introduce a simple in-memory job queue with retry and structured logging.
 
 ### Low
-- **#12 [apps/ui/src/types/data.ts]**: `DataProps` interface is defined but unreferenced anywhere. Delete it.
-- **#13 [apps/ui/src/types/view.ts]**: `ViewProps` interface appears unused — view mode is handled locally in `AllShows.tsx`. Verify and delete if orphaned.
 - **#14 [apps/ui/src/contexts/alert/AlertContext.tsx:9]**: `alertVariant` is typed as `string` instead of `'danger' | 'warning' | 'success'`. Fix: define an `AlertVariant` union type and apply it to `AlertProps`.
 - **#15 [apps/api/src/routes/auth.ts:142–143]**: Cookie paths (`/api/auth`, `/api`) are duplicated across logout and `deleteUser`. Export path constants from `utils/auth.ts` and reference them in all four call sites.
-- **#16 [apps/ui/src/components/ErrorBoundary.tsx:21]**: Uses `console.error` directly with an `eslint-disable` comment instead of the project's `logger` utility. Fix: import `logger` and remove the disable comment.
 - **#18 [apps/api/src/db/dbShowFunctions.ts]**: Multiple DB functions manually call `Number()` on string IDs. Extract a shared `ensureNumericId(id: string): number` helper to reduce duplication.
 
 ---
@@ -87,7 +84,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
-| Performance | 1 | 1 | 2 | 4 |
-| Improvements & Refactors | 0 | 2 | 6 | 8 |
+| Performance | 1 | 0 | 2 | 3 |
+| Improvements & Refactors | 0 | 2 | 4 | 6 |
 | Feature Ideas | 1 | 4 | 3 | 8 |
-| **Total** | **2** | **6** | **11** | **19** |
+| **Total** | **2** | **5** | **9** | **16** |
