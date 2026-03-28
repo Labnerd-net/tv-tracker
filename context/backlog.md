@@ -37,7 +37,7 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#9 [apps/ui/src/components/SingleShow.tsx:9]**: Each card in `AllShows` instantiates its own `useShowActions()` hook — N shows means N independent loading states and N memoized closures in memory. Acceptable for typical usage but degrades with large libraries. Fix: lift action state into `ShowContext` or use `useReducer` if library size becomes a concern.
+_None identified._
 
 ### Low
 _None identified._
@@ -83,7 +83,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
-| Performance | 0 | 1 | 0 | 1 |
+| Performance | 0 | 0 | 0 | 0 |
 | Improvements & Refactors | 1 | 1 | 0 | 2 |
 | Feature Ideas | 3 | 3 | 4 | 10 |
-| **Total** | **4** | **7** | **4** | **15** |
+| **Total** | **3** | **6** | **4** | **14** |
