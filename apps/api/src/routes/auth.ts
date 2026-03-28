@@ -7,7 +7,7 @@ import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
-import { generateRefreshToken, setAuthCookies } from '../utils/auth.js';
+import { generateRefreshToken, setAuthCookies, AUTH_COOKIE_PATH, API_COOKIE_PATH } from '../utils/auth.js';
 import type { JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
 import {
   bcryptSaltRounds,
@@ -139,8 +139,8 @@ const auth = new Hono<{ Variables: Variables }>()
     try {
       const payload = c.get('jwtPayload');
       await dbUserFunctions.clearRefreshToken(db, payload.sub);
-      deleteCookie(c, 'refreshToken', { path: '/api/auth' });
-      deleteCookie(c, 'accessToken', { path: '/api' });
+      deleteCookie(c, 'refreshToken', { path: AUTH_COOKIE_PATH });
+      deleteCookie(c, 'accessToken', { path: API_COOKIE_PATH });
       return c.json(ok({ status: 'logged out' }));
     } catch (e: unknown) {
       logger.error({ err: e }, 'Unexpected error in logout route');
@@ -166,14 +166,14 @@ const auth = new Hono<{ Variables: Variables }>()
         secure: isProduction,
         sameSite: isProduction ? 'None' : 'Lax',
         maxAge: 0,
-        path: '/api/auth',
+        path: AUTH_COOKIE_PATH,
       });
       setCookie(c, 'accessToken', '', {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? 'None' : 'Lax',
         maxAge: 0,
-        path: '/api',
+        path: API_COOKIE_PATH,
       });
       return c.json(ok({ status: 'deleted' }));
     } catch (e: unknown) {

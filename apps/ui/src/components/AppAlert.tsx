@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import type { AlertVariant } from '../types/alert.ts';
 
 const VARIANTS: Record<string, { bg: string; border: string; color: string; label: string }> = {
   success: { bg: 'rgba(76, 175, 80, 0.12)', border: 'rgba(76, 175, 80, 0.35)', color: '#4caf50', label: 'OK' },
@@ -8,7 +9,7 @@ const VARIANTS: Record<string, { bg: string; border: string; color: string; labe
   primary: { bg: 'rgba(144, 202, 249, 0.12)', border: 'rgba(144, 202, 249, 0.35)', color: '#90caf9', label: 'INFO' },
 };
 
-export default function AppAlert({ alertVariant, alertMessage }: { alertVariant: string; alertMessage: string }) {
+export default function AppAlert({ alertVariant, alertMessage }: { alertVariant: AlertVariant | ''; alertMessage: string }) {
   const v = VARIANTS[alertVariant] ?? VARIANTS.info;
 
   return (
