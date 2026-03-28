@@ -8,7 +8,7 @@
 ## Security
 
 ### High
-- **#3 [apps/api/src/db/schema.ts:18]**: `tv_shows.userId` FK lacks `ON DELETE CASCADE`. Deleting a user (`DELETE /api/auth/deleteUser`) leaves orphaned show rows. SQLite FK enforcement is off by default so no error is thrown. Fix: add `.references(() => users.userId, { onDelete: 'cascade' })` to the schema and generate a migration, or explicitly delete shows before deleting the user.
+_None identified._
 
 ### Medium
 _None identified._
@@ -21,7 +21,7 @@ _None identified._
 ## Bugs
 
 ### High
-- **#4 [apps/api/src/routes/user.ts:130]**: `POST /tvshow/:id` returns `ok({ status: 'added' })` with 200 even when `newShowId` is `undefined` (i.e., the DB insert failed). The equivalent guard exists on the `POST /tvshow` (add from body) route (lines 94–96) but is missing here. Fix: return `c.json(err('Failed to save show'), 500)` when `newShowId` is undefined.
+_None identified._
 
 ### Medium
 - **#5 [apps/ui/src/pages/OneShow.tsx:47]**: After a successful `refreshShow` action, the `OneShow` detail page continues to display stale data — it reads from its own fetch-on-mount local state, not from `ShowProvider`. Fix: either derive the show from `tvShows` in `ShowProvider` looked up by `showID`, or trigger a re-fetch after `refreshShow` resolves.
@@ -85,9 +85,9 @@ _None identified._
 
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
-| Security | 1 | 0 | 0 | 1 |
-| Bugs | 1 | 1 | 0 | 2 |
+| Security | 0 | 0 | 0 | 0 |
+| Bugs | 0 | 1 | 0 | 1 |
 | Performance | 1 | 1 | 2 | 4 |
 | Improvements & Refactors | 0 | 2 | 6 | 8 |
 | Feature Ideas | 1 | 4 | 3 | 8 |
-| **Total** | **4** | **8** | **11** | **23** |
+| **Total** | **2** | **7** | **11** | **20** |
