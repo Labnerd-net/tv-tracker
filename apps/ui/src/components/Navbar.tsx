@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -14,11 +14,14 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { showName } = useParams();
   const [userInput, setUserInput] = useState('');
 
   const startSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (userInput.trim()) navigate(`/search/${userInput}/`);
+    const term = userInput.trim();
+    if (!term || (showName && term === showName)) return;
+    navigate(`/search/${term}/`);
   };
 
   const handleLogout = () => {

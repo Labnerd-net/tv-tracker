@@ -52,8 +52,6 @@ _None identified._
 
 ### Medium
 - **#13 [apps/ui/src/]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` for the `AllShows.tsx` grid (lines 77–89).
-- **#14 [apps/ui/src/]**: Accessibility — interactive `<Box>` elements lack semantic roles/keyboard access. `ShowCard.tsx` card is a `<Box onClick>` without `role="button"` or `tabIndex`. Back button in `OneShow.tsx:115` has no `aria-label`. Action buttons in `ShowsTable.tsx` are missing labels. Fix: convert to semantic elements or add `role`/`tabIndex`/`aria-label` attributes.
-- **#15 [apps/ui/src/]**: No error boundary. If any page component throws, the entire app goes blank. Fix: add an `ErrorBoundary` class component wrapping the router in `App.tsx`.
 
 ### Low
 - **#16 [apps/api/src/db/schema.ts:23]**: `scheduleDay` is typed `string[]` but CLAUDE.md states only the first element is stored. The type and documentation contradict. Fix: either store the full array and remove the caveat, or type as `string` and rename to `scheduleDay` (singular).
@@ -76,7 +74,6 @@ _None identified._
 ### Low
 - **#26 [apps/ui/src/components/ShowCard.tsx]**: Upcoming episode urgency badge — compute `today | tomorrow | this-week | upcoming` from `nextEpisode` airdate and display a colored badge on cards. Client-side utility only.
 - **#27 [apps/api/src/routes/user.ts]**: Export/import — `GET /api/user/export` returns JSON of all shows; `POST /api/user/import` bulk-adds from JSON (skip duplicates). Low implementation effort, good portability feature.
-- **#28 [apps/ui/src/pages/AllShows.tsx]**: Better empty state — current fallback (line 131) shows no CTA. Add a link to search or surface TVMaze trending shows (public API, no auth).
 - **#29 [apps/api/src/routes/user.ts]**: AI show summaries — `GET /api/user/tvshow/:id/summary` proxies a Claude API call using TVMaze synopsis/genres/rating. Cache result for 7 days in a `summaryCache` column. Requires `ANTHROPIC_API_KEY`.
 - **#30 [apps/api/src/routes/user.ts]**: Smart recommendations — `POST /api/user/recommendations` sends tracked show list to Claude, resolves suggestions via TVMaze search, and displays on `/recommendations` page.
 
@@ -89,6 +86,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 3 | 2 | 6 |
-| Feature Ideas | 3 | 3 | 5 | 11 |
-| **Total** | **4** | **10** | **7** | **21** |
+| Improvements & Refactors | 1 | 1 | 2 | 4 |
+| Feature Ideas | 3 | 3 | 4 | 10 |
+| **Total** | **4** | **8** | **6** | **18** |

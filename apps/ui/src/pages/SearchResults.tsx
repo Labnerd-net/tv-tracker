@@ -15,33 +15,33 @@ export default function SearchResults() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [episodeDates, setEpisodeDates] = useState<Record<number, string>>({});
-  const [episodesLoading, setEpisodesLoading] = useState(false);
+  const [episodesLoading, setEpisodesLoading] = useState<Record<number, boolean>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
     const controller = new AbortController();
     const searchTvShows = async (showName: string) => {
       setEpisodeDates({});
-      setEpisodesLoading(false);
+      setEpisodesLoading({});
       try {
         const response = await Api.tvShowResults(showName);
         if (controller.signal.aborted) return;
         if (response.success && response.data) {
           const data = response.data;
           setSearchResults(data);
-          setEpisodesLoading(true);
-          const settled = await Promise.allSettled(
-            data.map(item =>
-              Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => [item.show.id, r.success ? r.data.date : ''] as const)
-            )
-          );
-          if (controller.signal.aborted) return;
-          const dateMap: Record<number, string> = {};
-          for (const r of settled) {
-            if (r.status === 'fulfilled') dateMap[r.value[0]] = r.value[1];
+          setEpisodesLoading(Object.fromEntries(data.map(item => [item.show.id, true])));
+          for (const item of data) {
+            const id = item.show.id;
+            Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => {
+              if (controller.signal.aborted) return;
+              setEpisodeDates(prev => ({ ...prev, [id]: r.success ? r.data.date : '' }));
+              setEpisodesLoading(prev => ({ ...prev, [id]: false }));
+            }).catch(() => {
+              if (!controller.signal.aborted) {
+                setEpisodesLoading(prev => ({ ...prev, [id]: false }));
+              }
+            });
           }
-          setEpisodeDates(dateMap);
-          setEpisodesLoading(false);
         } else {
           const msg = !response.success ? response.error : 'Failed to retrieve TV Show results';
           showAlert('danger', msg);
@@ -155,7 +155,7 @@ export default function SearchResults() {
                 showData={data}
                 showAlert={showAlert}
                 nextEpisodeDate={episodeDates[data.show.id] ?? ''}
-                episodeLoading={episodesLoading}
+                episodeLoading={episodesLoading[data.show.id] ?? false}
               />
             ))}
           </Box>
