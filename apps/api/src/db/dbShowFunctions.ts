@@ -4,6 +4,7 @@ import { tvShows } from './schema.js';
 import TvMazeData from '../tvmaze.js';
 import logger from '../utils/logger.js';
 import type { ShowData } from '@shared/types/tv-tracker.js';
+import { ensureNumericId } from './helpers.js';
 
 export async function returnAllShows(db: LibSQLDatabase, userId: number): Promise<ShowData[]> {
   logger.debug({ userId }, 'returnAllShows');
@@ -18,7 +19,7 @@ export async function returnAllShows(db: LibSQLDatabase, userId: number): Promis
 export async function returnOneShowId(db: LibSQLDatabase, showId: string, userId: number): Promise<ShowData[]> {
   logger.debug({ showId, userId }, 'returnOneShowId');
   try {
-    const showIdNumber = Number(showId);
+    const showIdNumber = ensureNumericId(showId);
     return await db.select().from(tvShows)
       .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
@@ -30,7 +31,7 @@ export async function returnOneShowId(db: LibSQLDatabase, showId: string, userId
 export async function deleteOneShowId(db: LibSQLDatabase, showId: string, userId: number) {
   logger.debug({ showId, userId }, 'deleteOneShowId');
   try {
-    const showIdNumber = Number(showId);
+    const showIdNumber = ensureNumericId(showId);
     return await db.delete(tvShows)
       .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
@@ -42,7 +43,7 @@ export async function deleteOneShowId(db: LibSQLDatabase, showId: string, userId
 export async function returnOneShowTvMazeId(db: LibSQLDatabase, tvMazeId: string, userId: number): Promise<ShowData[]> {
   logger.debug({ tvMazeId, userId }, 'returnOneShowTvMazeId');
   try {
-    const tvMazeIdNumber = Number(tvMazeId);
+    const tvMazeIdNumber = ensureNumericId(tvMazeId);
     return await db.select().from(tvShows)
       .where(and(eq(tvShows.tvMazeId, tvMazeIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
@@ -87,7 +88,7 @@ export async function updateShowEpisodes(db: LibSQLDatabase, id: number, next: s
 export async function updateOneShow(db: LibSQLDatabase, showData: TvMazeData, showId: string, userId: number) {
   logger.debug({ showId, userId }, 'updateOneShow');
   try {
-    const showIdNumber = Number(showId);
+    const showIdNumber = ensureNumericId(showId);
     return await db.update(tvShows)
       .set({
         title: showData.title,

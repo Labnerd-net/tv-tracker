@@ -1,6 +1,8 @@
+export type AlertVariant = 'danger' | 'warning' | 'success';
+
 export interface AlertProps {
   visibleAlert: boolean,
-  alertVariant: string,
+  alertVariant: AlertVariant | '',
   alertMessage: string,
-  showAlert: (variant: string, message: string) => void
+  showAlert: (variant: AlertVariant, message: string) => void
 }

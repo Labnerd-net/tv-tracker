@@ -5,6 +5,7 @@ import { getPlatformName, sanitizeTvMazeImageUrl } from '@shared/utils/tvmaze';
 import type { TvMazeSeries } from '@shared/types/tvmaze';
 import { useShow } from '../contexts/show/ShowContext';
 import ShowCard from './ShowCard';
+import type { AlertVariant } from '../types/alert.ts';
 
 export default function Result({
   showData,
@@ -13,7 +14,7 @@ export default function Result({
   episodeLoading,
 }: {
   showData: TvMazeSeries;
-  showAlert: (variant: string, message: string) => void;
+  showAlert: (variant: AlertVariant, message: string) => void;
   nextEpisodeDate: string;
   episodeLoading: boolean;
 }) {
