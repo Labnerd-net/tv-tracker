@@ -73,6 +73,9 @@ export async function deleteShow(showID: string): Promise<ApiResponse<{ status: 
 
 // TVMaze-direct functions — these call api.tvmaze.com directly, not our API
 
+const EPISODE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const episodeCache = new Map<string, { date: string; expiry: number }>();
+
 export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: AbortSignal): Promise<ApiResponse<{ date: string }>> {
   try {
     if (searchData._links.nextepisode) {
@@ -84,9 +87,15 @@ export async function fetchNextEpisodeDate(searchData: TvMazeShow, signal?: Abor
       } catch {
         return { success: false, error: 'Invalid episode link URL' };
       }
+      const cached = episodeCache.get(href);
+      if (cached && Date.now() < cached.expiry) {
+        return { success: true, data: { date: cached.date } };
+      }
       const response = await axios.get(href, { signal });
       if (response.data?.airdate) {
-        return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
+        const date = new Date(response.data.airdate).toDateString();
+        episodeCache.set(href, { date, expiry: Date.now() + EPISODE_CACHE_TTL_MS });
+        return { success: true, data: { date } };
       }
       return { success: false, error: 'No airdate in episode response' };
     }
@@ -107,9 +116,15 @@ export async function fetchPrevEpisodeDate(searchData: TvMazeShow, signal?: Abor
       } catch {
         return { success: false, error: 'Invalid episode link URL' };
       }
+      const cached = episodeCache.get(href);
+      if (cached && Date.now() < cached.expiry) {
+        return { success: true, data: { date: cached.date } };
+      }
       const response = await axios.get(href, { signal });
       if (response.data?.airdate) {
-        return { success: true, data: { date: new Date(response.data.airdate).toDateString() } };
+        const date = new Date(response.data.airdate).toDateString();
+        episodeCache.set(href, { date, expiry: Date.now() + EPISODE_CACHE_TTL_MS });
+        return { success: true, data: { date } };
       }
       return { success: false, error: 'No airdate in episode response' };
     }
