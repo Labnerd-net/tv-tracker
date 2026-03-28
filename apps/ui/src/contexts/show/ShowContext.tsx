@@ -4,9 +4,12 @@ import type { ShowData } from "@shared/types/tv-tracker";
 export interface ShowProps {
     tvShows: ShowData[]
     loading: boolean
+    actionLoading: Record<number, boolean>
     addShow: (show: ShowData) => void
     updateShow: (show: ShowData) => void
     removeShow: (showId: number) => void
+    refreshShow: (showId: string, title: string, onSuccess?: () => void) => Promise<void>
+    deleteShow: (showId: string, title: string, onSuccess?: () => void) => Promise<void>
 }
 
 export const ShowContext = createContext<ShowProps | undefined>(undefined);

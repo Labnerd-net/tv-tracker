@@ -6,8 +6,11 @@ import type { ShowData } from '@shared/types/tv-tracker.ts';
 import { useShowActions } from '../hooks/useShowActions.ts';
 import ShowCard from './ShowCard.tsx';
 
+// memo prevents re-renders when showData/index are unchanged. actionLoading is read from
+// context, so this card re-renders whenever any show's loading state changes — memo cannot
+// prevent context-driven re-renders, but the cost is low (no API calls triggered).
 export default memo(function SingleShow({ showData, index = 0 }: { showData: ShowData; index?: number }) {
-  const { loading, refreshShow, deleteShow } = useShowActions();
+  const { actionLoading, refreshShow, deleteShow } = useShowActions();
   const navigate = useNavigate();
 
   const refreshData = (e: React.MouseEvent) => {
@@ -23,7 +26,7 @@ export default memo(function SingleShow({ showData, index = 0 }: { showData: Sho
   const episodeLabel = showData.nextEpisode ? 'NEXT' : 'LAST';
   const episodeDate = showData.nextEpisode ?? showData.prevEpisode ?? showData.status ?? '—';
 
-  const actions = loading ? (
+  const actions = (actionLoading[showData.showId] ?? false) ? (
     <CircularProgress size={14} sx={{ color: 'var(--cream-dim)' }} />
   ) : (
     <>

@@ -122,7 +122,6 @@ React 19, React Router 7, MUI (Material UI v7 + Emotion), react-hook-form + `@ho
 - API uses ES modules (`"type": "module"`); imports must use `.js` extensions even for `.ts` source files.
 - The `db` client in `schema.ts` is instantiated at module load time — env vars must be set before import.
 - `DB_FILE_NAME` must use the `file:` URL prefix (e.g. `file:data/local.db`). A plain path throws `URL_INVALID` from libsql at startup.
-- `scheduleDay` in the DB schema stores only the first element of the TVMaze `schedule.days` array (multi-day shows lose that data).
 - `apps/shared/` has no build step — TypeScript source only. The API's `tsc` build includes shared files transitively via the `@shared/*` path alias, causing TypeScript to infer `rootDir` as `apps/`. Compiled API output therefore lands at `dist/api/src/` (not `dist/src/`). `tsc-alias` post-processes the output to rewrite `@shared/*` imports to relative paths.
 - Migration files in `apps/api/drizzle/` must be committed — they are needed at Docker build time and used by `migrate.ts` at container startup.
 

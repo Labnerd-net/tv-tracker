@@ -14,7 +14,7 @@ vi.mock('../src/contexts/show/ShowContext', async (importOriginal) => {
 });
 
 vi.mock('../src/hooks/useShowActions', () => ({
-  useShowActions: () => ({ loading: false, refreshShow: vi.fn(), deleteShow: vi.fn() }),
+  useShowActions: () => ({ actionLoading: {}, refreshShow: vi.fn(), deleteShow: vi.fn() }),
 }));
 
 let mockUseShow: () => { tvShows: ReturnType<typeof makeShow>[]; loading: boolean; addShow: () => void; updateShow: () => void; removeShow: () => void };

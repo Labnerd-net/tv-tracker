@@ -15,7 +15,8 @@ const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 export default function OneShow() {
   const { showID } = useParams();
   const { showAlert } = useAlert();
-  const { loading: actionLoading, refreshShow, deleteShow } = useShowActions();
+  const { actionLoading, refreshShow, deleteShow } = useShowActions();
+  const isActionLoading = actionLoading[Number(showID)] ?? false;
   const [tvShow, setTvShow] = useState<ShowData>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -242,8 +243,8 @@ export default function OneShow() {
               <Button
                 variant="outlined"
                 onClick={refreshData}
-                disabled={actionLoading}
-                startIcon={actionLoading ? <CircularProgress size={12} sx={{ color: 'inherit' }} /> : null}
+                disabled={isActionLoading}
+                startIcon={isActionLoading ? <CircularProgress size={12} sx={{ color: 'inherit' }} /> : null}
                 sx={{ color: 'var(--cream)', borderColor: 'var(--border-strong)', '&:hover': { borderColor: 'var(--cream)', background: 'rgba(232,224,208,0.05)' } }}
               >
                 Refresh Data
@@ -251,7 +252,7 @@ export default function OneShow() {
               <Button
                 variant="contained"
                 onClick={deleteOneShow}
-                disabled={actionLoading}
+                disabled={isActionLoading}
                 sx={{ bgcolor: 'var(--accent)', '&:hover': { bgcolor: 'var(--accent-hover)' } }}
               >
                 Remove Show

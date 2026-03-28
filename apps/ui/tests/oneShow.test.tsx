@@ -32,7 +32,7 @@ vi.mock('../src/contexts/alert/AlertContext', async (importOriginal) => {
 });
 
 vi.mock('../src/hooks/useShowActions', () => ({
-  useShowActions: () => ({ loading: false, refreshShow: vi.fn(), deleteShow: vi.fn() }),
+  useShowActions: () => ({ actionLoading: {}, refreshShow: vi.fn(), deleteShow: vi.fn() }),
 }));
 
 import * as Api from '../src/apis/userRequests';

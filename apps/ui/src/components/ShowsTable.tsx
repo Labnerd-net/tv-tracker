@@ -61,7 +61,7 @@ const actionBtn = (accent: boolean) => ({
 });
 
 export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
-  const { refreshShow, deleteShow } = useShowActions();
+  const { actionLoading, refreshShow, deleteShow } = useShowActions();
   const [sortCol, setSortCol] = useState<keyof ShowData>(getSavedSortCol);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(getSavedSortDir);
 
@@ -141,10 +141,10 @@ export default function ShowsTable({ tvShows }: { tvShows: ShowData[] }) {
               <TableCell>{show.prevEpisode}</TableCell>
               <TableCell>
                 <Box sx={{ display: 'flex', gap: '8px' }}>
-                  <Box component="button" aria-label={`Refresh ${show.title}`} onClick={() => refreshShow(String(show.showId), show.title)} sx={actionBtn(false)}>
+                  <Box component="button" aria-label={`Refresh ${show.title}`} disabled={actionLoading[show.showId] ?? false} onClick={() => refreshShow(String(show.showId), show.title)} sx={actionBtn(false)}>
                     Refresh
                   </Box>
-                  <Box component="button" aria-label={`Remove ${show.title}`} onClick={() => deleteShow(String(show.showId), show.title)} sx={actionBtn(true)}>
+                  <Box component="button" aria-label={`Remove ${show.title}`} disabled={actionLoading[show.showId] ?? false} onClick={() => deleteShow(String(show.showId), show.title)} sx={actionBtn(true)}>
                     Remove
                   </Box>
                 </Box>
