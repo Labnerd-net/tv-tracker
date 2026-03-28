@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -17,8 +18,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // eslint-disable-next-line no-console
-    console.error('[ErrorBoundary]', error, info);
+    logger.error('[ErrorBoundary]', error, info);
   }
 
   render() {
