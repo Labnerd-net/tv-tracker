@@ -8,8 +8,6 @@
 ## Security
 
 ### High
-- **#1 [apps/api/src/routes/user.ts:115, apps/api/src/tvmaze.ts:61]**: Outbound `fetch()` calls to TVMaze have no timeout. A slow or hung TVMaze response holds the request handler open indefinitely. Fix: add `AbortSignal.timeout(8000)` to every outbound fetch in `POST /tvshow/:id`, `PATCH /tvshow/:id`, and `TvMazeData.updateEpisodes()`.
-- **#2 [apps/api/src/routes/user.ts:119]**: TVMaze response body is fully buffered via `response.json()` before Zod validation. A large upstream payload is buffered into memory unchecked. Fix: read `response.text()` first, throw if `text.length > 1_000_000`, then `JSON.parse(text)`.
 - **#3 [apps/api/src/db/schema.ts:18]**: `tv_shows.userId` FK lacks `ON DELETE CASCADE`. Deleting a user (`DELETE /api/auth/deleteUser`) leaves orphaned show rows. SQLite FK enforcement is off by default so no error is thrown. Fix: add `.references(() => users.userId, { onDelete: 'cascade' })` to the schema and generate a migration, or explicitly delete shows before deleting the user.
 
 ### Medium
@@ -62,7 +60,6 @@ _None identified._
 - **#14 [apps/ui/src/contexts/alert/AlertContext.tsx:9]**: `alertVariant` is typed as `string` instead of `'danger' | 'warning' | 'success'`. Fix: define an `AlertVariant` union type and apply it to `AlertProps`.
 - **#15 [apps/api/src/routes/auth.ts:142–143]**: Cookie paths (`/api/auth`, `/api`) are duplicated across logout and `deleteUser`. Export path constants from `utils/auth.ts` and reference them in all four call sites.
 - **#16 [apps/ui/src/components/ErrorBoundary.tsx:21]**: Uses `console.error` directly with an `eslint-disable` comment instead of the project's `logger` utility. Fix: import `logger` and remove the disable comment.
-- **#17 [apps/ui/src/pages/OneShowSearch.tsx:34]**: No `AbortController` in the `useEffect` — episode date fetch continues after unmount and attempts state update on an unmounted component. Fix: add `AbortController` cleanup.
 - **#18 [apps/api/src/db/dbShowFunctions.ts]**: Multiple DB functions manually call `Number()` on string IDs. Extract a shared `ensureNumericId(id: string): number` helper to reduce duplication.
 
 ---
@@ -88,9 +85,9 @@ _None identified._
 
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
-| Security | 3 | 0 | 0 | 3 |
+| Security | 1 | 0 | 0 | 1 |
 | Bugs | 1 | 1 | 0 | 2 |
 | Performance | 1 | 1 | 2 | 4 |
-| Improvements & Refactors | 0 | 2 | 7 | 9 |
+| Improvements & Refactors | 0 | 2 | 6 | 8 |
 | Feature Ideas | 1 | 4 | 3 | 8 |
-| **Total** | **6** | **8** | **12** | **26** |
+| **Total** | **4** | **8** | **11** | **23** |
