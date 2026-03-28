@@ -58,7 +58,7 @@ export default class TvMazeData {
           logger.warn({ link }, `Rejected non-TVMaze URL for ${label} episode`);
           return '';
         }
-        const response = await fetch(link);
+        const response = await fetch(link, { signal: AbortSignal.timeout(15000) });
         if (!response.ok) {
           logger.warn({ link, status: response.status }, `Non-OK response from TVMaze for ${label} episode`);
           return '';

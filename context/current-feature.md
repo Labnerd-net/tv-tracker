@@ -13,6 +13,7 @@ Plan file:
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+- **Outbound Fetch Safety** — Added `AbortSignal.timeout(8000)` to TVMaze fetches in `POST /tvshow/:id` and `PATCH /tvshow/:id`; `AbortSignal.timeout(15000)` to `TvMazeData.updateEpisodes()`; body size guard (1 MB limit, 502) before JSON parsing in both routes; `TimeoutError` caught → 504. Added `AbortController` cleanup to `OneShowSearch.tsx` useEffect. 3 new tests (timeout → 504, oversized body → 502 on POST and PATCH). Closes backlog #1, #2, #17.
 - ...
 - **High Priority Security Fixes** — Fixed four security issues: wrapped all authenticated routes in `<ProtectedRoute>`; fixed `ProtectedRoute` to use `<Navigate>` instead of imperative navigate (children never render unauthenticated); removed raw `e.message` from all five auth catch blocks (now logs server-side, returns generic message); added hostname validation in `fetchAirdate()` to reject non-`api.tvmaze.com` URLs (SSRF fix). Added auth error leakage tests and new `tvmaze.test.ts` for URL validation.
 - **Security Quick Wins** — Four small security fixes: raised password minimum length to 8 chars (API schemas + UI forms, enforced on both login and registration); fixed admin error responses returning HTTP 200 instead of 500; added `encodeURIComponent()` to TVMaze search URL; replaced type-cast-only sensitive field exclusion in `GET /api/admin/users` with an explicit map. Added boundary tests for password validation and new `admin.test.ts` for field stripping and HTTP status checks.

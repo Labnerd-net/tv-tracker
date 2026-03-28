@@ -112,11 +112,15 @@ const user = new Hono<{ Variables: Variables }>()
       if (existing && existing.length > 0) {
         return c.json(ok({ status: 'exists' }));
       }
-      const response = await fetch(`${TV_MAZE_API_BASE}/shows/${tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
+      const response = await fetch(`${TV_MAZE_API_BASE}/shows/${tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`, { signal: AbortSignal.timeout(8000) });
       if (!response.ok) {
         return c.json(err(`TvMaze response status: ${response.status}`), 502);
       }
-      const showDataJson = await response.json();
+      const text = await response.text();
+      if (text.length > 1_000_000) {
+        return c.json(err('TVMaze response too large'), 502);
+      }
+      const showDataJson = JSON.parse(text);
       const parsed = tvMazeShowBodySchema.safeParse(showDataJson);
       if (!parsed.success) {
         return c.json(err('Invalid response from TVMaze'), 502);
@@ -129,6 +133,9 @@ const user = new Hono<{ Variables: Variables }>()
       }
       return c.json(ok({ status: 'added' }));
     } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === 'TimeoutError') {
+        return c.json(err('TVMaze request timed out'), 504);
+      }
       logger.error({ err: e }, 'Unexpected error in user route');
       return c.json(err('An unexpected error occurred'), 500);
     }
@@ -143,11 +150,15 @@ const user = new Hono<{ Variables: Variables }>()
       if (!existing || existing.length === 0) {
         return c.json(err(`Show with id=${showId} not found`), 404);
       }
-      const response = await fetch(`${TV_MAZE_API_BASE}/shows/${existing[0].tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`);
+      const response = await fetch(`${TV_MAZE_API_BASE}/shows/${existing[0].tvMazeId}?embed[]=nextepisode&embed[]=previousepisode`, { signal: AbortSignal.timeout(8000) });
       if (!response.ok) {
         return c.json(err(`TvMaze response status: ${response.status}`), 502);
       }
-      const showDataJson = await response.json();
+      const text = await response.text();
+      if (text.length > 1_000_000) {
+        return c.json(err('TVMaze response too large'), 502);
+      }
+      const showDataJson = JSON.parse(text);
       const parsed = tvMazeShowBodySchema.safeParse(showDataJson);
       if (!parsed.success) {
         return c.json(err('Invalid response from TVMaze'), 502);
@@ -157,6 +168,9 @@ const user = new Hono<{ Variables: Variables }>()
       await dbShowFunctions.updateOneShow(db, showData, showId, userId);
       return c.json(ok({ status: 'updated' }));
     } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === 'TimeoutError') {
+        return c.json(err('TVMaze request timed out'), 504);
+      }
       logger.error({ err: e }, 'Unexpected error in user route');
       return c.json(err('An unexpected error occurred'), 500);
     }

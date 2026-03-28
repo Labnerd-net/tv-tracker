@@ -80,7 +80,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   fetchMock.mockResolvedValue({
     ok: true,
-    json: async () => tvMazeShowJson,
+    text: async () => JSON.stringify(tvMazeShowJson),
   });
 });
 
@@ -254,7 +254,7 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
 
   it('returns 502 when TVMaze returns an invalid response body', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
-    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => '{}' });
     const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(502);
     const body = await res.json();
@@ -265,7 +265,7 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => tvMazeShowJson,
+      text: async () => JSON.stringify(tvMazeShowJson),
     });
     const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(200);
@@ -283,7 +283,7 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     const updateSpy = vi
       .spyOn(TvMazeData.prototype, 'updateEpisodes')
       .mockReturnValueOnce(episodesPromise);
-    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => tvMazeShowJson });
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify(tvMazeShowJson) });
 
     const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(200);
@@ -311,7 +311,7 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     const updateSpy = vi
       .spyOn(TvMazeData.prototype, 'updateEpisodes')
       .mockRejectedValueOnce(new Error('TVMaze down'));
-    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => tvMazeShowJson });
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify(tvMazeShowJson) });
 
     const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(200);
@@ -321,6 +321,24 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
 
     updateSpy.mockRestore();
+  });
+
+  it('returns 504 when TVMaze fetch times out', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    fetchMock.mockRejectedValueOnce(new DOMException('The operation timed out', 'TimeoutError'));
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(504);
+    const body = await res.json();
+    expect(body.error).toBe('TVMaze request timed out');
+  });
+
+  it('returns 502 when TVMaze response body exceeds 1 MB', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => 'x'.repeat(1_000_001) });
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.error).toBe('TVMaze response too large');
   });
 });
 
@@ -338,7 +356,7 @@ describe('PATCH /api/user/tvshow/:id', () => {
 
   it('returns 502 when TVMaze returns an invalid response body', async () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([mockShow]);
-    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => '{}' });
     const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(502);
     const body = await res.json();
@@ -349,12 +367,21 @@ describe('PATCH /api/user/tvshow/:id', () => {
     vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([mockShow]);
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => tvMazeShowJson,
+      text: async () => JSON.stringify(tvMazeShowJson),
     });
     const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data.status).toBe('updated');
+  });
+
+  it('returns 502 when TVMaze response body exceeds 1 MB', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowId).mockResolvedValueOnce([mockShow]);
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => 'x'.repeat(1_000_001) });
+    const res = await patch('/api/user/tvshow/1', { Cookie: authHeader });
+    expect(res.status).toBe(502);
+    const body = await res.json();
+    expect(body.error).toBe('TVMaze response too large');
   });
 });
 

@@ -26,12 +26,14 @@ export default function OneShowSearch() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const searchTvShow = async (showID: string) => {
       try {
         const response = await Api.returnSearchShow(showID);
         if (response.success && response.data) {
           setTvShow(response.data);
-          const nextEp = await Api.fetchNextEpisodeDate(response.data);
+          const nextEp = await Api.fetchNextEpisodeDate(response.data, controller.signal);
           if (nextEp.success && nextEp.data) {
             setNextEpisode(nextEp.data.date);
           }
@@ -53,6 +55,8 @@ export default function OneShowSearch() {
     if (showID) {
       searchTvShow(showID);
     }
+
+    return () => controller.abort();
   }, [showAlert, showID]);
 
   const addTvShow = async () => {
