@@ -128,9 +128,10 @@ const user = new Hono<{ Variables: Variables }>()
       const showData = new TvMazeData(parsed.data);
       const result = await dbShowFunctions.addOneShow(db, showData, userId);
       const newShowId = result?.[0]?.showId;
-      if (newShowId !== undefined) {
-        scheduleEpisodeUpdate(showData, newShowId);
+      if (newShowId === undefined) {
+        return c.json(err('Failed to save show'), 500);
       }
+      scheduleEpisodeUpdate(showData, newShowId);
       return c.json(ok({ status: 'added' }));
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'TimeoutError') {

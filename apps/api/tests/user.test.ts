@@ -340,6 +340,16 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     const body = await res.json();
     expect(body.error).toBe('TVMaze response too large');
   });
+
+  it('returns 500 when DB insert returns no row', async () => {
+    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
+    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([]);
+    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify(tvMazeShowJson) });
+    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe('Failed to save show');
+  });
 });
 
 describe('PATCH /api/user/tvshow/:id', () => {

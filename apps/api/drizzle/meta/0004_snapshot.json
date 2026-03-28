@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "5a33350e-514a-4c7d-a764-f06bb343ac9c",
-  "prevId": "c4a2e1f0-3b7d-4e9a-8f1c-2d5b6a0e4c3f",
+  "id": "4c95ba49-516c-465b-bc5a-6397497d3dc3",
+  "prevId": "5a33350e-514a-4c7d-a764-f06bb343ac9c",
   "tables": {
     "tv_shows": {
       "name": "tv_shows",
@@ -113,7 +113,7 @@
           "columnsTo": [
             "user_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
