@@ -57,8 +57,6 @@ _None identified._
 
 ### Low
 - **#16 [apps/api/src/db/schema.ts:23]**: `scheduleDay` is typed `string[]` but CLAUDE.md states only the first element is stored. The type and documentation contradict. Fix: either store the full array and remove the caveat, or type as `string` and rename to `scheduleDay` (singular).
-- **#17 [apps/api/src/routes/auth.ts]**: Cookie-setting logic (`setRefreshCookie`, `setAccessCookie`) is duplicated across `register`, `login`, and `refresh` routes. Fix: move to `apps/api/src/utils/auth.ts` as `setAuthCookies(c, tokens)`.
-- **#18 [apps/ui/src/components/Result.tsx:3,5,6,7]**: Imports use explicit `.ts`/`.tsx` extensions (`userRequests.ts`, `tvmaze.ts`, `ShowContext.tsx`, `ShowCard.tsx`) inconsistent with the rest of the UI codebase. Fix: remove extensions to match project convention.
 - **#19 [apps/ui/src/]**: Search navigation triggers on every keystroke. Add 300ms debounce to the search input before calling `navigate()` to reduce unnecessary route transitions.
 
 ---
@@ -91,6 +89,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 2 | 0 | 2 |
-| Improvements & Refactors | 1 | 3 | 4 | 8 |
+| Improvements & Refactors | 1 | 3 | 2 | 6 |
 | Feature Ideas | 3 | 3 | 5 | 11 |
-| **Total** | **4** | **10** | **9** | **23** |
+| **Total** | **4** | **10** | **7** | **21** |
