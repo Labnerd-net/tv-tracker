@@ -24,7 +24,7 @@ _None identified._
 _None identified._
 
 ### Medium
-- **#5 [apps/ui/src/pages/OneShow.tsx:47]**: After a successful `refreshShow` action, the `OneShow` detail page continues to display stale data — it reads from its own fetch-on-mount local state, not from `ShowProvider`. Fix: either derive the show from `tvShows` in `ShowProvider` looked up by `showID`, or trigger a re-fetch after `refreshShow` resolves.
+_None identified._
 
 ### Low
 _None identified._
@@ -86,8 +86,8 @@ _None identified._
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
-| Bugs | 0 | 1 | 0 | 1 |
+| Bugs | 0 | 0 | 0 | 0 |
 | Performance | 1 | 1 | 2 | 4 |
 | Improvements & Refactors | 0 | 2 | 6 | 8 |
 | Feature Ideas | 1 | 4 | 3 | 8 |
-| **Total** | **2** | **7** | **11** | **20** |
+| **Total** | **2** | **6** | **11** | **19** |
