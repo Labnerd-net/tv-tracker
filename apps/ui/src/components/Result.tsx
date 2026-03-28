@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import * as Api from '../apis/userRequests.ts';
+import * as Api from '../apis/userRequests';
 import { getPlatformName, sanitizeTvMazeImageUrl } from '@shared/utils/tvmaze';
-import type { TvMazeSeries } from '@shared/types/tvmaze.ts';
-import { useShow } from '../contexts/show/ShowContext.tsx';
-import ShowCard from './ShowCard.tsx';
+import type { TvMazeSeries } from '@shared/types/tvmaze';
+import { useShow } from '../contexts/show/ShowContext';
+import ShowCard from './ShowCard';
 
 export default function Result({
   showData,

@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import type { Context } from 'hono';
 import { sign } from 'hono/jwt';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import * as bcrypt from 'bcryptjs';
@@ -8,15 +7,13 @@ import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
 import { db } from '../db/client.js';
 import { ok, err } from '../utils/response.js';
-import { generateRefreshToken } from '../utils/auth.js';
+import { generateRefreshToken, setAuthCookies } from '../utils/auth.js';
 import type { JwtData, Role, UserData } from '@shared/types/tv-tracker.js';
 import {
   bcryptSaltRounds,
   jwtAlgorithm,
   getAccessTokenExpirationSeconds,
   getRefreshTokenExpirationDate,
-  refreshTokenExpiryDays,
-  accessTokenExpiryMinutes,
   jwtSecret,
   isProduction,
 } from '../utils/envVars.js';
@@ -29,26 +26,6 @@ import { validationHook } from '../utils/validationHook.js';
 type Variables = {
   jwtPayload: JwtData;
 };
-
-function setRefreshCookie(c: Context, raw: string) {
-  setCookie(c, 'refreshToken', raw, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'None' : 'Lax',
-    maxAge: refreshTokenExpiryDays * 24 * 60 * 60,
-    path: '/api/auth',
-  });
-}
-
-function setAccessCookie(c: Context, token: string) {
-  setCookie(c, 'accessToken', token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'None' : 'Lax',
-    maxAge: accessTokenExpiryMinutes * 60,
-    path: '/api',
-  });
-}
 
 const auth = new Hono<{ Variables: Variables }>()
   // Register a new user
@@ -79,8 +56,7 @@ const auth = new Hono<{ Variables: Variables }>()
       const { raw, hash } = generateRefreshToken();
       const expiresAt = getRefreshTokenExpirationDate();
       await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, expiresAt);
-      setRefreshCookie(c, raw);
-      setAccessCookie(c, token);
+      setAuthCookies(c, { accessToken: token, refreshToken: raw });
 
       return c.json(ok({}));
     } catch (e: unknown) {
@@ -111,8 +87,7 @@ const auth = new Hono<{ Variables: Variables }>()
       const { raw, hash } = generateRefreshToken();
       const expiresAt = getRefreshTokenExpirationDate();
       await dbUserFunctions.updateRefreshToken(db, user[0].userId, hash, expiresAt);
-      setRefreshCookie(c, raw);
-      setAccessCookie(c, token);
+      setAuthCookies(c, { accessToken: token, refreshToken: raw });
 
       return c.json(ok({}));
     } catch (e: unknown) {
@@ -151,8 +126,7 @@ const auth = new Hono<{ Variables: Variables }>()
       const { raw: newRaw, hash: newHash } = generateRefreshToken();
       const expiresAt = getRefreshTokenExpirationDate();
       await dbUserFunctions.updateRefreshToken(db, user.userId, newHash, expiresAt);
-      setRefreshCookie(c, newRaw);
-      setAccessCookie(c, token);
+      setAuthCookies(c, { accessToken: token, refreshToken: newRaw });
 
       return c.json(ok({}));
     } catch (e: unknown) {

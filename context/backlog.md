@@ -11,8 +11,7 @@
 _None identified._
 
 ### Medium
-- **#3 [apps/api/src/routes/auth.ts:183]**: `DELETE /api/auth/deleteUser` uses `authRateLimit` (5 req/15 min, keyed by IP+path). An attacker can burn a victim IP's quota before they attempt deletion. Self-service account operations should not share a bucket with brute-force login protection. Fix: apply `apiRateLimit` or a dedicated moderate limiter.
-- **#4 [apps/api/src/db/dbUserFunctions.ts:17]**: `returnUsers()` selects all columns including `passwordHash`, `refreshTokenHash`, and `refreshTokenExpiresAt`. The admin route projects only `ProfileData` so hashes are never sent, but they cross the DB→Node boundary unnecessarily. Fix: use Drizzle column selection to omit sensitive fields at query time.
+_None identified._
 
 ### Low
 _None identified._
@@ -89,9 +88,9 @@ _None identified._
 
 | Category | High | Medium | Low | Total |
 |----------|------|--------|-----|-------|
-| Security | 0 | 2 | 0 | 2 |
+| Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 2 | 0 | 2 |
 | Improvements & Refactors | 1 | 3 | 4 | 8 |
 | Feature Ideas | 3 | 3 | 5 | 11 |
-| **Total** | **4** | **12** | **9** | **25** |
+| **Total** | **4** | **10** | **9** | **23** |
