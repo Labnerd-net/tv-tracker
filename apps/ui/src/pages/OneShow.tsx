@@ -1,50 +1,20 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import * as Api from '../apis/userRequests.ts';
-import { logger } from '../utils/logger.ts';
-import type { ShowData } from '@shared/types/tv-tracker.ts';
-import { useAlert } from '../contexts/alert/AlertContext.tsx';
 import { useShowActions } from '../hooks/useShowActions.ts';
+import { useShow } from '../contexts/show/ShowContext.tsx';
 import ShowDetailSkeleton from '../components/ShowDetailSkeleton.tsx';
 
 const PLACEHOLDER = 'https://placehold.co/210x295/0f1420/5a5248?text=NO+IMAGE';
 
 export default function OneShow() {
   const { showID } = useParams();
-  const { showAlert } = useAlert();
   const { actionLoading, refreshShow, deleteShow } = useShowActions();
+  const { tvShows, loading } = useShow();
   const isActionLoading = actionLoading[Number(showID)] ?? false;
-  const [tvShow, setTvShow] = useState<ShowData>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const tvShow = tvShows.find(s => s.showId === Number(showID));
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const retrieveTvShow = async () => {
-      try {
-        if (showID) {
-          const response = await Api.getOneShow(showID);
-          if (response.success) {
-            setTvShow(response.data);
-          } else {
-            const msg = response.error ?? 'Failed to retrieve TV Show';
-            setError(msg);
-            showAlert('danger', msg);
-          }
-        }
-      } catch (err) {
-        logger.error(err);
-        setError('Failed to retrieve TV Show');
-        showAlert('danger', 'Failed to retrieve TV Show!');
-      } finally {
-        setLoading(false);
-      }
-    };
-    retrieveTvShow();
-  }, [showAlert, showID]);
 
   const refreshData = () => {
     if (tvShow && showID) {
@@ -62,11 +32,11 @@ export default function OneShow() {
     return <ShowDetailSkeleton />;
   }
 
-  if (error || !tvShow) {
+  if (!tvShow) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 54px)', bgcolor: 'var(--bg)' }}>
         <Box sx={{ fontFamily: '"Space Mono", monospace', fontSize: '0.75rem', color: 'var(--cream-muted)' }}>
-          {error || 'Show not found'}
+          Show not found
         </Box>
       </Box>
     );
