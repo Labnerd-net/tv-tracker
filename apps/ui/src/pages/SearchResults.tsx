@@ -8,6 +8,8 @@ import Result from '../components/Result.js';
 import type { TvMazeSeries } from '@shared/types/tvmaze.js';
 import { useAlert } from '../contexts/alert/AlertContext.js';
 
+const EPISODE_FETCH_BATCH_SIZE = 5;
+
 export default function SearchResults() {
   const { showAlert } = useAlert();
   const { showName } = useParams();
@@ -29,18 +31,25 @@ export default function SearchResults() {
         if (response.success && response.data) {
           const data = response.data;
           setSearchResults(data);
+          setLoading(false);
           setEpisodesLoading(Object.fromEntries(data.map(item => [item.show.id, true])));
-          for (const item of data) {
-            const id = item.show.id;
-            Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => {
-              if (controller.signal.aborted) return;
-              setEpisodeDates(prev => ({ ...prev, [id]: r.success ? r.data.date : '' }));
-              setEpisodesLoading(prev => ({ ...prev, [id]: false }));
-            }).catch(() => {
-              if (!controller.signal.aborted) {
-                setEpisodesLoading(prev => ({ ...prev, [id]: false }));
-              }
-            });
+          for (let i = 0; i < data.length; i += EPISODE_FETCH_BATCH_SIZE) {
+            if (controller.signal.aborted) break;
+            const batch = data.slice(i, i + EPISODE_FETCH_BATCH_SIZE);
+            await Promise.allSettled(
+              batch.map(item => {
+                const id = item.show.id;
+                return Api.fetchNextEpisodeDate(item.show, controller.signal).then(r => {
+                  if (controller.signal.aborted) return;
+                  setEpisodeDates(prev => ({ ...prev, [id]: r.success ? r.data.date : '' }));
+                  setEpisodesLoading(prev => ({ ...prev, [id]: false }));
+                }).catch(() => {
+                  if (!controller.signal.aborted) {
+                    setEpisodesLoading(prev => ({ ...prev, [id]: false }));
+                  }
+                });
+              })
+            );
           }
         } else {
           const msg = !response.success ? response.error : 'Failed to retrieve TV Show results';
