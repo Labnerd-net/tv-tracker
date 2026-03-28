@@ -53,7 +53,7 @@ _None identified._
 - **#13 [apps/ui/src/]**: No virtual scrolling. With 100+ shows the card grid renders all DOM nodes at once. Add `react-virtual` or `react-window` for the `AllShows.tsx` grid (lines 77–89).
 
 ### Low
-- **#16 [apps/api/src/db/schema.ts:23]**: `scheduleDay` is typed `string[]` but CLAUDE.md states only the first element is stored. The type and documentation contradict. Fix: either store the full array and remove the caveat, or type as `string` and rename to `scheduleDay` (singular).
+_None identified._
 
 ---
 
@@ -84,6 +84,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 2 | 0 | 2 |
 | Performance | 0 | 1 | 0 | 1 |
-| Improvements & Refactors | 1 | 1 | 1 | 3 |
+| Improvements & Refactors | 1 | 1 | 0 | 2 |
 | Feature Ideas | 3 | 3 | 4 | 10 |
-| **Total** | **4** | **7** | **5** | **16** |
+| **Total** | **4** | **7** | **4** | **15** |
