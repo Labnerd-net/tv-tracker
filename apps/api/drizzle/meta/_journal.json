@@ -29,6 +29,13 @@
       "when": 1773697918803,
       "tag": "0004_good_katie_power",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1774712458216,
+      "tag": "0005_last_magneto",
+      "breakpoints": true
     }
   ]
 }
