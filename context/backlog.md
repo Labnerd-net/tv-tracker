@@ -40,8 +40,7 @@ _None identified._
 _None identified._
 
 ### Low
-- **#8 [apps/api/src/utils/rateLimiter.ts:14–30]**: Rate limiter cleanup relies on a 5-minute `setInterval`. Expired entries linger between runs and the store can grow unbounded. Fix: check expiry on every request and do probabilistic cleanup (e.g., 1% of requests) instead of interval-based cleanup.
-- **#9 [apps/api/src/db/dbShowFunctions.ts, dbUserFunctions.ts]**: All queries use dynamic SQL builders. Drizzle prepared statements would reduce per-query parse overhead under high concurrency. Low priority given current scale.
+_None identified._
 
 ---
 
@@ -81,7 +80,7 @@ _None identified._
 |----------|------|--------|-----|-------|
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
-| Performance | 0 | 0 | 2 | 2 |
+| Performance | 0 | 0 | 0 | 0 |
 | Improvements & Refactors | 0 | 2 | 0 | 2 |
 | Feature Ideas | 1 | 3 | 3 | 7 |
-| **Total** | **1** | **5** | **5** | **11** |
+| **Total** | **1** | **5** | **3** | **9** |

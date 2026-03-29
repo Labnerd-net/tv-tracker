@@ -15,11 +15,10 @@ import TvMazeData from '../tvmaze.js';
 import { tvMazeShowBodySchema, numericIdParamSchema } from '../schemas/show.js';
 import { validationHook } from '../utils/validationHook.js';
 import { TV_MAZE_API_BASE } from '@shared/constants/tvmaze.js';
+import { enqueueEpisodeUpdate } from '../utils/jobQueue.js';
 
 function scheduleEpisodeUpdate(showData: TvMazeData, newShowId: number): void {
-  showData.updateEpisodes()
-    .then(({ next, prev }) => dbShowFunctions.updateShowEpisodes(db, newShowId, next, prev))
-    .catch(e => logger.error({ err: e }, 'background episode fetch failed'));
+  enqueueEpisodeUpdate(showData, newShowId);
 }
 
 type Variables = {
