@@ -51,7 +51,6 @@ _None identified._
 
 ### Medium
 - **#10 [apps/ui/src/contexts/show/ShowProvider.tsx]**: `actionLoading: Record<number, boolean>` is a single context value — any loading state change re-renders every `SingleShow` card. Fix: atomize loading state per `showId` via a context getter function, so only the affected card re-renders.
-- **#11 [apps/api/src/routes/user.ts]**: Background `scheduleEpisodeUpdate()` calls are fire-and-forget with no error visibility. Failures are silently swallowed. Fix: introduce a simple in-memory job queue with retry and structured logging.
 
 ### Low
 _None identified._
@@ -81,6 +80,6 @@ _None identified._
 | Security | 0 | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 | 0 |
 | Performance | 0 | 0 | 0 | 0 |
-| Improvements & Refactors | 0 | 2 | 0 | 2 |
+| Improvements & Refactors | 0 | 1 | 0 | 1 |
 | Feature Ideas | 1 | 3 | 3 | 7 |
-| **Total** | **1** | **5** | **3** | **9** |
+| **Total** | **1** | **4** | **3** | **8** |
