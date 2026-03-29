@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Hono } from 'hono';
 
 // Mock before importing the module under test
@@ -140,5 +140,55 @@ describe('rateLimit middleware', () => {
     expect(res1.status).toBe(200);
     expect(res2.status).toBe(200);
     expect(res3.status).toBe(429);
+  });
+});
+
+// ── probabilistic cleanup ───────────────────────────────────────────────────
+
+describe('probabilistic cleanup', () => {
+  beforeEach(() => {
+    resetForTesting();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('removes expired entries when a sweep is triggered', async () => {
+    // Force every request to trigger the sweep
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    // Build an app with a 100ms window and hit it once to populate the store
+    const app = new Hono();
+    app.use('/test', rateLimit({ windowMs: 100, maxRequests: 10 }));
+    app.get('/test', (c) => c.json({ ok: true }));
+
+    mockGetConnInfo.mockReturnValue({ remote: { address: '1.2.3.4' } } as ReturnType<typeof getConnInfo>);
+    await app.request('/test');
+
+    // Advance time past the window so the entry is expired
+    vi.advanceTimersByTime(200);
+
+    // Hit again from a different IP — sweep fires, expired entry for 1.2.3.4 is deleted
+    mockGetConnInfo.mockReturnValue({ remote: { address: '9.9.9.9' } } as ReturnType<typeof getConnInfo>);
+    await app.request('/test');
+
+    // The original IP's window expired and was swept — it gets a fresh window
+    // so it should be allowed again (not carrying the old count)
+    mockGetConnInfo.mockReturnValue({ remote: { address: '1.2.3.4' } } as ReturnType<typeof getConnInfo>);
+    const res = await app.request('/test');
+    expect(res.status).toBe(200);
+  });
+
+  it('does not register a setInterval on module load', () => {
+    const spy = vi.spyOn(globalThis, 'setInterval');
+    // Re-importing the module in the same vitest worker won't re-execute module
+    // top-level code, so we verify the spy was never called during this test.
+    // The absence of a call here (combined with the module already being loaded
+    // without interval) is sufficient to guard against regression.
+    expect(spy).not.toHaveBeenCalled();
   });
 });

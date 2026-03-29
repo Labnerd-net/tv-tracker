@@ -16,19 +16,6 @@ interface RateLimitEntry {
 // for multi-instance deployments.
 const store = new Map<string, RateLimitEntry>();
 
-// Cleanup old entries every 5 minutes to prevent memory leaks
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [key, entry] of store.entries()) {
-      if (entry.resetAt < now) {
-        store.delete(key);
-      }
-    }
-  },
-  5 * 60 * 1000
-);
-
 export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   maxRequests: number; // Maximum requests per window
@@ -59,6 +46,10 @@ export function isTrustedProxy(ip: string): boolean {
   const [a, b] = parts;
   return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
 }
+
+// Probability of running a full store sweep on any given request.
+// At 1%, ~1 in 100 requests will purge expired entries.
+const CLEANUP_PROBABILITY = 0.01;
 
 export function rateLimit(config: RateLimitConfig) {
   const { windowMs, maxRequests, message = 'Too many requests, please try again later' } = config;
@@ -93,6 +84,13 @@ export function rateLimit(config: RateLimitConfig) {
     }
 
     entry.count++;
+
+    // Probabilistic cleanup: sweep expired entries on ~1% of requests
+    if (Math.random() < CLEANUP_PROBABILITY) {
+      for (const [k, e] of store.entries()) {
+        if (e.resetAt < now) store.delete(k);
+      }
+    }
 
     // Check if limit exceeded
     if (entry.count > maxRequests) {
