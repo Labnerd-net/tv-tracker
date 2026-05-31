@@ -1,3 +1,6 @@
+// Hono context bindings type. Includes the core Workers bindings (TV_DB,
+// JWT_SECRET, ENVIRONMENT) generated in worker-configuration.d.ts, plus
+// optional runtime vars not declared in wrangler.jsonc.
 export type Bindings = {
   TV_DB: D1Database;
   JWT_SECRET: string;

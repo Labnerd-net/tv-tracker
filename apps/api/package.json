@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "pnpm wrangler types ./worker-configuration.d.ts && tsc && tsc-alias",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "lint": "eslint ."
@@ -17,7 +17,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250714.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.17",
     "drizzle-kit": "^0.31.8",

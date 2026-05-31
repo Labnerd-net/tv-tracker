@@ -1,4 +1,5 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "tv-tracker",
   "main": "apps/api/dist/api/src/index.js",
   "compatibility_date": "2025-01-01",
@@ -10,9 +11,8 @@
     {
       "binding": "TV_DB",
       "database_name": "tv-tracker",
-      // Add your D1 database_id here after running:
-      // wrangler d1 create tv-tracker
-      "database_id": ""
+      "database_id": "",
+      "migrations_dir": "./apps/api/drizzle"
     }
   ],
   "vars": {
