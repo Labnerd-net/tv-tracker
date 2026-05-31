@@ -1,8 +1,7 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { dbUrl } from '../utils/envVars.js';
+import { drizzle } from 'drizzle-orm/d1';
 
-export const db = drizzle(dbUrl);
+export type { DrizzleD1Database } from 'drizzle-orm/d1';
 
-// Enable FK enforcement — must be set per-connection in SQLite.
-// libsql serializes operations so this runs before any query.
-void db.$client.execute('PRAGMA foreign_keys = ON');
+export function getDb(d1: D1Database) {
+  return drizzle(d1);
+}

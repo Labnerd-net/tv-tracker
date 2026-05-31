@@ -3,7 +3,8 @@ import app from '../src/app.js';
 import * as dbUserFunctions from '../src/db/dbUserFunctions.js';
 import * as dbShowFunctions from '../src/db/dbShowFunctions.js';
 import TvMazeData from '../src/tvmaze.js';
-import { makeToken } from './helpers.js';
+import { makeToken, mockEnv, mockCtx } from './helpers.js';
+import * as jobQueue from '../src/utils/jobQueue.js';
 
 vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByEmail: vi.fn().mockResolvedValue([]),
@@ -20,13 +21,12 @@ vi.mock('../src/db/dbShowFunctions.js', () => ({
   addOneShow: vi.fn().mockResolvedValue([{ showId: 1 }]),
   updateOneShow: vi.fn().mockResolvedValue(undefined),
   updateShowEpisodes: vi.fn().mockResolvedValue(undefined),
-  deleteOneShowId: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
+  deleteOneShowId: vi.fn().mockResolvedValue([{ showId: 1 }]),
 }));
 
-vi.mock('../src/utils/rateLimiter.js', () => ({
-  authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-}));
+vi.mock('../src/db/client.js', () => ({ getDb: vi.fn().mockReturnValue({}) }));
+
+vi.mock('../src/utils/jobQueue.js', () => ({ scheduleEpisodeUpdate: vi.fn() }));
 
 const mockUser = {
   userId: 1,
@@ -85,7 +85,7 @@ beforeEach(() => {
 });
 
 function get(path: string, headers: Record<string, string> = {}) {
-  return app.request(path, { headers });
+  return app.request(path, { headers }, mockEnv, mockCtx);
 }
 
 function post(path: string, body: unknown, headers: Record<string, string> = {}) {
@@ -93,15 +93,15 @@ function post(path: string, body: unknown, headers: Record<string, string> = {})
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify(body),
-  });
+  }, mockEnv, mockCtx);
 }
 
 function patch(path: string, headers: Record<string, string> = {}) {
-  return app.request(path, { method: 'PATCH', headers });
+  return app.request(path, { method: 'PATCH', headers }, mockEnv, mockCtx);
 }
 
 function del(path: string, headers: Record<string, string> = {}) {
-  return app.request(path, { method: 'DELETE', headers });
+  return app.request(path, { method: 'DELETE', headers }, mockEnv, mockCtx);
 }
 
 describe('GET /api/user/profile', () => {
@@ -209,33 +209,15 @@ describe('POST /api/user/tvshow (body)', () => {
     expect(body.error).toBe('Failed to save show');
   });
 
-  it('fires updateEpisodes in background without blocking response', async () => {
+  it('schedules background episode update without blocking response', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 42 }]);
-    let resolveEpisodes!: (v: { next: string; prev: string }) => void;
-    const episodesPromise = new Promise<{ next: string; prev: string }>(
-      resolve => (resolveEpisodes = resolve),
-    );
-    const updateSpy = vi
-      .spyOn(TvMazeData.prototype, 'updateEpisodes')
-      .mockReturnValueOnce(episodesPromise);
+    const enqueueSpy = vi.spyOn(jobQueue, 'scheduleEpisodeUpdate');
 
     const res = await post('/api/user/tvshow', tvMazeShowJson, { Cookie: authHeader });
     expect(res.status).toBe(200);
-    expect(updateSpy).toHaveBeenCalled();
-    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
-
-    resolveEpisodes({ next: '2026-03-20', prev: '2026-03-10' });
-    await vi.waitFor(() => {
-      expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).toHaveBeenCalledWith(
-        expect.anything(),
-        42,
-        '2026-03-20',
-        '2026-03-10',
-      );
-    });
-
-    updateSpy.mockRestore();
+    expect(enqueueSpy).toHaveBeenCalledOnce();
+    expect(enqueueSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.any(TvMazeData), 42);
   });
 });
 
@@ -273,54 +255,16 @@ describe('POST /api/user/tvshow/:id (TVMaze fetch)', () => {
     expect(body.data.status).toBe('added');
   });
 
-  it('fires updateEpisodes in background without blocking response', async () => {
+  it('schedules background episode update without blocking response', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
     vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 42 }]);
-    let resolveEpisodes!: (v: { next: string; prev: string }) => void;
-    const episodesPromise = new Promise<{ next: string; prev: string }>(
-      resolve => (resolveEpisodes = resolve),
-    );
-    const updateSpy = vi
-      .spyOn(TvMazeData.prototype, 'updateEpisodes')
-      .mockReturnValueOnce(episodesPromise);
     fetchMock.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify(tvMazeShowJson) });
+    const enqueueSpy = vi.spyOn(jobQueue, 'scheduleEpisodeUpdate');
 
     const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
     expect(res.status).toBe(200);
-    // updateEpisodes was called but not awaited before response
-    expect(updateSpy).toHaveBeenCalled();
-    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
-
-    // Resolve the background fetch and verify DB update
-    resolveEpisodes({ next: '2026-03-20', prev: '2026-03-10' });
-    await vi.waitFor(() => {
-      expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).toHaveBeenCalledWith(
-        expect.anything(),
-        42,
-        '2026-03-20',
-        '2026-03-10',
-      );
-    });
-
-    updateSpy.mockRestore();
-  });
-
-  it('logs error and does not crash when background episode fetch fails', async () => {
-    vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
-    vi.mocked(dbShowFunctions.addOneShow).mockResolvedValueOnce([{ showId: 5 }]);
-    const updateSpy = vi
-      .spyOn(TvMazeData.prototype, 'updateEpisodes')
-      .mockRejectedValueOnce(new Error('TVMaze down'));
-    fetchMock.mockResolvedValueOnce({ ok: true, text: async () => JSON.stringify(tvMazeShowJson) });
-
-    const res = await post('/api/user/tvshow/123', {}, { Cookie: authHeader });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.data.status).toBe('added');
-
-    expect(vi.mocked(dbShowFunctions.updateShowEpisodes)).not.toHaveBeenCalled();
-
-    updateSpy.mockRestore();
+    expect(enqueueSpy).toHaveBeenCalledOnce();
+    expect(enqueueSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.any(TvMazeData), 42);
   });
 
   it('returns 504 when TVMaze fetch times out', async () => {
@@ -402,13 +346,13 @@ describe('DELETE /api/user/tvshow/:id', () => {
   });
 
   it('returns 404 when no rows affected', async () => {
-    vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce({ rowsAffected: 0 });
+    vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce([]);
     const res = await del('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(404);
   });
 
   it('returns deleted status on success', async () => {
-    vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce({ rowsAffected: 1 });
+    vi.mocked(dbShowFunctions.deleteOneShowId).mockResolvedValueOnce([{ showId: 1 }]);
     const res = await del('/api/user/tvshow/1', { Cookie: authHeader });
     expect(res.status).toBe(200);
     const body = await res.json();

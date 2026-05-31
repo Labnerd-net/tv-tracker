@@ -3,12 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
-    "dev:api": "pnpm --filter @tv-tracker/api run dev",
+    "dev": "pnpm build:ui && wrangler dev",
     "dev:ui": "pnpm --filter @tv-tracker/ui run dev",
-    "build": "pnpm -r run build",
+    "build": "pnpm build:api && pnpm build:ui",
     "build:api": "pnpm --filter @tv-tracker/api run build",
     "build:ui": "pnpm --filter @tv-tracker/ui run build",
+    "deploy": "pnpm build && wrangler deploy",
     "lint": "pnpm -r run lint",
     "prepare": "husky"
   },
@@ -27,6 +27,7 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.56.0",
+    "wrangler": "^4.24.3"
   }
 }

@@ -63,7 +63,7 @@ export default class TvMazeData {
           logger.warn({ link, status: response.status }, `Non-OK response from TVMaze for ${label} episode`);
           return '';
         }
-        const data = await response.json();
+        const data = await response.json() as { airdate?: string };
         return data.airdate ?? '';
       } catch (e) {
         logger.warn({ err: e }, `Failed to fetch ${label} episode`);

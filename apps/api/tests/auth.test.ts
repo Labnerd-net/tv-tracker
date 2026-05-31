@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import app from '../src/app.js';
 import * as dbUserFunctions from '../src/db/dbUserFunctions.js';
 import * as bcrypt from 'bcryptjs';
+import { mockEnv, mockCtx } from './helpers.js';
 
 vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByEmail: vi.fn().mockResolvedValue([]),
@@ -14,10 +15,7 @@ vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByRefreshTokenHash: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('../src/utils/rateLimiter.js', () => ({
-  authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-}));
+vi.mock('../src/db/client.js', () => ({ getDb: vi.fn().mockReturnValue({}) }));
 
 vi.mock('bcryptjs', () => ({
   hash: vi.fn().mockResolvedValue('hashed'),
@@ -40,7 +38,7 @@ function post(path: string, body: unknown, headers?: Record<string, string>) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify(body),
-  });
+  }, mockEnv, mockCtx);
 }
 
 beforeEach(() => {
@@ -262,7 +260,7 @@ describe('POST /api/auth/login', () => {
 
 describe('POST /api/auth/refresh', () => {
   it('returns 401 when refresh cookie is absent', async () => {
-    const res = await app.request('/api/auth/refresh', { method: 'POST' });
+    const res = await app.request('/api/auth/refresh', { method: 'POST' }, mockEnv, mockCtx);
     expect(res.status).toBe(401);
   });
 
@@ -271,7 +269,7 @@ describe('POST /api/auth/refresh', () => {
     const res = await app.request('/api/auth/refresh', {
       method: 'POST',
       headers: { Cookie: 'refreshToken=unknowntoken' },
-    });
+    }, mockEnv, mockCtx);
     expect(res.status).toBe(401);
   });
 
@@ -282,7 +280,7 @@ describe('POST /api/auth/refresh', () => {
     const res = await app.request('/api/auth/refresh', {
       method: 'POST',
       headers: { Cookie: 'refreshToken=expiredtoken' },
-    });
+    }, mockEnv, mockCtx);
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBe('Refresh token expired');
@@ -293,7 +291,7 @@ describe('POST /api/auth/refresh', () => {
     const res = await app.request('/api/auth/refresh', {
       method: 'POST',
       headers: { Cookie: 'refreshToken=validrawtoken' },
-    });
+    }, mockEnv, mockCtx);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -307,7 +305,7 @@ describe('POST /api/auth/refresh', () => {
 
 describe('POST /api/auth/logout', () => {
   it('returns 401 without a valid access token', async () => {
-    const res = await app.request('/api/auth/logout', { method: 'POST' });
+    const res = await app.request('/api/auth/logout', { method: 'POST' }, mockEnv, mockCtx);
     expect(res.status).toBe(401);
   });
 
@@ -328,7 +326,7 @@ describe('POST /api/auth/logout', () => {
     const res = await app.request('/api/auth/logout', {
       method: 'POST',
       headers: { Cookie: `accessToken=${accessToken}` },
-    });
+    }, mockEnv, mockCtx);
     expect(res.status).toBe(200);
     expect(vi.mocked(dbUserFunctions.clearRefreshToken)).toHaveBeenCalledOnce();
     const cookie = res.headers.get('set-cookie');

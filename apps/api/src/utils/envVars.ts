@@ -1,40 +1,39 @@
-import 'dotenv/config';
 import type { AlgorithmTypes } from 'hono/jwt';
+import type { Bindings } from './bindings.js';
 
-const sqliteFile = process.env.DB_FILE_NAME || 'file:data/local.db';
-export const dbUrl = sqliteFile;
-
-const localClientURLs = ['http://localhost:4173', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'];
-const envClientURLs = process.env.CLIENT_URL?.split(",");
-export const clientURLs = envClientURLs || localClientURLs;
-
-export const serverPort = Number(process.env.SERVER_PORT) || 3000;
-
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
-export const jwtSecret = process.env.JWT_SECRET;
-export const jwtAlgorithm = (process.env.JWT_ALGORITHM || 'HS256') as AlgorithmTypes;
-
-export const accessTokenExpiryMinutes = Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 15;
-export const refreshTokenExpiryDays = Number(process.env.JWT_EXPIRATION_DAYS) || 7;
-
-// Helper: access token exp claim (seconds since epoch)
-export function getAccessTokenExpirationSeconds(): number {
-  return Math.floor(Date.now() / 1000) + accessTokenExpiryMinutes * 60;
+export function jwtSecret(env: Bindings): string {
+  return env.JWT_SECRET;
 }
 
-// Backward-compat alias used by existing call sites
-export const getJwtExpirationSeconds = getAccessTokenExpirationSeconds;
-
-// Helper: refresh token expiry as a Date
-export function getRefreshTokenExpirationDate(): Date {
-  return new Date(Date.now() + refreshTokenExpiryDays * 24 * 60 * 60 * 1000);
+export function jwtAlgorithm(env: Bindings): AlgorithmTypes {
+  return (env.JWT_ALGORITHM ?? 'HS256') as AlgorithmTypes;
 }
 
-export const isProduction = process.env.NODE_ENV === 'production';
+export function bcryptSaltRounds(env: Bindings): number {
+  return Number(env.BCRYPT_SALT_ROUNDS) || 10;
+}
 
-export const bcryptSaltRounds = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
+export function isProduction(env: Bindings): boolean {
+  return env.ENVIRONMENT === 'production';
+}
 
-export const logLevel = process.env.LOG_LEVEL ?? 'info';
+export function accessTokenExpiryMinutes(env: Bindings): number {
+  return Number(env.ACCESS_TOKEN_EXPIRY_MINUTES) || 15;
+}
 
+export function refreshTokenExpiryDays(env: Bindings): number {
+  return Number(env.JWT_EXPIRATION_DAYS) || 7;
+}
+
+export function getAccessTokenExpirationSeconds(env: Bindings): number {
+  return Math.floor(Date.now() / 1000) + accessTokenExpiryMinutes(env) * 60;
+}
+
+export function getRefreshTokenExpirationDate(env: Bindings): Date {
+  return new Date(Date.now() + refreshTokenExpiryDays(env) * 24 * 60 * 60 * 1000);
+}
+
+export function getAllowedOrigins(env: Bindings): string[] {
+  if (env.CLIENT_URL) return env.CLIENT_URL.split(',');
+  return ['http://localhost:8787'];
+}

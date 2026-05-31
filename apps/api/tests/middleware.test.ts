@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { sign } from 'hono/jwt';
 import app from '../src/app.js';
+import { mockEnv, mockCtx } from './helpers.js';
 
 vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByEmail: vi.fn().mockResolvedValue([]),
@@ -13,10 +14,7 @@ vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByRefreshTokenHash: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('../src/utils/rateLimiter.js', () => ({
-  authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-}));
+vi.mock('../src/db/client.js', () => ({ getDb: vi.fn().mockReturnValue({}) }));
 
 const SECRET = 'test-secret';
 const ALG = 'HS256';
@@ -29,7 +27,7 @@ async function tokenCookie(payload: Record<string, unknown>): Promise<string> {
 function getProfile(cookie: string) {
   return app.request('/api/user/profile', {
     headers: { Cookie: cookie },
-  });
+  }, mockEnv, mockCtx);
 }
 
 describe('authMiddleware JWT shape validation', () => {

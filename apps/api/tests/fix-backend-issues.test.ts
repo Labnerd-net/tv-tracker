@@ -2,10 +2,8 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import app from '../src/app.js';
 import * as dbUserFunctions from '../src/db/dbUserFunctions.js';
 import * as dbShowFunctions from '../src/db/dbShowFunctions.js';
-import { resetForTesting } from '../src/utils/rateLimiter.js';
-import { makeToken } from './helpers.js';
+import { makeToken, mockEnv, mockCtx } from './helpers.js';
 
-// Mock DB functions but NOT rateLimiter — test 1 uses the real rate limiter.
 vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByEmail: vi.fn().mockResolvedValue([]),
   returnUsers: vi.fn().mockResolvedValue([]),
@@ -23,7 +21,13 @@ vi.mock('../src/db/dbShowFunctions.js', () => ({
   returnOneShowTvMazeId: vi.fn().mockResolvedValue([]),
   addOneShow: vi.fn().mockResolvedValue([{ showId: 1 }]),
   updateOneShow: vi.fn().mockResolvedValue(undefined),
-  deleteOneShowId: vi.fn().mockResolvedValue({ rowsAffected: 1 }),
+  deleteOneShowId: vi.fn().mockResolvedValue([{ showId: 1 }]),
+}));
+
+vi.mock('../src/db/client.js', () => ({ getDb: vi.fn().mockReturnValue({}) }));
+
+vi.mock('../src/utils/jobQueue.js', () => ({
+  scheduleEpisodeUpdate: vi.fn(),
 }));
 
 vi.mock('bcryptjs', () => ({
@@ -51,31 +55,18 @@ beforeAll(async () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  resetForTesting();
 });
 
-// 1. POST /api/auth/refresh is rate-limited
-describe('POST /api/auth/refresh rate limiting', () => {
-  it('returns 429 on the 6th request', async () => {
-    for (let i = 0; i < 5; i++) {
-      const res = await app.request('/api/auth/refresh', { method: 'POST' });
-      expect(res.status).toBe(401);
-    }
-    const res = await app.request('/api/auth/refresh', { method: 'POST' });
-    expect(res.status).toBe(429);
-  });
-});
-
-// 2. DELETE /api/auth/deleteUser clears refresh cookie
+// 1. DELETE /api/auth/deleteUser clears refresh cookie
 describe('DELETE /api/auth/deleteUser clears refresh cookie', () => {
   it('calls clearRefreshToken and sets Max-Age=0 cookie', async () => {
     vi.mocked(dbUserFunctions.returnUserById).mockResolvedValueOnce([mockUser]);
-    vi.mocked(dbUserFunctions.deleteUserById).mockResolvedValueOnce({ rowsAffected: 1 } as never);
+    vi.mocked(dbUserFunctions.deleteUserById).mockResolvedValueOnce({ changes: 1 } as never);
 
     const res = await app.request('/api/auth/deleteUser', {
       method: 'DELETE',
       headers: { Cookie: authHeader },
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(200);
     expect(vi.mocked(dbUserFunctions.clearRefreshToken)).toHaveBeenCalledOnce();
@@ -85,7 +76,7 @@ describe('DELETE /api/auth/deleteUser clears refresh cookie', () => {
   });
 });
 
-// 3. Multi-day schedule is stored as an array
+// 2. Multi-day schedule is stored as an array
 describe('POST /api/user/tvshow stores multi-day schedule', () => {
   it('passes scheduleDays array to addOneShow', async () => {
     vi.mocked(dbShowFunctions.returnOneShowTvMazeId).mockResolvedValueOnce([]);
@@ -105,7 +96,7 @@ describe('POST /api/user/tvshow stores multi-day schedule', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Cookie: authHeader },
       body: JSON.stringify(body),
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(200);
     expect(vi.mocked(dbShowFunctions.addOneShow)).toHaveBeenCalledOnce();
@@ -114,14 +105,14 @@ describe('POST /api/user/tvshow stores multi-day schedule', () => {
   });
 });
 
-// 4. Body with only { id } returns 400 (name is now required)
+// 3. Body with only { id } returns 400 (name is now required)
 describe('POST /api/user/tvshow body validation', () => {
   it('returns 400 when name is missing', async () => {
     const res = await app.request('/api/user/tvshow', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Cookie: authHeader },
       body: JSON.stringify({ id: 123 }),
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -129,7 +120,7 @@ describe('POST /api/user/tvshow body validation', () => {
   });
 });
 
-// 5. First user is not auto-promoted to admin when ADMIN_EMAIL is unset
+// 4. First user is not auto-promoted to admin when ADMIN_EMAIL is unset
 describe('POST /api/auth/register without ADMIN_EMAIL', () => {
   it('registers user with roles: [user] only', async () => {
     vi.mocked(dbUserFunctions.returnUserByEmail).mockResolvedValueOnce([]);
@@ -145,7 +136,7 @@ describe('POST /api/auth/register without ADMIN_EMAIL', () => {
         password: 'password123',
         displayName: 'New',
       }),
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(200);
     expect(vi.mocked(dbUserFunctions.addUser)).toHaveBeenCalledOnce();

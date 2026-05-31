@@ -2,13 +2,13 @@
 
 ## Current Feature Spec File
 
-Title:
-Spec file:
-Branch:
+Title: Migrate from Dokploy to Cloudflare Workers
+Spec file: context/specs/cloudflare-workers-migration.md
+Branch: claude/feature/cloudflare-workers-migration
 
 ## Current Feature Plan File
 
-Plan file:
+Plan file: context/specs/cloudflare-workers-migration.md
 
 ## History
 

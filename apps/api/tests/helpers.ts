@@ -1,4 +1,16 @@
 import { sign } from 'hono/jwt';
+import { vi } from 'vitest';
+
+export const mockEnv = {
+  DB: {} as D1Database,
+  JWT_SECRET: 'test-secret',
+  ENVIRONMENT: 'test',
+};
+
+export const mockCtx = {
+  waitUntil: vi.fn(),
+  passThroughOnException: vi.fn(),
+} as unknown as ExecutionContext;
 
 export async function makeToken(overrides: Record<string, unknown> = {}) {
   return sign(

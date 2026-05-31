@@ -1,0 +1,21 @@
+{
+  "name": "tv-tracker",
+  "main": "apps/api/dist/api/src/index.js",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./apps/ui/dist",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tv-tracker",
+      // Add your D1 database_id here after running:
+      // wrangler d1 create tv-tracker
+      "database_id": ""
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production"
+  }
+}

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import app from '../src/app.js';
 import * as dbUserFunctions from '../src/db/dbUserFunctions.js';
 import * as bcrypt from 'bcryptjs';
+import { mockEnv, mockCtx } from './helpers.js';
 
 vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByEmail: vi.fn().mockResolvedValue([]),
@@ -14,10 +15,7 @@ vi.mock('../src/db/dbUserFunctions.js', () => ({
   returnUserByRefreshTokenHash: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('../src/utils/rateLimiter.js', () => ({
-  authRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-  apiRateLimit: (_c: unknown, next: () => Promise<void>) => next(),
-}));
+vi.mock('../src/db/client.js', () => ({ getDb: vi.fn().mockReturnValue({}) }));
 
 vi.mock('bcryptjs', () => ({
   hash: vi.fn().mockResolvedValue('hashed'),
@@ -47,7 +45,7 @@ function post(path: string, body: unknown) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  });
+  }, mockEnv, mockCtx);
 }
 
 async function getAdminAccessToken(): Promise<string> {
@@ -74,7 +72,7 @@ describe('GET /api/admin/users', () => {
 
     const res = await app.request('/api/admin/users', {
       headers: { Cookie: `accessToken=${token}` },
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -100,7 +98,7 @@ describe('GET /api/admin/users', () => {
 
     const res = await app.request('/api/admin/users', {
       headers: { Cookie: `accessToken=${token}` },
-    });
+    }, mockEnv, mockCtx);
 
     expect(res.status).toBe(500);
     const body = await res.json();
