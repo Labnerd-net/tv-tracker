@@ -1,5 +1,5 @@
 export type Bindings = {
-  DB: D1Database;
+  TV_DB: D1Database;
   JWT_SECRET: string;
   ENVIRONMENT?: string;
   CLIENT_URL?: string;

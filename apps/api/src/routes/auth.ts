@@ -36,7 +36,7 @@ type Variables = {
 const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .post('/register', zValidator('json', registrationSchema, validationHook), async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const { email, password, displayName } = c.req.valid('json');
 
       const existing = await dbUserFunctions.returnUserByEmail(db, email);
@@ -72,7 +72,7 @@ const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .post('/login', zValidator('json', loginSchema, validationHook), async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const { email, password } = c.req.valid('json');
 
       const user = await dbUserFunctions.returnUserByEmail(db, email);
@@ -103,7 +103,7 @@ const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .post('/refresh', async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const raw = getCookie(c, 'refreshToken');
       if (!raw) {
         return c.json(err('Missing refresh token'), 401);
@@ -142,7 +142,7 @@ const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .post('/logout', authMiddleware, async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       await dbUserFunctions.clearRefreshToken(db, payload.sub);
       clearAuthCookies(c);
@@ -154,7 +154,7 @@ const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .delete('/deleteUser', authMiddleware, async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userIdString = String(payload.sub);
       const user = await dbUserFunctions.returnUserById(db, userIdString);

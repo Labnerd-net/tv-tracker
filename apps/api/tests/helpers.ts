@@ -2,7 +2,7 @@ import { sign } from 'hono/jwt';
 import { vi } from 'vitest';
 
 export const mockEnv = {
-  DB: {} as D1Database,
+  TV_DB: {} as D1Database,
   JWT_SECRET: 'test-secret',
   ENVIRONMENT: 'test',
 };

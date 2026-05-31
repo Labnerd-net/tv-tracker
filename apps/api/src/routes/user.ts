@@ -22,7 +22,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .use(authMiddleware)
   .get('/profile', async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userIdString = String(payload.sub);
       const found = await dbUserFunctions.returnUserById(db, userIdString);
@@ -43,7 +43,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .get('/tvshows', async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userId = Number(payload.sub);
       const shows = await dbShowFunctions.returnAllShows(db, userId);
@@ -56,7 +56,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .get('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async c => {
     const { id: showId } = c.req.valid('param');
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userId = Number(payload.sub);
       const shows = await dbShowFunctions.returnOneShowId(db, showId, userId);
@@ -71,7 +71,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   })
   .post('/tvshow', zValidator('json', tvMazeShowBodySchema, validationHook), async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const body = c.req.valid('json');
       const tvMazeId = String(body.id);
       const payload = c.get('jwtPayload');
@@ -96,7 +96,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .post('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async c => {
     const { id: tvMazeId } = c.req.valid('param');
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userId = Number(payload.sub);
       const existing = await dbShowFunctions.returnOneShowTvMazeId(db, tvMazeId, userId);
@@ -138,7 +138,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .patch('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async c => {
     const { id: showId } = c.req.valid('param');
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userId = Number(payload.sub);
       const existing = await dbShowFunctions.returnOneShowId(db, showId, userId);
@@ -176,7 +176,7 @@ const user = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .delete('/tvshow/:id', zValidator('param', numericIdParamSchema, validationHook), async c => {
     const { id: showId } = c.req.valid('param');
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const payload = c.get('jwtPayload');
       const userId = Number(payload.sub);
       const result = await dbShowFunctions.deleteOneShowId(db, showId, userId);

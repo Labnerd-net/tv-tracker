@@ -15,7 +15,7 @@ const admin = new Hono<{ Bindings: Bindings; Variables: Variables }>()
   .use(authMiddleware)
   .get('/users', requireRole('admin'), async c => {
     try {
-      const db = getDb(c.env.DB);
+      const db = getDb(c.env.TV_DB);
       const allUserProfiles = await returnUsers(db);
       return c.json(ok({ allUserProfiles }));
     } catch (e: unknown) {
