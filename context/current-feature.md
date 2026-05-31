@@ -2,19 +2,20 @@
 
 ## Current Feature Spec File
 
-Title: Migrate from Dokploy to Cloudflare Workers
-Spec file: context/specs/cloudflare-workers-migration.md
-Branch: claude/feature/cloudflare-workers-migration
+Title:
+Spec file:
+Branch:
 
 ## Current Feature Plan File
 
-Plan file: context/specs/cloudflare-workers-migration.md
+Plan file:
 
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
 - **Outbound Fetch Safety** — Added `AbortSignal.timeout(8000)` to TVMaze fetches in `POST /tvshow/:id` and `PATCH /tvshow/:id`; `AbortSignal.timeout(15000)` to `TvMazeData.updateEpisodes()`; body size guard (1 MB limit, 502) before JSON parsing in both routes; `TimeoutError` caught → 504. Added `AbortController` cleanup to `OneShowSearch.tsx` useEffect. 3 new tests (timeout → 504, oversized body → 502 on POST and PATCH). Closes backlog #1, #2, #17.
 - ...
+- **Cloudflare Workers Migration** — Replaced Node.js/Dokploy deployment with a single Cloudflare Workers deployment serving both the Hono API and the Vite-built SPA. Switched DB from file-based SQLite (`@libsql/client`) to Cloudflare D1 via Drizzle's D1 adapter (`getDb()` per-request). Replaced `@hono/node-server` entry point with `export default { fetch: app.fetch }`. Replaced `process.env`/dotenv with typed `Bindings` interface via `c.env`. Replaced Pino with a console-based logger wrapper. Replaced in-memory retry job queue with `ctx.waitUntil()` fire-and-forget. Removed in-memory rate limiter. Migrated auth crypto from `node:crypto` to native Workers globals (`crypto.randomUUID`, `crypto.subtle`). Added `wrangler.jsonc` at repo root; `pnpm deploy` builds both packages and runs `wrangler deploy`. Added `$schema`, `migrations_dir`, and `wrangler types` generation to build. Deleted `migrate.ts`, `rateLimiter.ts`; removed `db.test.ts`, `schema.test.ts`, `rateLimiter.test.ts`; updated all remaining tests with `mockEnv`/`mockCtx`.
 - **High Priority Security Fixes** — Fixed four security issues: wrapped all authenticated routes in `<ProtectedRoute>`; fixed `ProtectedRoute` to use `<Navigate>` instead of imperative navigate (children never render unauthenticated); removed raw `e.message` from all five auth catch blocks (now logs server-side, returns generic message); added hostname validation in `fetchAirdate()` to reject non-`api.tvmaze.com` URLs (SSRF fix). Added auth error leakage tests and new `tvmaze.test.ts` for URL validation.
 - **Security Quick Wins** — Four small security fixes: raised password minimum length to 8 chars (API schemas + UI forms, enforced on both login and registration); fixed admin error responses returning HTTP 200 instead of 500; added `encodeURIComponent()` to TVMaze search URL; replaced type-cast-only sensitive field exclusion in `GET /api/admin/users` with an explicit map. Added boundary tests for password validation and new `admin.test.ts` for field stripping and HTTP status checks.
 - **Error Response Hardening** — Removed `e.message` leaks from all catch blocks in `admin.ts` and `user.ts` (6 routes); all errors now log server-side and return a generic message. Removed redundant `code` field from `err()` helper in `response.ts`. Fixed latent bug in `requireRole` middleware that was returning HTTP 200 on forbidden responses. Extended `admin.test.ts` to assert the generic error message and absence of raw DB errors.
