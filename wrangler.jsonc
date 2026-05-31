@@ -11,7 +11,7 @@
     {
       "binding": "TV_DB",
       "database_name": "tv-tracker",
-      "database_id": "",
+      "database_id": "be5505ad-3e89-4826-a984-7ee018ad276e",
       "migrations_dir": "./apps/api/drizzle"
     }
   ],
