@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEMO_EMAIL_DOMAIN } from '../demo/seedShows.js';
 
 export const loginSchema = z.object({
   email: z.email('Invalid email format').min(1, 'Email is required').max(254),
@@ -6,6 +7,9 @@ export const loginSchema = z.object({
 });
 
 export const registrationSchema = loginSchema.extend({
+  // The demo domain is reserved: the cron purges any account on it.
+  email: z.email('Invalid email format').min(1, 'Email is required').max(254)
+    .refine(v => !v.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`), 'This email domain is reserved'),
   displayName: z
     .string()
     .min(1, 'Display name is required')

@@ -2,9 +2,9 @@
 
 ## Current Feature Spec File
 
-Title:
-Spec file:
-Branch:
+Title: Demo mode
+Spec file: context/specs/demo-mode.md
+Branch: claude/feature/demo-mode
 
 ## Current Feature Plan File
 

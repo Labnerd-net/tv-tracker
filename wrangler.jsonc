@@ -17,6 +17,9 @@
       "migrations_dir": "./apps/api/drizzle"
     }
   ],
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
   "vars": {
     "ENVIRONMENT": "production"
   }

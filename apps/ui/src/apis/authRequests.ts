@@ -12,6 +12,17 @@ export async function loginUser(credentials: Credentials): Promise<ApiVoidRespon
   }
 }
 
+export async function loginDemo(): Promise<ApiVoidResponse> {
+  try {
+    const response = await client.api.auth.demo.$post();
+    const data = await response.json();
+    if (data.ok) return { success: true };
+    return { success: false, error: data.error };
+  } catch {
+    return { success: false, error: 'An unexpected error occurred' };
+  }
+}
+
 export async function registerUser(data: RegistrationData): Promise<ApiVoidResponse> {
   try {
     const response = await client.api.auth.register.$post({ json: data });

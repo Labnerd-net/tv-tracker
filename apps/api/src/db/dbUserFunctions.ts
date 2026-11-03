@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, like, lt, and, count } from 'drizzle-orm';
 import type { DrizzleD1Database } from './client.js';
 import { users } from './schema.js';
 import logger from '../utils/logger.js';
@@ -134,6 +134,32 @@ export async function deleteUserById(db: DrizzleD1Database, userId: string) {
     return await db.delete(users).where(eq(users.userId, userIdNumber));
   } catch (e) {
     logger.error({ err: e }, 'deleteUserById failed');
+    throw e;
+  }
+}
+
+// ------------------------------------------------------------------
+// Demo users (identified by the reserved demo email domain)
+// ------------------------------------------------------------------
+export async function countDemoUsers(db: DrizzleD1Database, emailDomain: string): Promise<number> {
+  logger.debug('countDemoUsers');
+  try {
+    const rows = await db.select({ n: count() }).from(users).where(like(users.email, `%@${emailDomain}`));
+    return rows[0]?.n ?? 0;
+  } catch (e) {
+    logger.error({ err: e }, 'countDemoUsers failed');
+    throw e;
+  }
+}
+
+export async function deleteExpiredDemoUsers(db: DrizzleD1Database, emailDomain: string, olderThan: Date) {
+  logger.debug({ olderThan }, 'deleteExpiredDemoUsers');
+  try {
+    return await db.delete(users)
+      .where(and(like(users.email, `%@${emailDomain}`), lt(users.createdAt, olderThan)))
+      .returning({ userId: users.userId });
+  } catch (e) {
+    logger.error({ err: e }, 'deleteExpiredDemoUsers failed');
     throw e;
   }
 }

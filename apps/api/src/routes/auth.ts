@@ -4,7 +4,10 @@ import { getCookie, setCookie } from 'hono/cookie';
 import * as bcrypt from 'bcryptjs';
 import { zValidator } from '@hono/zod-validator';
 import * as dbUserFunctions from '../db/dbUserFunctions.js';
+import * as dbShowFunctions from '../db/dbShowFunctions.js';
 import { getDb } from '../db/client.js';
+import { refreshDemoShows } from '../utils/jobQueue.js';
+import { SEED_SHOWS, DEMO_EMAIL_DOMAIN, DEMO_DISPLAY_NAME, MAX_DEMO_USERS, DEMO_TTL_MS, DEMO_REFRESH_WAIT_MS } from '../demo/seedShows.js';
 import { ok, err } from '../utils/response.js';
 import {
   generateRefreshToken,
@@ -98,6 +101,63 @@ const auth = new Hono<{ Bindings: Bindings; Variables: Variables }>()
       return c.json(ok({}));
     } catch (e: unknown) {
       logger.error({ err: e }, 'Unexpected error in login route');
+      return c.json(err('An unexpected error occurred'), 500);
+    }
+  })
+  .post('/demo', async c => {
+    try {
+      const db = getDb(c.env.TV_DB);
+      let demoCount = await dbUserFunctions.countDemoUsers(db, DEMO_EMAIL_DOMAIN);
+      if (demoCount >= MAX_DEMO_USERS) {
+        // At the cap: reclaim expired demo users before giving up, so a missed cron run can't take the demo down.
+        await dbUserFunctions.deleteExpiredDemoUsers(db, DEMO_EMAIL_DOMAIN, new Date(Date.now() - DEMO_TTL_MS));
+        demoCount = await dbUserFunctions.countDemoUsers(db, DEMO_EMAIL_DOMAIN);
+      }
+      if (demoCount >= MAX_DEMO_USERS) {
+        return c.json(err('Demo is temporarily unavailable'), 503);
+      }
+      // Random, never-disclosed password: demo accounts cannot be logged into via /login.
+      const passwordHash = await bcrypt.hash(crypto.randomUUID(), bcryptSaltRounds(c.env));
+      const roles: Role[] = ['user'];
+      const user = {
+        email: `demo-${crypto.randomUUID()}@${DEMO_EMAIL_DOMAIN}`,
+        passwordHash,
+        roles,
+        displayName: DEMO_DISPLAY_NAME,
+      } as UserData;
+      const result = await dbUserFunctions.addUser(db, user);
+      if (!result || result.length === 0) {
+        throw new Error('Could not add demo user');
+      }
+      const seeded = await dbShowFunctions.addSeedShows(db, result[0].userId, SEED_SHOWS);
+      // Start the TVMaze refresh now; waitUntil lets it finish even if we stop waiting below.
+      const refresh = refreshDemoShows(db, seeded);
+      c.executionCtx.waitUntil(refresh);
+
+      const payload = {
+        sub: result[0].userId,
+        email: result[0].email,
+        displayName: result[0].displayName,
+        roles: result[0].roles,
+        exp: getAccessTokenExpirationSeconds(c.env),
+      };
+      const token = await sign(payload, jwtSecret(c.env), jwtAlgorithm(c.env));
+      const { raw, hash } = await generateRefreshToken();
+      await dbUserFunctions.updateRefreshToken(db, result[0].userId, hash, getRefreshTokenExpirationDate(c.env));
+      setAuthCookies(c, { accessToken: token, refreshToken: raw });
+
+      // The dashboard loads its shows right after this response, so give the refresh a short
+      // head start to have episode dates on first view. If TVMaze is slow, respond anyway.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      await Promise.race([
+        refresh,
+        new Promise<void>(resolve => { timer = setTimeout(resolve, DEMO_REFRESH_WAIT_MS); }),
+      ]);
+      clearTimeout(timer);
+
+      return c.json(ok({}));
+    } catch (e: unknown) {
+      logger.error({ err: e }, 'Unexpected error in demo route');
       return c.json(err('An unexpected error occurred'), 500);
     }
   })

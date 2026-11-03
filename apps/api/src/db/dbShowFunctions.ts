@@ -5,6 +5,7 @@ import TvMazeData from '../tvmaze.js';
 import logger from '../utils/logger.js';
 import type { ShowData } from '@shared/types/tv-tracker.js';
 import { ensureNumericId } from './helpers.js';
+import type { SeedShow } from '../demo/seedShows.js';
 
 export async function returnAllShows(db: DrizzleD1Database, userId: number): Promise<ShowData[]> {
   logger.debug({ userId }, 'returnAllShows');
@@ -105,6 +106,27 @@ export async function updateOneShow(db: DrizzleD1Database, showData: TvMazeData,
       .where(and(eq(tvShows.showId, showIdNumber), eq(tvShows.userId, userId)));
   } catch (e) {
     logger.error({ err: e }, 'updateOneShow failed');
+    throw e;
+  }
+}
+
+export async function addSeedShows(db: DrizzleD1Database, userId: number, seeds: SeedShow[]) {
+  logger.debug({ userId, count: seeds.length }, 'addSeedShows');
+  try {
+    return await db.insert(tvShows).values(seeds.map(s => ({
+      userId,
+      title: s.title,
+      tvMazeId: s.tvMazeId,
+      platform: s.platform,
+      status: s.status,
+      scheduleDay: s.scheduleDay,
+      scheduleTime: s.scheduleTime,
+      prevEpisode: '',
+      nextEpisode: '',
+      imageLink: s.imageLink,
+    }))).returning({ showId: tvShows.showId, tvMazeId: tvShows.tvMazeId });
+  } catch (e) {
+    logger.error({ err: e }, 'addSeedShows failed');
     throw e;
   }
 }
