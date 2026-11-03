@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router';
 import { ThemeProvider } from '../src/contexts/theme/ThemeProvider';
@@ -16,18 +16,11 @@ vi.mock('react-router', async (importOriginal) => {
   };
 });
 
-vi.mock('../src/apis/userRequests');
-
-vi.mock('../src/contexts/alert/AlertContext', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/contexts/alert/AlertContext')>();
+vi.mock('../src/contexts/show/ShowContext', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/contexts/show/ShowContext')>();
   return {
     ...actual,
-    useAlert: () => ({
-      visibleAlert: false,
-      alertVariant: '',
-      alertMessage: '',
-      showAlert: vi.fn(),
-    }),
+    useShow: () => mockUseShow(),
   };
 });
 
@@ -35,7 +28,8 @@ vi.mock('../src/hooks/useShowActions', () => ({
   useShowActions: () => ({ actionLoading: {}, refreshShow: vi.fn(), deleteShow: vi.fn() }),
 }));
 
-import * as Api from '../src/apis/userRequests';
+// OneShow reads its show from ShowContext (populated by the dashboard), not from an API call.
+let mockUseShow: () => { tvShows: ReturnType<typeof makeShow>[]; loading: boolean };
 
 function renderOneShow() {
   return render(
@@ -49,16 +43,11 @@ function renderOneShow() {
 
 describe('OneShow — loading state', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    mockUseShow = () => ({ tvShows: [], loading: true });
   });
 
-  it('does not show show title or error text while fetching', async () => {
-    // getOneShow never resolves — component stays in loading state
-    vi.mocked(Api.getOneShow).mockImplementation(() => new Promise(() => {}));
-
-    await act(async () => {
-      renderOneShow();
-    });
+  it('does not show show title or error text while loading', () => {
+    renderOneShow();
 
     expect(screen.queryByText('Test Show')).not.toBeInTheDocument();
     expect(screen.queryByText(/show not found/i)).not.toBeInTheDocument();
@@ -67,54 +56,44 @@ describe('OneShow — loading state', () => {
 
 describe('OneShow — detail view', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    const show = makeShow({ showId: 42, title: 'Breaking Bad', platform: 'AMC', status: 'Ended' });
+    mockUseShow = () => ({ tvShows: [show], loading: false });
   });
 
-  it('renders the show title when fetch succeeds', async () => {
-    const show = makeShow({ showId: 42, title: 'Breaking Bad', platform: 'AMC', status: 'Ended' });
-    vi.mocked(Api.getOneShow).mockResolvedValue({ success: true, data: show });
-
-    await act(async () => {
-      renderOneShow();
-    });
+  it('renders the show title', () => {
+    renderOneShow();
 
     expect(screen.getByText('Breaking Bad')).toBeInTheDocument();
   });
 
-  it('renders platform and status metadata', async () => {
-    const show = makeShow({ showId: 42, title: 'Breaking Bad', platform: 'AMC', status: 'Ended' });
-    vi.mocked(Api.getOneShow).mockResolvedValue({ success: true, data: show });
-
-    await act(async () => {
-      renderOneShow();
-    });
+  it('renders platform and status metadata', () => {
+    renderOneShow();
 
     // Platform and status are joined as "AMC · Ended" in the subtitle line
     expect(screen.getByText('AMC · Ended')).toBeInTheDocument();
   });
 });
 
-describe('OneShow — error state', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it('shows "Show not found" when getOneShow returns failure', async () => {
-    vi.mocked(Api.getOneShow).mockResolvedValue({ success: false, error: 'Not found' });
-
-    await act(async () => {
-      renderOneShow();
-    });
+describe('OneShow — not found state', () => {
+  it('shows "Show not found" when there are no shows', () => {
+    mockUseShow = () => ({ tvShows: [], loading: false });
+    renderOneShow();
 
     expect(screen.getByText(/show not found/i)).toBeInTheDocument();
   });
 
-  it('does not render the show title in error state', async () => {
-    vi.mocked(Api.getOneShow).mockResolvedValue({ success: false, error: 'Not found' });
+  it('shows "Show not found" when the id is not in the list', () => {
+    const other = makeShow({ showId: 7, title: 'Other Show' });
+    mockUseShow = () => ({ tvShows: [other], loading: false });
+    renderOneShow();
 
-    await act(async () => {
-      renderOneShow();
-    });
+    expect(screen.getByText(/show not found/i)).toBeInTheDocument();
+    expect(screen.queryByText('Other Show')).not.toBeInTheDocument();
+  });
+
+  it('does not render a show heading', () => {
+    mockUseShow = () => ({ tvShows: [], loading: false });
+    renderOneShow();
 
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
   });

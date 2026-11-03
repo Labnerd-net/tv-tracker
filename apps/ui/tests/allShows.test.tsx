@@ -102,8 +102,8 @@ describe('AllShows — empty state', () => {
     expect(screen.getByText(/no shows tracked yet/i)).toBeInTheDocument();
   });
 
-  it('shows the search prompt', () => {
+  it('links to the search page', () => {
     renderAllShows();
-    expect(screen.getByText(/use search to find and add shows/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /search for shows/i })).toHaveAttribute('href', '/search/');
   });
 });

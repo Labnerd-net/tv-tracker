@@ -18,6 +18,10 @@ vi.mock('react-router', async (importOriginal) => {
 
 vi.mock('../src/apis/userRequests');
 
+// Must be a stable reference: SearchResults lists showAlert in its effect deps, so a new
+// function per render re-runs the effect forever (the real AlertProvider uses useCallback).
+const mockShowAlert = vi.hoisted(() => vi.fn());
+
 vi.mock('../src/contexts/alert/AlertContext', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../src/contexts/alert/AlertContext')>();
   return {
@@ -26,7 +30,7 @@ vi.mock('../src/contexts/alert/AlertContext', async (importOriginal) => {
       visibleAlert: false,
       alertVariant: '',
       alertMessage: '',
-      showAlert: vi.fn(),
+      showAlert: mockShowAlert,
     }),
   };
 });
