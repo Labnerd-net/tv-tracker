@@ -24,10 +24,11 @@ export default memo(function SingleShow({ showData, index = 0 }: { showData: Sho
   };
 
   const episodeLabel = showData.nextEpisode ? 'NEXT' : 'LAST';
-  const episodeDate = showData.nextEpisode ?? showData.prevEpisode ?? showData.status ?? '—';
+  // The API stores "no episode" as '', so fall through on falsy values (not just null).
+  const episodeDate = showData.nextEpisode || showData.prevEpisode || showData.status || '—';
 
   const actions = (actionLoading[showData.showId] ?? false) ? (
-    <CircularProgress size={14} sx={{ color: 'var(--cream-dim)' }} />
+    <CircularProgress size={14} sx={{ color: 'var(--poster-text-muted)' }} />
   ) : (
     <>
       <Box
@@ -47,7 +48,7 @@ export default memo(function SingleShow({ showData, index = 0 }: { showData: Sho
           '&:hover': {
             background: 'rgba(232,224,208,0.1)',
             borderColor: 'rgba(232,224,208,0.5)',
-            color: 'var(--cream)',
+            color: 'var(--poster-text)',
           },
         }}
       >

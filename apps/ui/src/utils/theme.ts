@@ -13,6 +13,10 @@ const DARK_VARS = `
     --amber: #f2a65a;
     --border: rgba(232, 224, 208, 0.08);
     --border-strong: rgba(232, 224, 208, 0.18);
+    /* Text on poster overlays: the overlay is dark in both themes, so these do not flip. */
+    --poster-text: #e8e0d0;
+    --poster-text-muted: #b8ae9e;
+    --poster-amber: #f2a65a;
   }
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(14px); }
@@ -41,6 +45,10 @@ const LIGHT_VARS = `
     --amber: #c8760a;
     --border: rgba(26, 21, 16, 0.10);
     --border-strong: rgba(26, 21, 16, 0.22);
+    /* Text on poster overlays: the overlay is dark in both themes, so these do not flip. */
+    --poster-text: #e8e0d0;
+    --poster-text-muted: #b8ae9e;
+    --poster-amber: #f2a65a;
   }
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(14px); }

@@ -84,7 +84,7 @@ export default function ShowCard({
           sx={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, rgba(8,11,18,0.97) 0%, rgba(8,11,18,0.75) 40%, rgba(8,11,18,0.15) 100%)',
+            background: 'linear-gradient(to top, rgba(8,11,18,0.97) 0%, rgba(8,11,18,0.88) 45%, rgba(8,11,18,0.4) 75%, rgba(8,11,18,0.1) 100%)',
             transition: 'opacity 0.3s ease',
             opacity: 0.88,
           }}
@@ -106,7 +106,8 @@ export default function ShowCard({
               fontSize: '1.08rem',
               fontWeight: 500,
               lineHeight: 1.2,
-              color: 'var(--cream)',
+              color: 'var(--poster-text)',
+              textShadow: '0 1px 4px rgba(0,0,0,0.6)',
               mb: '4px',
             }}
           >
@@ -119,7 +120,7 @@ export default function ShowCard({
                 fontFamily: '"Space Mono", monospace',
                 fontSize: '0.56rem',
                 letterSpacing: '0.14em',
-                color: 'var(--cream-muted)',
+                color: 'var(--poster-text-muted)',
                 textTransform: 'uppercase',
                 mb: '10px',
               }}
@@ -132,12 +133,12 @@ export default function ShowCard({
             sx={{
               fontFamily: '"Space Mono", monospace',
               fontSize: '0.62rem',
-              color: episodeHighlight ? 'var(--amber)' : 'var(--cream-muted)',
+              color: episodeHighlight ? 'var(--poster-amber)' : 'var(--poster-text-muted)',
               letterSpacing: '0.05em',
             }}
           >
             {episodeLabel && (
-              <Box component="span" sx={{ opacity: 0.5, mr: '6px', fontSize: '0.54rem', letterSpacing: '0.12em' }}>
+              <Box component="span" sx={{ opacity: 0.8, mr: '6px', fontSize: '0.54rem', letterSpacing: '0.12em' }}>
                 {episodeLabel}
               </Box>
             )}
