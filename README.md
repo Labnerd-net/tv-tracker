@@ -1,5 +1,7 @@
 # TV Tracker
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Track the TV shows you follow and see when the next episode airs. Search any show on TVMaze, add it to your list, and see the next and previous episode dates at a glance.
 
 **Live demo: [tvtracker.labnerd.net](https://tvtracker.labnerd.net/)**. Click **Try the demo** on the landing page to explore without signing up. It creates a throwaway account pre-loaded with a few shows.
@@ -15,7 +17,7 @@ Track the TV shows you follow and see when the next episode airs. Search any sho
 - Light and dark themes ("Broadcast Noir")
 - Email/password accounts, plus a one-click demo mode
 
-## Stack
+## Tech Stack
 
 | Layer | Tech |
 |---|---|
@@ -27,7 +29,7 @@ Track the TV shows you follow and see when the next episode airs. Search any sho
 | Data source | [TVMaze public API](https://www.tvmaze.com/api) |
 | Tooling | TypeScript, pnpm workspaces, Vitest, ESLint, Husky |
 
-## Design notes
+## Engineering Highlights
 
 - **One Worker serves everything.** The Worker runs the API under `/api/*` and serves the built UI as static assets, with a single-page-app fallback so client routes survive a refresh. `run_worker_first` in `wrangler.jsonc` keeps API and health requests out of that fallback.
 - **Cookie auth, no tokens in JavaScript.** The access and refresh tokens are `HttpOnly` cookies. The refresh token is a random value; only its SHA-256 hash is stored, and it is rotated on every refresh. On a 401 the UI refreshes once and retries.
@@ -35,7 +37,7 @@ Track the TV shows you follow and see when the next episode airs. Search any sho
 - **Slow work happens after the response.** Episode dates are resolved with `ctx.waitUntil`, so adding a show returns immediately.
 - **Demo mode is built to be disposable.** `POST /api/auth/demo` creates a user on the reserved `demo.invalid` domain with an unusable password and a seeded show list, capped at 200 live demo users. An hourly cron deletes demo users older than 24 hours (their shows cascade-delete), and registration rejects the reserved domain so a real account can never be swept up.
 
-## Local development
+## Local Development
 
 Requires Node 22+ (Wrangler's minimum) and pnpm.
 
@@ -82,7 +84,7 @@ pnpm --filter @tv-tracker/api db:generate        # generate a migration from sch
 pnpm exec wrangler d1 migrations apply tv-tracker --local
 ```
 
-## Project structure
+## Project Structure
 
 ```
 apps/
@@ -137,3 +139,7 @@ Protected routes read the `accessToken` cookie; there is no `Authorization` head
 - Migration files in `apps/api/drizzle/` must be committed. Apply them with `wrangler d1 migrations apply`.
 - There is no rate limiting yet. Demo sign-ups are bounded by the user cap and cleanup, not per-IP limits.
 - Show and episode data comes from TVMaze and is not owned by this project.
+
+## License
+
+[MIT](./LICENSE)
