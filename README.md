@@ -1,149 +1,122 @@
 # TV Tracker
 
-A self-hosted TV show tracker. Add shows from TVMaze, see upcoming and previous episode dates, and manage your watchlist.
+Track the TV shows you follow and see when the next episode airs. Search any show on TVMaze, add it to your list, and see the next and previous episode dates at a glance.
+
+**Live demo: [tvtracker.labnerd.net](https://tvtracker.labnerd.net/)**. Click **Try the demo** on the landing page to explore without signing up. It creates a throwaway account pre-loaded with a few shows.
+
+![TV Tracker dashboard in card view](apps/ui/public/dashboard-cards-dark.webp)
+![TV Tracker dashboard in table view](apps/ui/public/dashboard-dark.webp)
+
+## Features
+
+- Search TVMaze and add shows in one click
+- Next or last episode date for every show, with per-show refresh
+- Card grid or sortable table view
+- Light and dark themes ("Broadcast Noir")
+- Email/password accounts, plus a one-click demo mode
 
 ## Stack
 
 | Layer | Tech |
 |---|---|
-| API | Hono + Node.js, SQLite via libsql/Drizzle ORM |
-| UI | React 19, React Router 7, MUI v7 (Broadcast Noir theme) |
-| Auth | JWT (7-day expiry), bcrypt passwords |
+| API | [Hono](https://hono.dev) on Cloudflare Workers, Zod validation |
+| Database | Cloudflare D1 (SQLite) via Drizzle ORM |
+| UI | React 19, React Router 7, MUI v7 |
+| API client | Hono RPC client, with request and response types inferred from the API's `AppType` |
+| Auth | HttpOnly cookies: 15-minute JWT access token plus a rotating refresh token; bcrypt passwords |
 | Data source | [TVMaze public API](https://www.tvmaze.com/api) |
-| Runtime | Node.js, pnpm workspaces |
+| Tooling | TypeScript, pnpm workspaces, Vitest, ESLint, Husky |
 
-## Self-Hosting with Docker
+## Design notes
 
-Pre-built images are published to GitHub Container Registry on every release:
+- **One Worker serves everything.** The Worker runs the API under `/api/*` and serves the built UI as static assets, with a single-page-app fallback so client routes survive a refresh. `run_worker_first` in `wrangler.jsonc` keeps API and health requests out of that fallback.
+- **Cookie auth, no tokens in JavaScript.** The access and refresh tokens are `HttpOnly` cookies. The refresh token is a random value; only its SHA-256 hash is stored, and it is rotated on every refresh. On a 401 the UI refreshes once and retries.
+- **Outbound requests are bounded.** TVMaze calls have timeouts and response size caps, and episode links are only followed if they point at `api.tvmaze.com`.
+- **Slow work happens after the response.** Episode dates are resolved with `ctx.waitUntil`, so adding a show returns immediately.
+- **Demo mode is built to be disposable.** `POST /api/auth/demo` creates a user on the reserved `demo.invalid` domain with an unusable password and a seeded show list, capped at 200 live demo users. An hourly cron deletes demo users older than 24 hours (their shows cascade-delete), and registration rejects the reserved domain so a real account can never be swept up.
 
-- `ghcr.io/labnerd-net/tv-tracker-api:latest`
-- `ghcr.io/labnerd-net/tv-tracker-ui:latest`
+## Local development
 
-The UI container proxies `/api/*` requests to the API container via nginx — no build-time configuration required. Both images can be pulled and run directly.
-
-**1. Clone the repo (for the compose file)**
-
-```bash
-git clone https://github.com/Labnerd-net/tv-tracker.git
-cd tv-tracker
-```
-
-**2. Edit `docker-compose.yml`**
-
-At minimum, set these values:
-
-| Service | Variable | Description |
-|---|---|---|
-| `api` | `JWT_SECRET` | Random secret — generate with `openssl rand -base64 32` |
-| `api` | `CLIENT_URL` | Public URL of the UI (used for CORS) |
-| `ui` | `API_HOST` | Internal hostname of the API container (default: `api`) |
-
-**3. Start**
-
-```bash
-docker compose up -d
-```
-
-The API runs database migrations automatically on startup. SQLite data is persisted in the named Docker volume `tv-tracker-data`.
-
----
-
-## Prerequisites
-
-- Node.js 20+
-- pnpm 9+
-
-## Local Dev Setup
-
-**1. Install dependencies**
+Requires Node 22+ (Wrangler's minimum) and pnpm.
 
 ```bash
 pnpm install
+
+# Local secrets (gitignored). ENVIRONMENT=development is needed so auth cookies work over http.
+printf 'JWT_SECRET=%s\nENVIRONMENT=development\n' "$(openssl rand -base64 32)" > .dev.vars
+
+pnpm exec wrangler d1 migrations apply tv-tracker --local
+
+pnpm dev                                           # builds API and UI, then http://localhost:8787
 ```
 
-**2. Configure environment**
+`pnpm dev` does a full build before starting Wrangler, so restart it to pick up code changes.
+
+## Deploying to Cloudflare
 
 ```bash
-cp apps/api/.env.sample apps/api/.env
-cp apps/ui/.env.sample apps/ui/.env
+pnpm exec wrangler d1 create tv-tracker            # put the returned database_id in wrangler.jsonc
+pnpm exec wrangler d1 migrations apply tv-tracker --remote
+pnpm exec wrangler secret put JWT_SECRET           # openssl rand -base64 32
+pnpm deploy                                        # builds both apps, then wrangler deploy
 ```
 
-Edit `apps/api/.env` — at minimum set a real `JWT_SECRET`:
-
-```
-DB_FILE_NAME=file:data/local.db
-SERVER_PORT=3000
-CLIENT_URL=http://localhost:5173
-JWT_SECRET=<your-secret>   # openssl rand -base64 32
-```
-
-**3. Create the database directory and run migrations**
-
-```bash
-mkdir -p apps/api/data
-cd apps/api && pnpm db:migrate && cd ../..
-```
-
-**4. Start dev servers**
-
-```bash
-pnpm dev
-```
-
-UI runs at `http://localhost:5173`, API at `http://localhost:3000`.
+The cron trigger for demo cleanup is declared in `wrangler.jsonc` and is registered on deploy.
 
 ## Commands
 
-Run from repo root unless noted.
+Run from the repo root.
 
 ```bash
-pnpm dev              # both apps in watch mode
-pnpm dev:api          # API only
-pnpm dev:ui           # UI only
-
-pnpm build            # build both
-pnpm build:api        # tsc + tsc-alias (output: dist/api/src/)
+pnpm dev                 # build API and UI, run wrangler dev on :8787
+pnpm build               # build API and UI
+pnpm build:api           # tsc + tsc-alias (output: apps/api/dist/api/src/)
 pnpm build:ui
+pnpm deploy              # build + wrangler deploy
+pnpm lint                # ESLint (API and UI)
 
-pnpm lint             # ESLint (UI)
+pnpm --filter @tv-tracker/api test               # API tests
+pnpm --filter @tv-tracker/ui test -- --run       # UI tests
 
-# Tests (API)
-pnpm --filter @tv-tracker/api test
-pnpm --filter @tv-tracker/api test tests/auth.test.ts
-
-# Database (run from apps/api/)
-pnpm db:generate      # generate migration from schema changes
-pnpm db:migrate       # apply migrations
+pnpm --filter @tv-tracker/api db:generate        # generate a migration from schema changes
+pnpm exec wrangler d1 migrations apply tv-tracker --local
 ```
 
-## Project Structure
+## Project structure
 
 ```
 apps/
-  api/        Hono REST API
+  api/        Hono API (Cloudflare Worker)
     src/
-      routes/           auth, user, admin route handlers
-      db/               Drizzle schema + query wrappers
+      routes/           auth, user, admin handlers
+      db/               Drizzle schema + query functions
       schemas/          Zod request schemas
-      utils/            auth, middleware, rate limiter, response helpers
+      demo/             demo-mode constants and seed shows
+      utils/            auth cookies, middleware, background jobs, env helpers
       tvmaze.ts         TVMaze API wrapper
     drizzle/            migration files (commit these)
-    data/               SQLite DB file (gitignored)
-  ui/         React frontend
+    tests/
+  ui/         React frontend (Vite)
     src/
       apis/             one file per API domain
       contexts/         Auth, Show, Alert, Theme providers
       pages/            route-level components
       components/       shared UI components
-      utils/            theme, request helpers
+      utils/            theme, Hono client, request helpers
+    tests/
   shared/     Shared TypeScript types (no build step)
+wrangler.jsonc          Worker config: D1 binding, static assets, cron
 ```
 
-## API Overview
+## API overview
 
 ```
 POST   /api/auth/register
 POST   /api/auth/login
+POST   /api/auth/demo             # create and sign in a throwaway demo user
+POST   /api/auth/refresh
+POST   /api/auth/logout
+DELETE /api/auth/deleteUser
 
 GET    /api/user/profile
 GET    /api/user/tvshows
@@ -153,14 +126,14 @@ POST   /api/user/tvshow/:id       # add by TVMaze show ID
 PATCH  /api/user/tvshow/:id       # refresh from TVMaze
 DELETE /api/user/tvshow/:id
 
-GET    /api/admin/users
-DELETE /api/admin/user/:id
+GET    /api/admin/users           # admin role only
+GET    /health
 ```
 
-All protected routes require `Authorization: Bearer <token>`.
+Protected routes read the `accessToken` cookie; there is no `Authorization` header.
 
 ## Notes
 
-- The SQLite file must be at a path prefixed with `file:` (e.g. `file:data/local.db`). A bare path will throw `URL_INVALID` at startup.
-- The rate limiter is in-memory — state resets on server restart and is not suitable for multi-instance deployments.
-- Migration files in `apps/api/drizzle/` must be committed; they are applied at container startup in production via `migrate.ts`.
+- Migration files in `apps/api/drizzle/` must be committed. Apply them with `wrangler d1 migrations apply`.
+- There is no rate limiting yet. Demo sign-ups are bounded by the user cap and cleanup, not per-IP limits.
+- Show and episode data comes from TVMaze and is not owned by this project.

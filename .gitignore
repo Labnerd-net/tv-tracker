@@ -19,3 +19,5 @@ apps/api/worker-configuration.d.ts
 
 # OS
 .DS_Store
+
+.wrangler/

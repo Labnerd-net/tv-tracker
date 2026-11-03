@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "pnpm build:ui && wrangler dev",
+    "dev": "pnpm build && wrangler dev",
     "dev:ui": "pnpm --filter @tv-tracker/ui run dev",
     "build": "pnpm build:api && pnpm build:ui",
     "build:api": "pnpm --filter @tv-tracker/api run build",
@@ -16,7 +16,7 @@
     "*.{ts,tsx}": "eslint"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "pnpm": ">=9"
   },
   "devDependencies": {
